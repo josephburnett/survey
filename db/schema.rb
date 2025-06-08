@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_054435) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_194216) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -24,6 +24,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_054435) do
     t.index ["question_id"], name: "index_answers_on_question_id"
     t.index ["response_id"], name: "index_answers_on_response_id"
     t.index ["user_id"], name: "index_answers_on_user_id"
+  end
+
+  create_table "metrics", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "source_type", null: false
+    t.integer "source_id", null: false
+    t.string "resolution"
+    t.string "width"
+    t.string "aggregation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source_type", "source_id"], name: "index_metrics_on_source"
+    t.index ["user_id"], name: "index_metrics_on_user_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -70,6 +83,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_054435) do
   add_foreign_key "answers", "questions"
   add_foreign_key "answers", "responses"
   add_foreign_key "answers", "users"
+  add_foreign_key "metrics", "users"
   add_foreign_key "questions", "users"
   add_foreign_key "responses", "sections"
   add_foreign_key "responses", "users"
