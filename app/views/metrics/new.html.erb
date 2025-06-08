@@ -1,0 +1,81 @@
+<h1>New Metric</h1>
+
+<%= link_to "← Back to Metrics", metrics_path, class: "back-link" %>
+
+<%= form_with model: @metric, local: true do |form| %>
+  <% if @metric.errors.any? %>
+    <div class="error-messages">
+      <h4><%= pluralize(@metric.errors.count, "error") %> prohibited this metric from being saved:</h4>
+      <ul>
+        <% @metric.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :source_type, "Source Type" %>
+    <%= form.select :source_type, [['Question', 'Question'], ['Metric', 'Metric']], { prompt: 'Select source type' }, { required: true } %>
+  </div>
+  
+  <div class="field question-sources" style="display: none;">
+    <%= form.label :source_id, "Question" %>
+    <%= form.select :source_id, options_from_collection_for_select(@questions, :id, :name), { prompt: 'Select question' }, { class: 'question-select' } %>
+  </div>
+  
+  <div class="field metric-sources" style="display: none;">
+    <%= form.label :source_id, "Metric" %>
+    <%= form.select :source_id, options_from_collection_for_select(@metrics, :id, :id), { prompt: 'Select metric' }, { class: 'metric-select' } %>
+  </div>
+
+  <div class="field">
+    <%= form.label :resolution %>
+    <%= form.select :resolution, [['Day', 'day'], ['Week', 'week'], ['Month', 'month']], { prompt: 'Select resolution' }, { required: true } %>
+  </div>
+
+  <div class="field">
+    <%= form.label :width %>
+    <%= form.select :width, [['Daily', 'daily'], ['Weekly', 'weekly'], ['Monthly', 'monthly'], ['90 Days', '90_days'], ['Yearly', 'yearly'], ['All Time', 'all_time']], { prompt: 'Select width' }, { required: true } %>
+  </div>
+
+  <div class="field">
+    <%= form.label :aggregation %>
+    <%= form.select :aggregation, [['Sum', 'sum'], ['Average', 'average']], { prompt: 'Select aggregation' }, { required: true } %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Create Metric" %>
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sourceTypeSelect = document.querySelector('#metric_source_type');
+    const questionSources = document.querySelector('.question-sources');
+    const metricSources = document.querySelector('.metric-sources');
+    const questionSelect = document.querySelector('.question-select');
+    const metricSelect = document.querySelector('.metric-select');
+    
+    if (sourceTypeSelect) {
+      sourceTypeSelect.addEventListener('change', function() {
+        if (this.value === 'Question') {
+          questionSources.style.display = 'block';
+          metricSources.style.display = 'none';
+          questionSelect.required = true;
+          metricSelect.required = false;
+        } else if (this.value === 'Metric') {
+          questionSources.style.display = 'none';
+          metricSources.style.display = 'block';
+          questionSelect.required = false;
+          metricSelect.required = true;
+        } else {
+          questionSources.style.display = 'none';
+          metricSources.style.display = 'none';
+          questionSelect.required = false;
+          metricSelect.required = false;
+        }
+      });
+    }
+  });
+</script>

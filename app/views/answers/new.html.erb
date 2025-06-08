@@ -1,0 +1,72 @@
+<h1>New Answer</h1>
+
+<%= link_to "← Back to Answers", answers_path, class: "back-link" %>
+
+<%= form_with model: @answer, local: true do |form| %>
+  <% if @answer.errors.any? %>
+    <div class="error-messages">
+      <h4><%= pluralize(@answer.errors.count, "error") %> prohibited this answer from being saved:</h4>
+      <ul>
+        <% @answer.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :question_id, "Question" %>
+    <%= form.select :question_id, options_from_collection_for_select(@questions, :id, :name), { prompt: 'Select question' }, { required: true } %>
+  </div>
+
+  <div class="field">
+    <%= form.label :answer_type, "Answer Type" %>
+    <%= form.select :answer_type, [['String', 'string'], ['Number', 'number'], ['Yes/No', 'bool'], ['Range', 'range']], { prompt: 'Select type' }, { required: true } %>
+  </div>
+
+  <div class="field string-field" style="display: none;">
+    <%= form.label :string_value, "Text Answer" %>
+    <%= form.text_field :string_value %>
+  </div>
+
+  <div class="field number-field" style="display: none;">
+    <%= form.label :number_value, "Number Answer" %>
+    <%= form.number_field :number_value, step: :any %>
+  </div>
+
+  <div class="field bool-field" style="display: none;">
+    <%= form.label :bool_value, "Yes/No Answer" %>
+    <%= form.select :bool_value, [['Yes', true], ['No', false]], { prompt: 'Select answer' } %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Create Answer" %>
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.querySelector('#answer_answer_type');
+    const stringField = document.querySelector('.string-field');
+    const numberField = document.querySelector('.number-field');
+    const boolField = document.querySelector('.bool-field');
+    
+    if (typeSelect) {
+      typeSelect.addEventListener('change', function() {
+        // Hide all fields first
+        stringField.style.display = 'none';
+        numberField.style.display = 'none';
+        boolField.style.display = 'none';
+        
+        // Show appropriate field
+        if (this.value === 'string') {
+          stringField.style.display = 'block';
+        } else if (this.value === 'number' || this.value === 'range') {
+          numberField.style.display = 'block';
+        } else if (this.value === 'bool') {
+          boolField.style.display = 'block';
+        }
+      });
+    }
+  });
+</script>

@@ -1,0 +1,27 @@
+<h1>New Response</h1>
+
+<%= link_to "← Back to Responses", responses_path, class: "back-link" %>
+
+<%= form_with model: @response, local: true do |form| %>
+  <% if @response.errors.any? %>
+    <div class="error-messages">
+      <h4><%= pluralize(@response.errors.count, "error") %> prohibited this response from being saved:</h4>
+      <ul>
+        <% @response.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :section_id, "Section" %>
+    <%= form.select :section_id, options_from_collection_for_select(@sections, :id, :name), { prompt: 'Select section' }, { required: true } %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Create Response" %>
+  </div>
+<% end %>
+
+<p><em>Note: After creating a response, you can add answers by editing the response or by taking the section survey.</em></p>

@@ -1,0 +1,27 @@
+<h1>Edit Response</h1>
+
+<%= link_to "← Back to Response", @response, class: "back-link" %>
+
+<%= form_with model: @response, local: true do |form| %>
+  <% if @response.errors.any? %>
+    <div class="error-messages">
+      <h4><%= pluralize(@response.errors.count, "error") %> prohibited this response from being saved:</h4>
+      <ul>
+        <% @response.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :section_id, "Section" %>
+    <%= form.select :section_id, options_from_collection_for_select(@sections, :id, :name, @response.section_id), { prompt: 'Select section' }, { required: true } %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Update Response" %>
+  </div>
+<% end %>
+
+<p><em>Note: To modify the answers in this response, you'll need to edit individual answers or retake the section survey.</em></p>

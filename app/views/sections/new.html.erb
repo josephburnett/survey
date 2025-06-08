@@ -2,7 +2,7 @@
 
 <%= link_to "← Back to Sections", sections_path, class: "back-link" %>
 
-<%= form_with model: @section, local: true do |form| %>
+<%= form_with model: @section, local: true, data: { turbo: false } do |form| %>
   <% if @section.errors.any? %>
     <div class="error-messages">
       <h4><%= pluralize(@section.errors.count, "error") %> prohibited this section from being saved:</h4>
@@ -21,7 +21,7 @@
 
   <div class="field">
     <%= form.label :prompt %>
-    <%= form.text_area :prompt, required: true %>
+    <%= form.text_area :prompt %>
   </div>
 
   <div class="actions">
