@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_044306) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_045531) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -22,14 +22,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_044306) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "response_id"
+    t.integer "user_id"
     t.index ["question_id"], name: "index_answers_on_question_id"
     t.index ["response_id"], name: "index_answers_on_response_id"
+    t.index ["user_id"], name: "index_answers_on_user_id"
   end
 
   create_table "questions", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.index ["user_id"], name: "index_questions_on_user_id"
   end
 
   create_table "questions_sections", id: false, force: :cascade do |t|
@@ -41,7 +45,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_044306) do
     t.integer "section_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
     t.index ["section_id"], name: "index_responses_on_section_id"
+    t.index ["user_id"], name: "index_responses_on_user_id"
   end
 
   create_table "sections", force: :cascade do |t|
@@ -49,9 +55,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_044306) do
     t.string "prompt"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.index ["user_id"], name: "index_sections_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.string "password_digest"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "answers", "questions"
   add_foreign_key "answers", "responses"
+  add_foreign_key "answers", "users"
+  add_foreign_key "questions", "users"
   add_foreign_key "responses", "sections"
+  add_foreign_key "responses", "users"
+  add_foreign_key "sections", "users"
 end

@@ -1,0 +1,21 @@
+<h1>My Sections</h1>
+
+<% if logged_in? %>
+  <p>Welcome, <%= current_user.name %>!</p>
+  
+  <%= link_to "Logout", logout_path, data: { "turbo-method": :delete }, class: "logout-link" %>
+  
+  <% if @sections.any? %>
+    <div class="sections-list">
+      <% @sections.each do |section| %>
+        <div class="section-item">
+          <h3><%= section.name %></h3>
+          <p><%= section.prompt %></p>
+          <small>Created: <%= section.created_at.strftime("%B %d, %Y") %></small>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p>You haven't created any sections yet.</p>
+  <% end %>
+<% end %>
