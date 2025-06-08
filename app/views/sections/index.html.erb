@@ -4,6 +4,7 @@
   <p>Welcome, <%= current_user.name %>!</p>
   
   <%= link_to "Logout", logout_path, data: { "turbo-method": :delete }, class: "logout-link" %>
+  <%= link_to "New Section", new_section_path, class: "new-link" %>
   
   <% if @sections.any? %>
     <div class="sections-list">

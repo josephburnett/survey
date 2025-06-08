@@ -1,6 +1,8 @@
 <h1>Answer Details</h1>
 
 <%= link_to "← Back to Answers", answers_path, class: "back-link" %>
+<%= link_to "Edit", edit_answer_path(@answer), class: "edit-link" %>
+<%= link_to "Delete", soft_delete_answer_path(@answer), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
 
 <div class="answer-details">
   <h3>Question: <%= link_to @answer.question.name, question_path(@answer.question) %></h3>

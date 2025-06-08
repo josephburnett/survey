@@ -2,6 +2,8 @@
 <p><%= @section.prompt %></p>
 
 <%= link_to "← Back to Sections", root_path, class: "back-link" %>
+<%= link_to "Edit", edit_section_path(@section), class: "edit-link" %>
+<%= link_to "Delete", soft_delete_section_path(@section), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
 <%= link_to "Fill Out Survey", survey_section_path(@section), class: "survey-link" %>
 <%= link_to "View Responses", section_responses_path(@section), class: "responses-link" %>
 
@@ -26,8 +28,53 @@
     <%= form.label :name, "Question Name" %>
     <%= form.text_field :name, required: true %>
   </div>
+  
+  <div class="field">
+    <%= form.label :question_type, "Question Type" %>
+    <%= form.select :question_type, [['String', 'string'], ['Number', 'number'], ['Yes/No', 'bool'], ['Range', 'range']], { prompt: 'Select type' }, { required: true } %>
+  </div>
+  
+  <div class="field range-fields" style="display: none;">
+    <%= form.label :range_min, "Range Min" %>
+    <%= form.number_field :range_min, step: :any %>
+    
+    <%= form.label :range_max, "Range Max" %>
+    <%= form.number_field :range_max, step: :any %>
+  </div>
 
   <div class="actions">
     <%= form.submit "Create Question" %>
   </div>
 <% end %>
+
+<% if @available_questions.any? %>
+  <h3>Add Existing Question</h3>
+  
+  <%= form_with url: add_question_section_path(@section), method: :patch, local: true do |form| %>
+    <div class="field">
+      <%= form.label :question_id, "Select Question" %>
+      <%= form.select :question_id, options_from_collection_for_select(@available_questions, :id, :name), { prompt: 'Choose a question' }, { required: true } %>
+    </div>
+
+    <div class="actions">
+      <%= form.submit "Add Question to Section" %>
+    </div>
+  <% end %>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.querySelector('#question_question_type');
+    const rangeFields = document.querySelector('.range-fields');
+    
+    if (typeSelect && rangeFields) {
+      typeSelect.addEventListener('change', function() {
+        if (this.value === 'range') {
+          rangeFields.style.display = 'block';
+        } else {
+          rangeFields.style.display = 'none';
+        }
+      });
+    }
+  });
+</script>

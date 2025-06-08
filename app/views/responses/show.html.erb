@@ -1,6 +1,8 @@
 <h1>Response to: <%= @response.section.name %></h1>
 
 <%= link_to "← Back to Responses", responses_path, class: "back-link" %>
+<%= link_to "Edit", edit_response_path(@response), class: "edit-link" %>
+<%= link_to "Delete", soft_delete_response_path(@response), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
 <%= link_to "View Section", section_path(@response.section), class: "section-link" %>
 
 <div class="response-details">

@@ -1,6 +1,8 @@
 <h1>Metric Details</h1>
 
 <%= link_to "← Back to Metrics", metrics_path, class: "back-link" %>
+<%= link_to "Edit", edit_metric_path(@metric), class: "edit-link" %>
+<%= link_to "Delete", soft_delete_metric_path(@metric), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
 
 <div class="metric-details">
   <h2>Metric Configuration</h2>

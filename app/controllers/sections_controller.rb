@@ -1,13 +1,44 @@
 class SectionsController < ApplicationController
   before_action :require_login
-  before_action :find_section, only: [:show, :survey, :submit_survey]
+  before_action :find_section, only: [:show, :edit, :update, :soft_delete, :survey, :submit_survey]
   
   def index
-    @sections = current_user.sections
+    @sections = current_user.sections.not_deleted
   end
   
   def show
     @question = Question.new
+    @available_questions = current_user.questions.not_deleted - @section.questions
+  end
+  
+  def new
+    @section = Section.new
+  end
+  
+  def create
+    @section = current_user.sections.build(section_params)
+    
+    if @section.save
+      redirect_to @section, notice: 'Section created successfully'
+    else
+      render :new
+    end
+  end
+  
+  def edit
+  end
+  
+  def update
+    if @section.update(section_params)
+      redirect_to @section, notice: 'Section updated successfully'
+    else
+      render :edit
+    end
+  end
+  
+  def soft_delete
+    @section.soft_delete!
+    redirect_to sections_path, notice: 'Section deleted successfully'
   end
   
   def survey
@@ -47,9 +78,25 @@ class SectionsController < ApplicationController
     end
   end
   
+  def add_question
+    @section = current_user.sections.find(params[:id])
+    @question = current_user.questions.find(params[:question_id])
+    
+    unless @section.questions.include?(@question)
+      @section.questions << @question
+      redirect_to @section, notice: 'Question added to section successfully'
+    else
+      redirect_to @section, alert: 'Question is already in this section'
+    end
+  end
+  
   private
   
   def find_section
-    @section = current_user.sections.find(params[:id])
+    @section = current_user.sections.not_deleted.find(params[:id])
+  end
+  
+  def section_params
+    params.require(:section).permit(:name, :prompt)
   end
 end

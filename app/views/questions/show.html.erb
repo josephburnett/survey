@@ -1,6 +1,8 @@
 <h1>Question: <%= @question.name %></h1>
 
 <%= link_to "← Back to Questions", questions_path, class: "back-link" %>
+<%= link_to "Edit", edit_question_path(@question), class: "edit-link" %>
+<%= link_to "Delete", soft_delete_question_path(@question), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
 
 <div class="question-details">
   <p><strong>Type:</strong> <%= @question.question_type || "Not set" %></p>

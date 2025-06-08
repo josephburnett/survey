@@ -1,6 +1,7 @@
 <h1>My Metrics</h1>
 
 <%= link_to "← Back to Sections", root_path, class: "back-link" %>
+<%= link_to "New Metric", new_metric_path, class: "new-link" %>
 
 <% if @metrics.any? %>
   <div class="metrics-list">

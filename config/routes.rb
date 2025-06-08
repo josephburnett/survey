@@ -1,19 +1,40 @@
 Rails.application.routes.draw do
   root 'sections#index'
   
-  resources :sections, only: [:index, :show] do
+  resources :sections do
     resources :questions, only: [:create]
     resources :responses, only: [:index]
     member do
       get :survey
       post :submit_survey
+      patch :soft_delete
+      patch :add_question
     end
   end
   
-  resources :questions, only: [:index, :show]
-  resources :answers, only: [:index, :show]
-  resources :responses, only: [:index, :show]
-  resources :metrics, only: [:index, :show]
+  resources :questions do
+    member do
+      patch :soft_delete
+    end
+  end
+  
+  resources :answers do
+    member do
+      patch :soft_delete
+    end
+  end
+  
+  resources :responses do
+    member do
+      patch :soft_delete
+    end
+  end
+  
+  resources :metrics do
+    member do
+      patch :soft_delete
+    end
+  end
   
   resources :sessions, only: [:new, :create, :destroy]
   get '/login', to: 'sessions#new'

@@ -6,6 +6,12 @@ class Metric < ApplicationRecord
   validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly all_time] }
   validates :aggregation, presence: true, inclusion: { in: %w[sum average] }
   
+  scope :not_deleted, -> { where(deleted: false) }
+  
+  def soft_delete!
+    update!(deleted: true)
+  end
+  
   def type
     case source
     when Question

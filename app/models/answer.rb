@@ -8,6 +8,12 @@ class Answer < ApplicationRecord
   validates :number_value, presence: true, if: -> { answer_type == 'number' || answer_type == 'range' }
   validates :bool_value, inclusion: { in: [true, false] }, if: -> { answer_type == 'bool' }
   
+  scope :not_deleted, -> { where(deleted: false) }
+  
+  def soft_delete!
+    update!(deleted: true)
+  end
+  
   def value
     case answer_type
     when 'string'

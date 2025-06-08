@@ -4,6 +4,7 @@
 <% else %>
   <h1>My Responses</h1>
   <%= link_to "← Back to Sections", root_path, class: "back-link" %>
+  <%= link_to "New Response", new_response_path, class: "new-link" %>
 <% end %>
 
 <% if @responses.any? %>

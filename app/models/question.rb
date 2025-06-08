@@ -8,6 +8,12 @@ class Question < ApplicationRecord
   has_and_belongs_to_many :sections
   has_many :answers
   
+  scope :not_deleted, -> { where(deleted: false) }
+  
+  def soft_delete!
+    update!(deleted: true)
+  end
+  
   def range_options
     return [] unless question_type == 'range' && range_min && range_max
     (range_min.to_i..range_max.to_i).to_a

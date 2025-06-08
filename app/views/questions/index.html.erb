@@ -1,6 +1,7 @@
 <h1>My Questions</h1>
 
 <%= link_to "← Back to Sections", root_path, class: "back-link" %>
+<%= link_to "New Question", new_question_path, class: "new-link" %>
 
 <% if @questions.any? %>
   <div class="questions-list">

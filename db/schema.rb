@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_194216) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_221115) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -21,6 +21,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_194216) do
     t.datetime "updated_at", null: false
     t.integer "response_id"
     t.integer "user_id"
+    t.boolean "deleted", default: false, null: false
     t.index ["question_id"], name: "index_answers_on_question_id"
     t.index ["response_id"], name: "index_answers_on_response_id"
     t.index ["user_id"], name: "index_answers_on_user_id"
@@ -35,6 +36,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_194216) do
     t.string "aggregation"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "deleted", default: false, null: false
     t.index ["source_type", "source_id"], name: "index_metrics_on_source"
     t.index ["user_id"], name: "index_metrics_on_user_id"
   end
@@ -47,6 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_194216) do
     t.string "question_type"
     t.float "range_min"
     t.float "range_max"
+    t.boolean "deleted", default: false, null: false
     t.index ["user_id"], name: "index_questions_on_user_id"
   end
 
@@ -60,6 +63,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_194216) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
+    t.boolean "deleted", default: false, null: false
     t.index ["section_id"], name: "index_responses_on_section_id"
     t.index ["user_id"], name: "index_responses_on_user_id"
   end
@@ -70,6 +74,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_194216) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
+    t.boolean "deleted", default: false, null: false
     t.index ["user_id"], name: "index_sections_on_user_id"
   end
 
