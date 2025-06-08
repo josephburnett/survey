@@ -1,0 +1,31 @@
+<h1>Question: <%= @question.name %></h1>
+
+<%= link_to "← Back to Questions", questions_path, class: "back-link" %>
+
+<div class="question-details">
+  <p><strong>Type:</strong> <%= @question.question_type || "Not set" %></p>
+  
+  <% if @question.question_type == 'range' %>
+    <p><strong>Range:</strong> <%= @question.range_min %> to <%= @question.range_max %></p>
+  <% end %>
+  
+  <p><strong>Created:</strong> <%= @question.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+  
+  <h3>Sections</h3>
+  <% if @question.sections.any? %>
+    <ul>
+      <% @question.sections.each do |section| %>
+        <li><%= link_to section.name, section_path(section) %></li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>This question is not used in any sections yet.</p>
+  <% end %>
+  
+  <h3>Answers</h3>
+  <% if @question.answers.any? %>
+    <p><strong>Total answers received:</strong> <%= @question.answers.count %></p>
+  <% else %>
+    <p>No answers have been submitted for this question yet.</p>
+  <% end %>
+</div>

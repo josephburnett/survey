@@ -1,0 +1,34 @@
+<h1>Response to: <%= @response.section.name %></h1>
+
+<%= link_to "← Back to Responses", responses_path, class: "back-link" %>
+<%= link_to "View Section", section_path(@response.section), class: "section-link" %>
+
+<div class="response-details">
+  <p><strong>Section:</strong> <%= @response.section.name %></p>
+  <p><strong>Submitted:</strong> <%= @response.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+  
+  <h2>Your Answers</h2>
+  
+  <% if @response.answers.any? %>
+    <div class="answers-list">
+      <% @response.answers.each do |answer| %>
+        <div class="answer-block">
+          <h4><%= link_to answer.question.name, question_path(answer.question) %></h4>
+          <p><strong>Your Answer:</strong> 
+            <% case answer.answer_type %>
+            <% when 'string' %>
+              "<%= answer.string_value %>"
+            <% when 'number', 'range' %>
+              <%= answer.number_value %>
+            <% when 'bool' %>
+              <%= answer.bool_value ? 'Yes' : 'No' %>
+            <% end %>
+          </p>
+          <small>Type: <%= answer.answer_type %></small>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p>This response has no answers recorded.</p>
+  <% end %>
+</div>

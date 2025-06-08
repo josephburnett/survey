@@ -1,0 +1,83 @@
+<h1>Metric Details</h1>
+
+<%= link_to "← Back to Metrics", metrics_path, class: "back-link" %>
+
+<div class="metric-details">
+  <h2>Metric Configuration</h2>
+  <p><strong>Source:</strong> 
+    <% if @metric.source.respond_to?(:name) %>
+      <%= link_to @metric.source.name, polymorphic_path(@metric.source) %>
+    <% else %>
+      <%= @metric.source.class.name %> #<%= @metric.source.id %>
+    <% end %>
+  </p>
+  <p><strong>Type:</strong> <%= @metric.type %></p>
+  <p><strong>Resolution:</strong> <%= @metric.resolution %></p>
+  <p><strong>Width:</strong> <%= @metric.width %></p>
+  <p><strong>Aggregation:</strong> <%= @metric.aggregation %></p>
+  
+  <h2>Time Series Data</h2>
+  
+  <% if @series_data.any? %>
+    <div class="chart-container">
+      <canvas id="metricChart" width="400" height="200"></canvas>
+    </div>
+    
+    <h3>Raw Data</h3>
+    <table class="series-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @series_data.each do |time, value| %>
+          <tr>
+            <td><%= time.strftime("%B %d, %Y") %></td>
+            <td><%= value.round(2) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No data available for this metric configuration.</p>
+  <% end %>
+</div>
+
+<% if @series_data.any? %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('metricChart').getContext('2d');
+  
+  const chartData = {
+    labels: <%= raw @series_data.map { |time, _| time.strftime("%m/%d") }.to_json %>,
+    datasets: [{
+      label: <%= raw "#{@metric.type.capitalize} Value".to_json %>,
+      data: <%= raw @series_data.map { |_, value| value.round(2) }.to_json %>,
+      borderColor: 'rgb(75, 192, 192)',
+      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      tension: 0.1
+    }]
+  };
+  
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: <%= raw "Metric: #{@metric.source.respond_to?(:name) ? @metric.source.name : @metric.source.class.name}".to_json %>
+        }
+      }
+    }
+  });
+</script>
+<% end %>

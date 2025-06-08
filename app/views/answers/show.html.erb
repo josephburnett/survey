@@ -1,0 +1,26 @@
+<h1>Answer Details</h1>
+
+<%= link_to "← Back to Answers", answers_path, class: "back-link" %>
+
+<div class="answer-details">
+  <h3>Question: <%= link_to @answer.question.name, question_path(@answer.question) %></h3>
+  
+  <p><strong>Type:</strong> <%= @answer.answer_type %></p>
+  
+  <p><strong>Your Answer:</strong> 
+    <% case @answer.answer_type %>
+    <% when 'string' %>
+      "<%= @answer.string_value %>"
+    <% when 'number', 'range' %>
+      <%= @answer.number_value %>
+    <% when 'bool' %>
+      <%= @answer.bool_value ? 'Yes' : 'No' %>
+    <% end %>
+  </p>
+  
+  <p><strong>Submitted:</strong> <%= @answer.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+  
+  <% if @answer.response %>
+    <p><strong>Part of Response:</strong> <%= link_to "View Full Response", response_path(@answer.response) %></p>
+  <% end %>
+</div>

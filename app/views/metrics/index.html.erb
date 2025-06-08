@@ -1,0 +1,16 @@
+<h1>My Metrics</h1>
+
+<%= link_to "← Back to Sections", root_path, class: "back-link" %>
+
+<% if @metrics.any? %>
+  <div class="metrics-list">
+    <% @metrics.each do |metric| %>
+      <div class="metric-item">
+        <%= link_to "Metric for #{metric.source.respond_to?(:name) ? metric.source.name : metric.source.class.name}", metric_path(metric) %>
+        <small> - <%= metric.resolution %> / <%= metric.width %> / <%= metric.aggregation %></small>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p>You haven't created any metrics yet.</p>
+<% end %>

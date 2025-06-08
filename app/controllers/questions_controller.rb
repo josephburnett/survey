@@ -1,5 +1,13 @@
 class QuestionsController < ApplicationController
   before_action :require_login
+  before_action :find_question, only: [:show]
+  
+  def index
+    @questions = current_user.questions
+  end
+  
+  def show
+  end
   
   def create
     @section = current_user.sections.find(params[:section_id])
@@ -15,6 +23,10 @@ class QuestionsController < ApplicationController
   end
   
   private
+  
+  def find_question
+    @question = current_user.questions.find(params[:id])
+  end
   
   def question_params
     params.require(:question).permit(:name)

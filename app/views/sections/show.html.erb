@@ -3,6 +3,7 @@
 
 <%= link_to "← Back to Sections", root_path, class: "back-link" %>
 <%= link_to "Fill Out Survey", survey_section_path(@section), class: "survey-link" %>
+<%= link_to "View Responses", section_responses_path(@section), class: "responses-link" %>
 
 <h2>Questions</h2>
 
@@ -10,8 +11,7 @@
   <div class="questions-list">
     <% @section.questions.each do |question| %>
       <div class="question-item">
-        <h4><%= question.name %></h4>
-        <small>Created: <%= question.created_at.strftime("%B %d, %Y") %></small>
+        <%= link_to question.name, question_path(question) %>
       </div>
     <% end %>
   </div>

@@ -1,12 +1,20 @@
 Rails.application.routes.draw do
   root 'sections#index'
+  
   resources :sections, only: [:index, :show] do
     resources :questions, only: [:create]
+    resources :responses, only: [:index]
     member do
       get :survey
       post :submit_survey
     end
   end
+  
+  resources :questions, only: [:index, :show]
+  resources :answers, only: [:index, :show]
+  resources :responses, only: [:index, :show]
+  resources :metrics, only: [:index, :show]
+  
   resources :sessions, only: [:new, :create, :destroy]
   get '/login', to: 'sessions#new'
   delete '/logout', to: 'sessions#destroy'

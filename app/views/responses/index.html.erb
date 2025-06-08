@@ -1,0 +1,24 @@
+<% if @section %>
+  <h1>Responses to: <%= @section.name %></h1>
+  <%= link_to "← Back to Section", section_path(@section), class: "back-link" %>
+<% else %>
+  <h1>My Responses</h1>
+  <%= link_to "← Back to Sections", root_path, class: "back-link" %>
+<% end %>
+
+<% if @responses.any? %>
+  <div class="responses-list">
+    <% @responses.each do |response| %>
+      <div class="response-item">
+        <%= link_to "Response to #{response.section.name}", response_path(response) %>
+        <small> - <%= response.created_at.strftime("%B %d, %Y at %I:%M %p") %></small>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <% if @section %>
+    <p>No responses have been submitted for this section yet.</p>
+  <% else %>
+    <p>You haven't submitted any responses yet.</p>
+  <% end %>
+<% end %>

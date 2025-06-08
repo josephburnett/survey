@@ -9,11 +9,7 @@
     <div class="sections-list">
       <% @sections.each do |section| %>
         <div class="section-item">
-          <%= link_to section_path(section), class: "section-link" do %>
-            <h3><%= section.name %></h3>
-            <p><%= section.prompt %></p>
-            <small>Created: <%= section.created_at.strftime("%B %d, %Y") %></small>
-          <% end %>
+          <%= link_to section.name, section_path(section) %>
         </div>
       <% end %>
     </div>
