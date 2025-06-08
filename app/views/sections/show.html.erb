@@ -1,0 +1,33 @@
+<h1><%= @section.name %></h1>
+<p><%= @section.prompt %></p>
+
+<%= link_to "← Back to Sections", root_path, class: "back-link" %>
+<%= link_to "Fill Out Survey", survey_section_path(@section), class: "survey-link" %>
+
+<h2>Questions</h2>
+
+<% if @section.questions.any? %>
+  <div class="questions-list">
+    <% @section.questions.each do |question| %>
+      <div class="question-item">
+        <h4><%= question.name %></h4>
+        <small>Created: <%= question.created_at.strftime("%B %d, %Y") %></small>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p>No questions yet. Create your first question below.</p>
+<% end %>
+
+<h3>Add New Question</h3>
+
+<%= form_with model: [@section, @question], local: true do |form| %>
+  <div class="field">
+    <%= form.label :name, "Question Name" %>
+    <%= form.text_field :name, required: true %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Create Question" %>
+  </div>
+<% end %>

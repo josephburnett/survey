@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
   root 'sections#index'
-  resources :sections, only: [:index]
+  resources :sections, only: [:index, :show] do
+    resources :questions, only: [:create]
+    member do
+      get :survey
+      post :submit_survey
+    end
+  end
   resources :sessions, only: [:new, :create, :destroy]
   get '/login', to: 'sessions#new'
   delete '/logout', to: 'sessions#destroy'

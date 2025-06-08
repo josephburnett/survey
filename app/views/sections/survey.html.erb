@@ -1,0 +1,48 @@
+<h1>Take Survey: <%= @section.name %></h1>
+<p><%= @section.prompt %></p>
+
+<%= link_to "← Back to Section", @section, class: "back-link" %>
+
+<%= form_with url: submit_survey_section_path(@section), method: :post, local: true do |form| %>
+  <% @section.questions.each do |question| %>
+    <div class="question-block">
+      <h3><%= question.name %></h3>
+      
+      <% case question.question_type %>
+      <% when 'string' %>
+        <%= text_field_tag "answers[#{question.id}][value]", "", placeholder: "Enter your answer", required: true %>
+        
+      <% when 'number' %>
+        <%= number_field_tag "answers[#{question.id}][value]", "", step: :any, placeholder: "Enter a number", required: true %>
+        
+      <% when 'bool' %>
+        <div class="radio-group">
+          <%= radio_button_tag "answers[#{question.id}][value]", "1", false, required: true %>
+          <%= label_tag "answers_#{question.id}_value_1", "Yes" %>
+          
+          <%= radio_button_tag "answers[#{question.id}][value]", "0", false, required: true %>
+          <%= label_tag "answers_#{question.id}_value_0", "No" %>
+        </div>
+        
+      <% when 'range' %>
+        <div class="radio-group">
+          <% question.range_options.each do |option| %>
+            <%= radio_button_tag "answers[#{question.id}][value]", option, false, required: true %>
+            <%= label_tag "answers_#{question.id}_value_#{option}", option %>
+          <% end %>
+        </div>
+        
+      <% else %>
+        <p><em>Question type not supported yet</em></p>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <% if @section.questions.any? %>
+    <div class="submit-section">
+      <%= form.submit "Submit Survey", class: "submit-button" %>
+    </div>
+  <% else %>
+    <p>This section has no questions to answer.</p>
+  <% end %>
+<% end %>

@@ -10,15 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_045531) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_054435) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
     t.string "string_value"
     t.float "number_value"
     t.boolean "bool_value"
-    t.float "range_min"
-    t.float "range_max"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "response_id"
@@ -33,6 +31,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_045531) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
+    t.string "question_type"
+    t.float "range_min"
+    t.float "range_max"
     t.index ["user_id"], name: "index_questions_on_user_id"
   end
 
