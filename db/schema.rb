@@ -10,7 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_07_233726) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_020230) do
+  create_table "answers", force: :cascade do |t|
+    t.integer "question_id", null: false
+    t.string "answer_type"
+    t.string "string_value"
+    t.float "number_value"
+    t.boolean "bool_value"
+    t.float "range_min"
+    t.float "range_max"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["question_id"], name: "index_answers_on_question_id"
+  end
+
   create_table "questions", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -28,4 +41,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_07_233726) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  add_foreign_key "answers", "questions"
 end

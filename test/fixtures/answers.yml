@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  question: one
+  answer_type: MyString
+  string_value: MyString
+  number_value: 1.5
+  bool_value: false
+  range_min: 1.5
+  range_max: 1.5
+
+two:
+  question: two
+  answer_type: MyString
+  string_value: MyString
+  number_value: 1.5
+  bool_value: false
+  range_min: 1.5
+  range_max: 1.5
