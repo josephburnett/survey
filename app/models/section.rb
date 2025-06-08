@@ -3,4 +3,5 @@ class Section < ApplicationRecord
   validates :prompt, presence: true
   
   has_and_belongs_to_many :questions
+  has_many :responses
 end

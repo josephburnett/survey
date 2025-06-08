@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_020230) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_08_044306) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -21,7 +21,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_020230) do
     t.float "range_max"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "response_id"
     t.index ["question_id"], name: "index_answers_on_question_id"
+    t.index ["response_id"], name: "index_answers_on_response_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -35,6 +37,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_020230) do
     t.integer "section_id", null: false
   end
 
+  create_table "responses", force: :cascade do |t|
+    t.integer "section_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["section_id"], name: "index_responses_on_section_id"
+  end
+
   create_table "sections", force: :cascade do |t|
     t.string "name"
     t.string "prompt"
@@ -43,4 +52,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_020230) do
   end
 
   add_foreign_key "answers", "questions"
+  add_foreign_key "answers", "responses"
+  add_foreign_key "responses", "sections"
 end

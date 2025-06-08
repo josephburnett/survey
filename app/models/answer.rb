@@ -1,5 +1,6 @@
 class Answer < ApplicationRecord
   belongs_to :question
+  belongs_to :response, optional: true
   
   validates :answer_type, presence: true, inclusion: { in: %w[string number bool range] }
   validates :string_value, presence: true, if: -> { answer_type == 'string' }
