@@ -1,7 +1,9 @@
-class Response < ApplicationRecord
-  belongs_to :form
+class Form < ApplicationRecord
+  validates :name, presence: true
+  
   belongs_to :user, optional: true
-  has_many :answers
+  has_and_belongs_to_many :sections
+  has_many :responses
   
   scope :not_deleted, -> { where(deleted: false) }
   

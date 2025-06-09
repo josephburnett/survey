@@ -36,7 +36,7 @@
 
   <div class="field bool-field" style="display: none;">
     <%= form.label :bool_value, "Yes/No Answer" %>
-    <%= form.select :bool_value, [['Yes', true], ['No', false]], { prompt: 'Select answer' } %>
+    <%= form.check_box :bool_value %>
   </div>
 
   <div class="actions">

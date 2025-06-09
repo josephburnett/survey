@@ -1,0 +1,25 @@
+<h1>Edit Form</h1>
+
+<%= link_to "← Back to Form", @form, class: "back-link" %>
+
+<%= form_with model: @form, local: true do |form| %>
+  <% if @form.errors.any? %>
+    <div class="error-messages">
+      <h4><%= pluralize(@form.errors.count, "error") %> prohibited this form from being saved:</h4>
+      <ul>
+        <% @form.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, required: true %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Update Form" %>
+  </div>
+<% end %>

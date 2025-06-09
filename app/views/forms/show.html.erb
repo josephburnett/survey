@@ -1,0 +1,74 @@
+<h1><%= @form.name %></h1>
+
+<%= link_to "← Back to Forms", forms_path, class: "back-link" %>
+<%= link_to "Edit", edit_form_path(@form), class: "edit-link" %>
+<%= link_to "Delete", soft_delete_form_path(@form), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
+<%= link_to "Fill Out Form", survey_form_path(@form), class: "survey-link" %>
+
+<h2>Sections</h2>
+
+<% if @form.sections.any? %>
+  <div class="sections-list">
+    <% @form.sections.each do |section| %>
+      <div class="section-item">
+        <%= link_to section.name, section_path(section) %>
+        <span class="section-meta">
+          - <%= pluralize(section.questions.count, 'question') %>
+        </span>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p>No sections yet. Create your first section below.</p>
+<% end %>
+
+<h3>Add New Section</h3>
+
+<%= form_with model: [@form, @section], local: true, data: { turbo: false } do |form| %>
+  <div class="field">
+    <%= form.label :name, "Section Name" %>
+    <%= form.text_field :name, required: true %>
+  </div>
+  
+  <div class="field">
+    <%= form.label :prompt, "Section Prompt" %>
+    <%= form.text_area :prompt %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Create Section" %>
+  </div>
+<% end %>
+
+<% if @available_sections.any? %>
+  <h3>Add Existing Section</h3>
+  
+  <%= form_with url: add_section_form_path(@form), method: :patch, local: true do |form| %>
+    <div class="field">
+      <%= form.label :section_id, "Select Section" %>
+      <%= form.select :section_id, options_from_collection_for_select(@available_sections, :id, :name), { prompt: 'Choose a section' }, { required: true } %>
+    </div>
+
+    <div class="actions">
+      <%= form.submit "Add Section to Form" %>
+    </div>
+  <% end %>
+<% end %>
+
+<h2>Responses</h2>
+
+<% if @form.responses.any? %>
+  <div class="responses-list">
+    <% @form.responses.each do |response| %>
+      <div class="response-item">
+        <%= link_to "Response ##{response.id}", response_path(response) %>
+        <span class="response-meta">
+          - <%= response.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+          - <%= pluralize(response.answers.count, 'answer') %>
+        </span>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p>No responses yet. Share the form link to start collecting responses.</p>
+<% end %>

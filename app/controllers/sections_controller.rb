@@ -1,6 +1,6 @@
 class SectionsController < ApplicationController
   before_action :require_login
-  before_action :find_section, only: [:show, :edit, :update, :soft_delete, :survey, :submit_survey]
+  before_action :find_section, only: [:show, :edit, :update, :soft_delete]
   
   def index
     @sections = current_user.sections.not_deleted
@@ -16,12 +16,27 @@ class SectionsController < ApplicationController
   end
   
   def create
-    @section = current_user.sections.build(section_params)
-    
-    if @section.save
-      redirect_to @section, notice: 'Section created successfully'
+    if params[:form_id]
+      # Creating section from form
+      @form = current_user.forms.find(params[:form_id])
+      @section = Section.new(section_params)
+      @section.user = current_user
+      
+      if @section.save
+        @form.sections << @section
+        redirect_to @form, notice: 'Section created successfully'
+      else
+        redirect_to @form, alert: 'Error creating section'
+      end
     else
-      render :new
+      # Standalone section creation
+      @section = current_user.sections.build(section_params)
+      
+      if @section.save
+        redirect_to @section, notice: 'Section created successfully'
+      else
+        render :new
+      end
     end
   end
   
@@ -41,42 +56,6 @@ class SectionsController < ApplicationController
     redirect_to sections_path, notice: 'Section deleted successfully'
   end
   
-  def survey
-    @response = Response.new
-  end
-  
-  def submit_survey
-    @response = Response.new(section: @section, user: current_user)
-    
-    if @response.save
-      # Process answers for each question
-      params[:answers]&.each do |question_id, answer_data|
-        question = @section.questions.find(question_id)
-        answer = @response.answers.build(
-          question: question,
-          user: current_user,
-          answer_type: question.question_type
-        )
-        
-        case question.question_type
-        when 'string'
-          answer.string_value = answer_data[:value]
-        when 'number'
-          answer.number_value = answer_data[:value].to_f
-        when 'bool'
-          answer.bool_value = answer_data[:value] == '1'
-        when 'range'
-          answer.number_value = answer_data[:value].to_f
-        end
-        
-        answer.save
-      end
-      
-      redirect_to @section, notice: 'Survey submitted successfully'
-    else
-      render :survey, alert: 'Error submitting survey'
-    end
-  end
   
   def add_question
     @section = current_user.sections.find(params[:id])

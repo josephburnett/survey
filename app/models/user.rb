@@ -3,6 +3,7 @@ class User < ApplicationRecord
   
   validates :name, presence: true, uniqueness: true
   
+  has_many :forms
   has_many :questions
   has_many :sections
   has_many :answers

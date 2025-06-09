@@ -1,11 +1,9 @@
 <h1><%= @section.name %></h1>
 <p><%= @section.prompt %></p>
 
-<%= link_to "← Back to Sections", root_path, class: "back-link" %>
+<%= link_to "← Back to Forms", root_path, class: "back-link" %>
 <%= link_to "Edit", edit_section_path(@section), class: "edit-link" %>
 <%= link_to "Delete", soft_delete_section_path(@section), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
-<%= link_to "Fill Out Survey", survey_section_path(@section), class: "survey-link" %>
-<%= link_to "View Responses", section_responses_path(@section), class: "responses-link" %>
 
 <h2>Questions</h2>
 

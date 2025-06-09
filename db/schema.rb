@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_08_221115) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_09_020225) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -25,6 +25,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_221115) do
     t.index ["question_id"], name: "index_answers_on_question_id"
     t.index ["response_id"], name: "index_answers_on_response_id"
     t.index ["user_id"], name: "index_answers_on_user_id"
+  end
+
+  create_table "forms", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id"
+    t.boolean "deleted", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "forms_sections", id: false, force: :cascade do |t|
+    t.integer "form_id", null: false
+    t.integer "section_id", null: false
   end
 
   create_table "metrics", force: :cascade do |t|
@@ -59,12 +72,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_221115) do
   end
 
   create_table "responses", force: :cascade do |t|
-    t.integer "section_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.boolean "deleted", default: false, null: false
-    t.index ["section_id"], name: "index_responses_on_section_id"
+    t.integer "form_id"
     t.index ["user_id"], name: "index_responses_on_user_id"
   end
 
@@ -90,7 +102,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_221115) do
   add_foreign_key "answers", "users"
   add_foreign_key "metrics", "users"
   add_foreign_key "questions", "users"
-  add_foreign_key "responses", "sections"
   add_foreign_key "responses", "users"
   add_foreign_key "sections", "users"
 end

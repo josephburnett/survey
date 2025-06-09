@@ -1,12 +1,19 @@
 Rails.application.routes.draw do
-  root 'sections#index'
+  root 'forms#index'
   
-  resources :sections do
-    resources :questions, only: [:create]
-    resources :responses, only: [:index]
+  resources :forms do
+    resources :sections, only: [:create]
     member do
       get :survey
       post :submit_survey
+      patch :soft_delete
+      patch :add_section
+    end
+  end
+  
+  resources :sections do
+    resources :questions, only: [:create]
+    member do
       patch :soft_delete
       patch :add_question
     end

@@ -1,0 +1,36 @@
+<h1>Fill Out Form: <%= @form.name %></h1>
+
+<%= link_to "← Back to Form", @form, class: "back-link" %>
+
+<%= form_with url: submit_survey_form_path(@form), method: :post, local: true do |form| %>
+  <% @form.sections.each_with_index do |section, section_index| %>
+    <div class="section-block">
+      <h2><%= section.name %></h2>
+      <% if section.prompt.present? %>
+        <p class="section-prompt"><%= section.prompt %></p>
+      <% end %>
+      
+      <% section.questions.each do |question| %>
+        <div class="question-block">
+          <label><%= question.name %></label>
+          
+          <% case question.question_type %>
+          <% when 'string' %>
+            <%= text_field_tag "answers[#{question.id}][value]", nil, required: true %>
+          <% when 'number' %>
+            <%= number_field_tag "answers[#{question.id}][value]", nil, step: :any, required: true %>
+          <% when 'bool' %>
+            <%= check_box_tag "answers[#{question.id}][value]", '1', false %>
+            <%= hidden_field_tag "answers[#{question.id}][value]", '0' %>
+          <% when 'range' %>
+            <%= select_tag "answers[#{question.id}][value]", options_for_select(question.range_options.map { |val| [val, val] }), prompt: 'Select...', required: true %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <div class="actions">
+    <%= form.submit "Submit Form" %>
+  </div>
+<% end %>
