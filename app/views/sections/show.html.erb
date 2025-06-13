@@ -1,64 +1,97 @@
-<h1><%= @section.name %></h1>
-<p><%= @section.prompt %></p>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Forms", root_path, class: "back-link" %>
-<%= link_to "Edit", edit_section_path(@section), class: "edit-link" %>
-<%= link_to "Delete", soft_delete_section_path(@section), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
+  <div class="index-header">
+    <h1><%= @section.name %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "Edit", edit_section_path(@section), class: "btn btn-primary" %>
+      <%= link_to "Delete", soft_delete_section_path(@section), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
+    </div>
+  </div>
 
-<h2>Questions</h2>
+  <%= link_to "← Back to Forms", root_path, class: "back-link" %>
 
-<% if @section.questions.any? %>
-  <div class="questions-list">
-    <% @section.questions.each do |question| %>
-      <div class="question-item">
-        <%= link_to question.name, question_path(question) %>
+  <% if @section.prompt.present? %>
+    <div class="card">
+      <h3>Section Prompt</h3>
+      <p><%= @section.prompt %></p>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <h2>Questions</h2>
+
+    <% if @section.questions.any? %>
+      <div class="index-grid">
+        <% @section.questions.each do |question| %>
+          <div class="index-card">
+            <h3><%= link_to question.name, question_path(question) %></h3>
+            <p>Type: <%= question.question_type || "Not set" %></p>
+            <div class="index-card-actions">
+              <%= link_to "View", question_path(question) %>
+              <%= link_to "Edit", edit_question_path(question) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p>No questions yet. Create your first question below.</p>
+    <% end %>
+  </div>
+
+  <div class="card">
+    <h3>Add New Question</h3>
+
+    <%= form_with model: [@section, @question], local: true do |form| %>
+      <div class="field">
+        <%= form.label :name, "Question Name" %>
+        <%= form.text_field :name, required: true %>
+      </div>
+      
+      <div class="field">
+        <%= form.label :question_type, "Question Type" %>
+        <%= form.select :question_type, [['String', 'string'], ['Number', 'number'], ['Yes/No', 'bool'], ['Range', 'range']], { prompt: 'Select type' }, { required: true } %>
+      </div>
+      
+      <div class="field range-fields" style="display: none;">
+        <%= form.label :range_min, "Range Min" %>
+        <%= form.number_field :range_min, step: :any %>
+        
+        <%= form.label :range_max, "Range Max" %>
+        <%= form.number_field :range_max, step: :any %>
+      </div>
+
+      <div class="actions">
+        <%= form.submit "Create Question" %>
       </div>
     <% end %>
   </div>
-<% else %>
-  <p>No questions yet. Create your first question below.</p>
-<% end %>
 
-<h3>Add New Question</h3>
+  <% if @available_questions.any? %>
+    <div class="card">
+      <h3>Add Existing Question</h3>
+      
+      <%= form_with url: add_question_section_path(@section), method: :patch, local: true do |form| %>
+        <div class="field">
+          <%= form.label :question_id, "Select Question" %>
+          <%= form.select :question_id, options_from_collection_for_select(@available_questions, :id, :name), { prompt: 'Choose a question' }, { required: true } %>
+        </div>
 
-<%= form_with model: [@section, @question], local: true do |form| %>
-  <div class="field">
-    <%= form.label :name, "Question Name" %>
-    <%= form.text_field :name, required: true %>
-  </div>
-  
-  <div class="field">
-    <%= form.label :question_type, "Question Type" %>
-    <%= form.select :question_type, [['String', 'string'], ['Number', 'number'], ['Yes/No', 'bool'], ['Range', 'range']], { prompt: 'Select type' }, { required: true } %>
-  </div>
-  
-  <div class="field range-fields" style="display: none;">
-    <%= form.label :range_min, "Range Min" %>
-    <%= form.number_field :range_min, step: :any %>
-    
-    <%= form.label :range_max, "Range Max" %>
-    <%= form.number_field :range_max, step: :any %>
-  </div>
-
-  <div class="actions">
-    <%= form.submit "Create Question" %>
-  </div>
-<% end %>
-
-<% if @available_questions.any? %>
-  <h3>Add Existing Question</h3>
-  
-  <%= form_with url: add_question_section_path(@section), method: :patch, local: true do |form| %>
-    <div class="field">
-      <%= form.label :question_id, "Select Question" %>
-      <%= form.select :question_id, options_from_collection_for_select(@available_questions, :id, :name), { prompt: 'Choose a question' }, { required: true } %>
-    </div>
-
-    <div class="actions">
-      <%= form.submit "Add Question to Section" %>
+        <div class="actions">
+          <%= form.submit "Add Question to Section" %>
+        </div>
+      <% end %>
     </div>
   <% end %>
-<% end %>
+</div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {

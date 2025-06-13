@@ -1,28 +1,46 @@
-<h1>Answer Details</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Answers", answers_path, class: "back-link" %>
-<%= link_to "Edit", edit_answer_path(@answer), class: "edit-link" %>
-<%= link_to "Delete", soft_delete_answer_path(@answer), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
+  <div class="index-header">
+    <h1>Answer #<%= @answer.id %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "Edit", edit_answer_path(@answer), class: "btn btn-primary" %>
+      <%= link_to "Delete", soft_delete_answer_path(@answer), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
+    </div>
+  </div>
 
-<div class="answer-details">
-  <h3>Question: <%= link_to @answer.question.name, question_path(@answer.question) %></h3>
-  
-  <p><strong>Type:</strong> <%= @answer.answer_type %></p>
-  
-  <p><strong>Your Answer:</strong> 
-    <% case @answer.answer_type %>
-    <% when 'string' %>
-      "<%= @answer.string_value %>"
-    <% when 'number', 'range' %>
-      <%= @answer.number_value %>
-    <% when 'bool' %>
-      <%= @answer.bool_value ? 'Yes' : 'No' %>
+  <%= link_to "← Back to Answers", answers_path, class: "back-link" %>
+
+  <div class="card">
+    <h3>Answer Details</h3>
+    
+    <p><strong>Question:</strong> <%= link_to @answer.question.name, question_path(@answer.question) %></p>
+    
+    <p><strong>Type:</strong> <%= @answer.answer_type %></p>
+    
+    <p><strong>Your Answer:</strong> 
+      <% case @answer.answer_type %>
+      <% when 'string' %>
+        "<%= @answer.string_value %>"
+      <% when 'number', 'range' %>
+        <%= @answer.number_value %>
+      <% when 'bool' %>
+        <%= @answer.bool_value ? 'Yes' : 'No' %>
+      <% end %>
+    </p>
+    
+    <p><strong>Submitted:</strong> <%= @answer.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+    
+    <% if @answer.response %>
+      <p><strong>Part of Response:</strong> <%= link_to "View Full Response", response_path(@answer.response) %></p>
     <% end %>
-  </p>
-  
-  <p><strong>Submitted:</strong> <%= @answer.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
-  
-  <% if @answer.response %>
-    <p><strong>Part of Response:</strong> <%= link_to "View Full Response", response_path(@answer.response) %></p>
-  <% end %>
+  </div>
 </div>

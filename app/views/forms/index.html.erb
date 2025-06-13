@@ -1,29 +1,37 @@
-<nav>
-  <%= link_to "Forms", forms_path %>
-  <%= link_to "Sections", sections_path %>
-  <%= link_to "Questions", questions_path %>
-  <%= link_to "Answers", answers_path %>
-  <%= link_to "Responses", responses_path %>
-  <%= link_to "Metrics", metrics_path %>
-  <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
-</nav>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<h1>Your Forms</h1>
-
-<%= link_to "New Form", new_form_path, class: "create-link" %>
-
-<% if @forms.any? %>
-  <div class="forms-list">
-    <% @forms.each do |form| %>
-      <div class="form-item">
-        <%= link_to form.name, form_path(form) %>
-        <span class="form-meta">
-          - <%= pluralize(form.sections.count, 'section') %>
-          - <%= pluralize(form.responses.count, 'response') %>
-        </span>
-      </div>
-    <% end %>
+  <div class="index-header">
+    <h1>Your Forms</h1>
+    <%= link_to "New Form", new_form_path, class: "btn btn-primary" %>
   </div>
-<% else %>
-  <p>No forms yet. Create your first form to get started!</p>
-<% end %>
+
+  <% if @forms.any? %>
+    <div class="index-grid">
+      <% @forms.each do |form| %>
+        <div class="index-card">
+          <h3><%= link_to form.name, form_path(form) %></h3>
+          <p><%= pluralize(form.sections.count, 'section') %> • <%= pluralize(form.responses.count, 'response') %></p>
+          <div class="index-card-actions">
+            <%= link_to "View", form_path(form) %>
+            <%= link_to "Edit", edit_form_path(form) %>
+            <%= link_to "Fill Out", survey_form_path(form) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card text-center">
+      <p>No forms yet. Create your first form to get started!</p>
+      <%= link_to "Create Form", new_form_path, class: "btn btn-primary mt-2" %>
+    </div>
+  <% end %>
+</div>

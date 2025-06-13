@@ -1,8 +1,20 @@
-<h1>Edit Answer</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Answer", @answer, class: "back-link" %>
+  <h1>Edit Answer</h1>
 
-<%= form_with model: @answer, local: true do |form| %>
+  <%= link_to "← Back to Answer", @answer, class: "back-link" %>
+
+  <div class="card">
+    <%= form_with model: @answer, local: true do |form| %>
   <% if @answer.errors.any? %>
     <div class="error-messages">
       <h4><%= pluralize(@answer.errors.count, "error") %> prohibited this answer from being saved:</h4>
@@ -39,10 +51,12 @@
     <%= form.check_box :bool_value %>
   </div>
 
-  <div class="actions">
-    <%= form.submit "Update Answer" %>
+      <div class="actions">
+        <%= form.submit "Update Answer" %>
+      </div>
+    <% end %>
   </div>
-<% end %>
+</div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {

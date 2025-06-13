@@ -1,74 +1,100 @@
-<h1><%= @form.name %></h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Forms", forms_path, class: "back-link" %>
-<%= link_to "Edit", edit_form_path(@form), class: "edit-link" %>
-<%= link_to "Delete", soft_delete_form_path(@form), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
-<%= link_to "Fill Out Form", survey_form_path(@form), class: "survey-link" %>
+  <div class="index-header">
+    <h1><%= @form.name %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "Fill Out Form", survey_form_path(@form), class: "btn btn-primary" %>
+      <%= link_to "Edit", edit_form_path(@form), class: "btn btn-secondary" %>
+      <%= link_to "Delete", soft_delete_form_path(@form), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
+    </div>
+  </div>
 
-<h2>Sections</h2>
+  <%= link_to "← Back to Forms", forms_path, class: "back-link" %>
 
-<% if @form.sections.any? %>
-  <div class="sections-list">
-    <% @form.sections.each do |section| %>
-      <div class="section-item">
-        <%= link_to section.name, section_path(section) %>
-        <span class="section-meta">
-          - <%= pluralize(section.questions.count, 'question') %>
-        </span>
+  <div class="card">
+    <h2>Sections</h2>
+
+    <% if @form.sections.any? %>
+      <div class="index-grid">
+        <% @form.sections.each do |section| %>
+          <div class="index-card">
+            <h3><%= link_to section.name, section_path(section) %></h3>
+            <p><%= pluralize(section.questions.count, 'question') %></p>
+            <div class="index-card-actions">
+              <%= link_to "View", section_path(section) %>
+              <%= link_to "Edit", edit_section_path(section) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p>No sections yet. Create your first section below.</p>
+    <% end %>
+  </div>
+
+  <div class="card">
+    <h3>Add New Section</h3>
+
+    <%= form_with model: [@form, @section], local: true, data: { turbo: false } do |form| %>
+      <div class="field">
+        <%= form.label :name, "Section Name" %>
+        <%= form.text_field :name, required: true %>
+      </div>
+      
+      <div class="field">
+        <%= form.label :prompt, "Section Prompt" %>
+        <%= form.text_area :prompt %>
+      </div>
+
+      <div class="actions">
+        <%= form.submit "Create Section" %>
       </div>
     <% end %>
   </div>
-<% else %>
-  <p>No sections yet. Create your first section below.</p>
-<% end %>
 
-<h3>Add New Section</h3>
+  <% if @available_sections.any? %>
+    <div class="card">
+      <h3>Add Existing Section</h3>
+      
+      <%= form_with url: add_section_form_path(@form), method: :patch, local: true do |form| %>
+        <div class="field">
+          <%= form.label :section_id, "Select Section" %>
+          <%= form.select :section_id, options_from_collection_for_select(@available_sections, :id, :name), { prompt: 'Choose a section' }, { required: true } %>
+        </div>
 
-<%= form_with model: [@form, @section], local: true, data: { turbo: false } do |form| %>
-  <div class="field">
-    <%= form.label :name, "Section Name" %>
-    <%= form.text_field :name, required: true %>
-  </div>
-  
-  <div class="field">
-    <%= form.label :prompt, "Section Prompt" %>
-    <%= form.text_area :prompt %>
-  </div>
-
-  <div class="actions">
-    <%= form.submit "Create Section" %>
-  </div>
-<% end %>
-
-<% if @available_sections.any? %>
-  <h3>Add Existing Section</h3>
-  
-  <%= form_with url: add_section_form_path(@form), method: :patch, local: true do |form| %>
-    <div class="field">
-      <%= form.label :section_id, "Select Section" %>
-      <%= form.select :section_id, options_from_collection_for_select(@available_sections, :id, :name), { prompt: 'Choose a section' }, { required: true } %>
-    </div>
-
-    <div class="actions">
-      <%= form.submit "Add Section to Form" %>
+        <div class="actions">
+          <%= form.submit "Add Section to Form" %>
+        </div>
+      <% end %>
     </div>
   <% end %>
-<% end %>
 
-<h2>Responses</h2>
+  <div class="card">
+    <h2>Responses</h2>
 
-<% if @form.responses.any? %>
-  <div class="responses-list">
-    <% @form.responses.each do |response| %>
-      <div class="response-item">
-        <%= link_to "Response ##{response.id}", response_path(response) %>
-        <span class="response-meta">
-          - <%= response.created_at.strftime("%B %d, %Y at %I:%M %p") %>
-          - <%= pluralize(response.answers.count, 'answer') %>
-        </span>
+    <% if @form.responses.any? %>
+      <div class="index-grid">
+        <% @form.responses.each do |response| %>
+          <div class="index-card">
+            <h3><%= link_to "Response ##{response.id}", response_path(response) %></h3>
+            <p><%= response.created_at.strftime("%B %d, %Y at %I:%M %p") %> • <%= pluralize(response.answers.count, 'answer') %></p>
+            <div class="index-card-actions">
+              <%= link_to "View", response_path(response) %>
+            </div>
+          </div>
+        <% end %>
       </div>
+    <% else %>
+      <p>No responses yet. Share the form link to start collecting responses.</p>
     <% end %>
   </div>
-<% else %>
-  <p>No responses yet. Share the form link to start collecting responses.</p>
-<% end %>
+</div>

@@ -1,33 +1,59 @@
-<h1>Question: <%= @question.name %></h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Questions", questions_path, class: "back-link" %>
-<%= link_to "Edit", edit_question_path(@question), class: "edit-link" %>
-<%= link_to "Delete", soft_delete_question_path(@question), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
+  <div class="index-header">
+    <h1>Question: <%= @question.name %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "Edit", edit_question_path(@question), class: "btn btn-primary" %>
+      <%= link_to "Delete", soft_delete_question_path(@question), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
+    </div>
+  </div>
 
-<div class="question-details">
-  <p><strong>Type:</strong> <%= @question.question_type || "Not set" %></p>
+  <%= link_to "← Back to Questions", questions_path, class: "back-link" %>
+
+  <div class="card">
+    <h3>Question Details</h3>
+    <p><strong>Type:</strong> <%= @question.question_type || "Not set" %></p>
+    
+    <% if @question.question_type == 'range' %>
+      <p><strong>Range:</strong> <%= @question.range_min %> to <%= @question.range_max %></p>
+    <% end %>
+    
+    <p><strong>Created:</strong> <%= @question.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+  </div>
   
-  <% if @question.question_type == 'range' %>
-    <p><strong>Range:</strong> <%= @question.range_min %> to <%= @question.range_max %></p>
-  <% end %>
+  <div class="card">
+    <h3>Sections</h3>
+    <% if @question.sections.any? %>
+      <div class="index-grid">
+        <% @question.sections.each do |section| %>
+          <div class="index-card">
+            <h3><%= link_to section.name, section_path(section) %></h3>
+            <div class="index-card-actions">
+              <%= link_to "View", section_path(section) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p>This question is not used in any sections yet.</p>
+    <% end %>
+  </div>
   
-  <p><strong>Created:</strong> <%= @question.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
-  
-  <h3>Sections</h3>
-  <% if @question.sections.any? %>
-    <ul>
-      <% @question.sections.each do |section| %>
-        <li><%= link_to section.name, section_path(section) %></li>
-      <% end %>
-    </ul>
-  <% else %>
-    <p>This question is not used in any sections yet.</p>
-  <% end %>
-  
-  <h3>Answers</h3>
-  <% if @question.answers.any? %>
-    <p><strong>Total answers received:</strong> <%= @question.answers.count %></p>
-  <% else %>
-    <p>No answers have been submitted for this question yet.</p>
-  <% end %>
+  <div class="card">
+    <h3>Answers</h3>
+    <% if @question.answers.any? %>
+      <p><strong>Total answers received:</strong> <%= @question.answers.count %></p>
+    <% else %>
+      <p>No answers have been submitted for this question yet.</p>
+    <% end %>
+  </div>
 </div>

@@ -1,20 +1,38 @@
-<h1>My Sections</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<% if logged_in? %>
-  <p>Welcome, <%= current_user.name %>!</p>
-  
-  <%= link_to "Logout", logout_path, data: { "turbo-method": :delete }, class: "logout-link" %>
-  <%= link_to "New Section", new_section_path, class: "new-link" %>
-  
-  <% if @sections.any? %>
-    <div class="sections-list">
-      <% @sections.each do |section| %>
-        <div class="section-item">
-          <%= link_to section.name, section_path(section) %>
-        </div>
-      <% end %>
+  <% if logged_in? %>
+    <div class="index-header">
+      <h1>My Sections</h1>
+      <%= link_to "New Section", new_section_path, class: "btn btn-primary" %>
     </div>
-  <% else %>
-    <p>You haven't created any sections yet.</p>
+    
+    <% if @sections.any? %>
+      <div class="index-grid">
+        <% @sections.each do |section| %>
+          <div class="index-card">
+            <h3><%= link_to section.name, section_path(section) %></h3>
+            <p><%= section.prompt.present? ? truncate(section.prompt, length: 100) : "No prompt set" %></p>
+            <div class="index-card-actions">
+              <%= link_to "View", section_path(section) %>
+              <%= link_to "Edit", edit_section_path(section) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="card text-center">
+        <p>You haven't created any sections yet.</p>
+        <%= link_to "Create Section", new_section_path, class: "btn btn-primary mt-2" %>
+      </div>
+    <% end %>
   <% end %>
-<% end %>
+</div>

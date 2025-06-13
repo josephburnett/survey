@@ -1,17 +1,37 @@
-<h1>My Answers</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Sections", root_path, class: "back-link" %>
-<%= link_to "New Answer", new_answer_path, class: "new-link" %>
-
-<% if @answers.any? %>
-  <div class="answers-list">
-    <% @answers.each do |answer| %>
-      <div class="answer-item">
-        <%= link_to "Answer to: #{answer.question.name}", answer_path(answer) %>
-        <small> - <%= answer.created_at.strftime("%B %d, %Y") %></small>
-      </div>
-    <% end %>
+  <div class="index-header">
+    <h1>My Answers</h1>
+    <%= link_to "New Answer", new_answer_path, class: "btn btn-primary" %>
   </div>
-<% else %>
-  <p>You haven't submitted any answers yet.</p>
-<% end %>
+
+  <% if @answers.any? %>
+    <div class="index-grid">
+      <% @answers.each do |answer| %>
+        <div class="index-card">
+          <h3><%= link_to "Answer ##{answer.id}", answer_path(answer) %></h3>
+          <p>Question: <%= truncate(answer.question.name, length: 50) %></p>
+          <p>Type: <%= answer.answer_type %> • <%= answer.created_at.strftime("%B %d, %Y") %></p>
+          <div class="index-card-actions">
+            <%= link_to "View", answer_path(answer) %>
+            <%= link_to "Edit", edit_answer_path(answer) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card text-center">
+      <p>You haven't submitted any answers yet.</p>
+      <%= link_to "Create Answer", new_answer_path, class: "btn btn-primary mt-2" %>
+    </div>
+  <% end %>
+</div>

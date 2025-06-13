@@ -3,9 +3,9 @@ class ResponsesController < ApplicationController
   before_action :find_response, only: [:show, :edit, :update, :soft_delete]
   
   def index
-    if params[:section_id]
-      @section = current_user.sections.find(params[:section_id])
-      @responses = @section.responses.not_deleted.where(user: current_user)
+    if params[:form_id]
+      @form = current_user.forms.find(params[:form_id])
+      @responses = @form.responses.not_deleted.where(user: current_user)
     else
       @responses = current_user.responses.not_deleted
     end
@@ -16,7 +16,7 @@ class ResponsesController < ApplicationController
   
   def new
     @response = Response.new
-    @sections = current_user.sections.not_deleted
+    @forms = current_user.forms.not_deleted
   end
   
   def create
@@ -25,20 +25,20 @@ class ResponsesController < ApplicationController
     if @response.save
       redirect_to @response, notice: 'Response created successfully'
     else
-      @sections = current_user.sections.not_deleted
+      @forms = current_user.forms.not_deleted
       render :new
     end
   end
   
   def edit
-    @sections = current_user.sections.not_deleted
+    @forms = current_user.forms.not_deleted
   end
   
   def update
     if @response.update(response_params)
       redirect_to @response, notice: 'Response updated successfully'
     else
-      @sections = current_user.sections.not_deleted
+      @forms = current_user.forms.not_deleted
       render :edit
     end
   end
@@ -55,6 +55,6 @@ class ResponsesController < ApplicationController
   end
   
   def response_params
-    params.require(:response).permit(:section_id)
+    params.require(:response).permit(:form_id)
   end
 end

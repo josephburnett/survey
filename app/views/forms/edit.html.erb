@@ -1,25 +1,39 @@
-<h1>Edit Form</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Form", @form, class: "back-link" %>
+  <h1>Edit Form</h1>
 
-<%= form_with model: @form, local: true do |form| %>
-  <% if @form.errors.any? %>
-    <div class="error-messages">
-      <h4><%= pluralize(@form.errors.count, "error") %> prohibited this form from being saved:</h4>
-      <ul>
-        <% @form.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+  <%= link_to "← Back to Form", @form, class: "back-link" %>
 
-  <div class="field">
-    <%= form.label :name %>
-    <%= form.text_field :name, required: true %>
+  <div class="card">
+    <%= form_with model: @form, local: true do |form| %>
+      <% if @form.errors.any? %>
+        <div class="error-messages">
+          <h4><%= pluralize(@form.errors.count, "error") %> prohibited this form from being saved:</h4>
+          <ul>
+            <% @form.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <%= form.label :name %>
+        <%= form.text_field :name, required: true %>
+      </div>
+
+      <div class="actions">
+        <%= form.submit "Update Form" %>
+      </div>
+    <% end %>
   </div>
-
-  <div class="actions">
-    <%= form.submit "Update Form" %>
-  </div>
-<% end %>
+</div>

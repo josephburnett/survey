@@ -1,8 +1,20 @@
-<h1>Edit Metric</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Metric", @metric, class: "back-link" %>
+  <h1>Edit Metric</h1>
 
-<%= form_with model: @metric, local: true do |form| %>
+  <%= link_to "← Back to Metric", @metric, class: "back-link" %>
+
+  <div class="card">
+    <%= form_with model: @metric, local: true do |form| %>
   <% if @metric.errors.any? %>
     <div class="error-messages">
       <h4><%= pluralize(@metric.errors.count, "error") %> prohibited this metric from being saved:</h4>
@@ -44,10 +56,12 @@
     <%= form.select :aggregation, [['Sum', 'sum'], ['Average', 'average']], { prompt: 'Select aggregation' }, { required: true } %>
   </div>
 
-  <div class="actions">
-    <%= form.submit "Update Metric" %>
+      <div class="actions">
+        <%= form.submit "Update Metric" %>
+      </div>
+    <% end %>
   </div>
-<% end %>
+</div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {

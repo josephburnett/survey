@@ -1,16 +1,36 @@
-<h1>My Questions</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Sections", root_path, class: "back-link" %>
-<%= link_to "New Question", new_question_path, class: "new-link" %>
-
-<% if @questions.any? %>
-  <div class="questions-list">
-    <% @questions.each do |question| %>
-      <div class="question-item">
-        <%= link_to question.name, question_path(question) %>
-      </div>
-    <% end %>
+  <div class="index-header">
+    <h1>My Questions</h1>
+    <%= link_to "New Question", new_question_path, class: "btn btn-primary" %>
   </div>
-<% else %>
-  <p>You haven't created any questions yet.</p>
-<% end %>
+
+  <% if @questions.any? %>
+    <div class="index-grid">
+      <% @questions.each do |question| %>
+        <div class="index-card">
+          <h3><%= link_to question.name, question_path(question) %></h3>
+          <p>Type: <%= question.question_type || "Not set" %></p>
+          <div class="index-card-actions">
+            <%= link_to "View", question_path(question) %>
+            <%= link_to "Edit", edit_question_path(question) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card text-center">
+      <p>You haven't created any questions yet.</p>
+      <%= link_to "Create Question", new_question_path, class: "btn btn-primary mt-2" %>
+    </div>
+  <% end %>
+</div>

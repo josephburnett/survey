@@ -1,36 +1,55 @@
-<h1>Response to: <%= @response.section.name %></h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Responses", responses_path, class: "back-link" %>
-<%= link_to "Edit", edit_response_path(@response), class: "edit-link" %>
-<%= link_to "Delete", soft_delete_response_path(@response), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
-<%= link_to "View Section", section_path(@response.section), class: "section-link" %>
-
-<div class="response-details">
-  <p><strong>Section:</strong> <%= @response.section.name %></p>
-  <p><strong>Submitted:</strong> <%= @response.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
-  
-  <h2>Your Answers</h2>
-  
-  <% if @response.answers.any? %>
-    <div class="answers-list">
-      <% @response.answers.each do |answer| %>
-        <div class="answer-block">
-          <h4><%= link_to answer.question.name, question_path(answer.question) %></h4>
-          <p><strong>Your Answer:</strong> 
-            <% case answer.answer_type %>
-            <% when 'string' %>
-              "<%= answer.string_value %>"
-            <% when 'number', 'range' %>
-              <%= answer.number_value %>
-            <% when 'bool' %>
-              <%= answer.bool_value ? 'Yes' : 'No' %>
-            <% end %>
-          </p>
-          <small>Type: <%= answer.answer_type %></small>
-        </div>
-      <% end %>
+  <div class="index-header">
+    <h1>Response #<%= @response.id %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "View Form", form_path(@response.form), class: "btn btn-secondary" %>
+      <%= link_to "Edit", edit_response_path(@response), class: "btn btn-primary" %>
+      <%= link_to "Delete", soft_delete_response_path(@response), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
     </div>
-  <% else %>
-    <p>This response has no answers recorded.</p>
-  <% end %>
+  </div>
+
+  <%= link_to "← Back to Responses", responses_path, class: "back-link" %>
+
+  <div class="card">
+    <h3>Response Details</h3>
+    <p><strong>Form:</strong> <%= link_to @response.form.name, form_path(@response.form) %></p>
+    <p><strong>Submitted:</strong> <%= @response.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+  </div>
+  
+  <div class="card">
+    <h2>Your Answers</h2>
+    
+    <% if @response.answers.any? %>
+      <div class="grid">
+        <% @response.answers.each do |answer| %>
+          <div class="question-block">
+            <h4><%= link_to answer.question.name, question_path(answer.question) %></h4>
+            <p><strong>Your Answer:</strong> 
+              <% case answer.answer_type %>
+              <% when 'string' %>
+                "<%= answer.string_value %>"
+              <% when 'number', 'range' %>
+                <%= answer.number_value %>
+              <% when 'bool' %>
+                <%= answer.bool_value ? 'Yes' : 'No' %>
+              <% end %>
+            </p>
+            <small>Type: <%= answer.answer_type %></small>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p>This response has no answers recorded.</p>
+    <% end %>
+  </div>
 </div>

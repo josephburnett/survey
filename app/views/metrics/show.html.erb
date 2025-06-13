@@ -1,50 +1,68 @@
-<h1>Metric Details</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Metrics", metrics_path, class: "back-link" %>
-<%= link_to "Edit", edit_metric_path(@metric), class: "edit-link" %>
-<%= link_to "Delete", soft_delete_metric_path(@metric), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "delete-link" %>
-
-<div class="metric-details">
-  <h2>Metric Configuration</h2>
-  <p><strong>Source:</strong> 
-    <% if @metric.source.respond_to?(:name) %>
-      <%= link_to @metric.source.name, polymorphic_path(@metric.source) %>
-    <% else %>
-      <%= @metric.source.class.name %> #<%= @metric.source.id %>
-    <% end %>
-  </p>
-  <p><strong>Type:</strong> <%= @metric.type %></p>
-  <p><strong>Resolution:</strong> <%= @metric.resolution %></p>
-  <p><strong>Width:</strong> <%= @metric.width %></p>
-  <p><strong>Aggregation:</strong> <%= @metric.aggregation %></p>
-  
-  <h2>Time Series Data</h2>
-  
-  <% if @series_data.any? %>
-    <div class="chart-container">
-      <canvas id="metricChart" width="400" height="200"></canvas>
+  <div class="index-header">
+    <h1>Metric #<%= @metric.id %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "Edit", edit_metric_path(@metric), class: "btn btn-primary" %>
+      <%= link_to "Delete", soft_delete_metric_path(@metric), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
     </div>
+  </div>
+
+  <%= link_to "← Back to Metrics", metrics_path, class: "back-link" %>
+
+  <div class="card">
+    <h2>Metric Configuration</h2>
+    <p><strong>Source:</strong> 
+      <% if @metric.source.respond_to?(:name) %>
+        <%= link_to @metric.source.name, polymorphic_path(@metric.source) %>
+      <% else %>
+        <%= @metric.source.class.name %> #<%= @metric.source.id %>
+      <% end %>
+    </p>
+    <p><strong>Type:</strong> <%= @metric.type %></p>
+    <p><strong>Resolution:</strong> <%= @metric.resolution %></p>
+    <p><strong>Width:</strong> <%= @metric.width %></p>
+    <p><strong>Aggregation:</strong> <%= @metric.aggregation %></p>
+  </div>
+  
+  <div class="card">
+    <h2>Time Series Data</h2>
     
-    <h3>Raw Data</h3>
-    <table class="series-table">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @series_data.each do |time, value| %>
+    <% if @series_data.any? %>
+      <div class="chart-container" style="margin-bottom: 2rem;">
+        <canvas id="metricChart" width="400" height="200"></canvas>
+      </div>
+      
+      <h3>Raw Data</h3>
+      <table class="series-table">
+        <thead>
           <tr>
-            <td><%= time.strftime("%B %d, %Y") %></td>
-            <td><%= value.round(2) %></td>
+            <th>Time</th>
+            <th>Value</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    <p>No data available for this metric configuration.</p>
-  <% end %>
+        </thead>
+        <tbody>
+          <% @series_data.each do |time, value| %>
+            <tr>
+              <td><%= time.strftime("%B %d, %Y") %></td>
+              <td><%= value.round(2) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p>No data available for this metric configuration.</p>
+    <% end %>
+  </div>
 </div>
 
 <% if @series_data.any? %>

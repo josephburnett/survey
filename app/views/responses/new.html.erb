@@ -1,27 +1,41 @@
-<h1>New Response</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Responses", responses_path, class: "back-link" %>
+  <h1>New Response</h1>
 
-<%= form_with model: @response, local: true do |form| %>
-  <% if @response.errors.any? %>
-    <div class="error-messages">
-      <h4><%= pluralize(@response.errors.count, "error") %> prohibited this response from being saved:</h4>
-      <ul>
-        <% @response.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+  <%= link_to "← Back to Responses", responses_path, class: "back-link" %>
 
-  <div class="field">
-    <%= form.label :section_id, "Section" %>
-    <%= form.select :section_id, options_from_collection_for_select(@sections, :id, :name), { prompt: 'Select section' }, { required: true } %>
+  <div class="card">
+    <%= form_with model: @response, local: true do |form| %>
+      <% if @response.errors.any? %>
+        <div class="error-messages">
+          <h4><%= pluralize(@response.errors.count, "error") %> prohibited this response from being saved:</h4>
+          <ul>
+            <% @response.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <%= form.label :form_id, "Form" %>
+        <%= form.select :form_id, options_from_collection_for_select(@forms, :id, :name), { prompt: 'Select form' }, { required: true } %>
+      </div>
+
+      <div class="actions">
+        <%= form.submit "Create Response" %>
+      </div>
+    <% end %>
+
+    <p><em>Note: After creating a response, you can add answers by editing the response or by taking the form survey.</em></p>
   </div>
-
-  <div class="actions">
-    <%= form.submit "Create Response" %>
-  </div>
-<% end %>
-
-<p><em>Note: After creating a response, you can add answers by editing the response or by taking the section survey.</em></p>
+</div>

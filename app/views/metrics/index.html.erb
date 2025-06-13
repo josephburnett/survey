@@ -1,17 +1,37 @@
-<h1>My Metrics</h1>
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
 
-<%= link_to "← Back to Sections", root_path, class: "back-link" %>
-<%= link_to "New Metric", new_metric_path, class: "new-link" %>
-
-<% if @metrics.any? %>
-  <div class="metrics-list">
-    <% @metrics.each do |metric| %>
-      <div class="metric-item">
-        <%= link_to "Metric for #{metric.source.respond_to?(:name) ? metric.source.name : metric.source.class.name}", metric_path(metric) %>
-        <small> - <%= metric.resolution %> / <%= metric.width %> / <%= metric.aggregation %></small>
-      </div>
-    <% end %>
+  <div class="index-header">
+    <h1>My Metrics</h1>
+    <%= link_to "New Metric", new_metric_path, class: "btn btn-primary" %>
   </div>
-<% else %>
-  <p>You haven't created any metrics yet.</p>
-<% end %>
+
+  <% if @metrics.any? %>
+    <div class="index-grid">
+      <% @metrics.each do |metric| %>
+        <div class="index-card">
+          <h3><%= link_to "Metric ##{metric.id}", metric_path(metric) %></h3>
+          <p>Source: <%= metric.source.respond_to?(:name) ? metric.source.name : metric.source.class.name %></p>
+          <p><%= metric.resolution %> • <%= metric.width %> • <%= metric.aggregation %></p>
+          <div class="index-card-actions">
+            <%= link_to "View", metric_path(metric) %>
+            <%= link_to "Edit", edit_metric_path(metric) %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="card text-center">
+      <p>You haven't created any metrics yet.</p>
+      <%= link_to "Create Metric", new_metric_path, class: "btn btn-primary mt-2" %>
+    </div>
+  <% end %>
+</div>
