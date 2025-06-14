@@ -14,5 +14,5 @@ development:
 test:
   <<: *default
 
-production:
+home:
   <<: *default

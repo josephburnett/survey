@@ -11,6 +11,6 @@ development:
 test:
   <<: *default
 
-production:
+home:
   database: cache
   <<: *default

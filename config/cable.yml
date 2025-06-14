@@ -8,7 +8,7 @@ development:
 test:
   adapter: test
 
-production:
+home:
   adapter: solid_cable
   connects_to:
     database:
