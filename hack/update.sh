@@ -11,14 +11,14 @@ NC='\033[0m' # No Color
 
 # Get current git commit hash (full hash to match Kamal)
 COMMIT=$(git rev-parse HEAD)
-IMAGE_TAG="${IMAGE_BASE}:${COMMIT}"
+IMAGE_REPO="josephburnett/routine"
+FULL_IMAGE="${IMAGE_REPO}:${COMMIT}"
 
 # Configuration
 REMOTE_HOST="home.local"
 REMOTE_USER="joe"
 SSH_KEY="$HOME/.ssh/home.local"
 CONTAINER_NAME="routine-web-${COMMIT}"
-IMAGE_BASE="josephburnett/routine"
 
 # Read Rails master key from file
 if [ ! -f "config/master.key" ]; then
@@ -27,42 +27,32 @@ if [ ! -f "config/master.key" ]; then
 fi
 RAILS_MASTER_KEY=$(cat config/master.key)
 
-echo -e "${BLUE}Starting deployment process...${NC}"
-
-echo -e "${YELLOW}Building and pushing image: ${IMAGE_TAG}${NC}"
-
-# Build and push with Kamal
-if ! kamal build push; then
-    echo -e "${RED}Failed to build and push image with Kamal${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}Image built and pushed successfully${NC}"
-
 echo -e "${YELLOW}Deploying to ${REMOTE_HOST}...${NC}"
 
 # Deploy to remote server
 ssh -i "${SSH_KEY}" "${REMOTE_USER}@${REMOTE_HOST}" << EOF
     set -e
     
+    echo "Pulling latest image..."
+    sudo docker pull ${FULL_IMAGE}
+
+    OLD_CONTAINER_ID=$(sudo docker ps -q -f name=routine)
+    
     echo "Stopping existing container (if running)..."
-    if sudo docker ps -q -f name=${CONTAINER_NAME} | grep -q .; then
+    if [[ -n "${OLD_CONTAINER_ID}" ]]; then
         echo "  Found running container, stopping..."
-        sudo docker stop ${CONTAINER_NAME}
+        sudo docker stop ${OLD_CONTAINER_ID}
     else
         echo "  No running container found"
     fi
     
     echo "Removing existing container (if exists)..."
-    if sudo docker ps -aq -f name=${CONTAINER_NAME} | grep -q .; then
+    if [[ -n "${OLD_CONTAINER}" ]]; then
         echo "  Found existing container, removing..."
-        sudo docker rm ${CONTAINER_NAME}
+        sudo docker rm ${OLD_CONTAINER_ID}
     else
         echo "  No existing container found"
     fi
-    
-    echo "Pulling latest image..."
-    sudo docker pull ${IMAGE_BASE}${IMAGE_TAG}
     
     echo "Starting new container..."
     sudo docker run -d \\
@@ -70,7 +60,7 @@ ssh -i "${SSH_KEY}" "${REMOTE_USER}@${REMOTE_HOST}" << EOF
         -e RAILS_MASTER_KEY=${RAILS_MASTER_KEY} \\
         -e RAILS_ENV=home \\
         --name ${CONTAINER_NAME} \\
-        ${IMAGE_BASE}${IMAGE_TAG}
+        ${FULL_IMAGE}
     
     echo "Container started successfully"
     
