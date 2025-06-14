@@ -36,20 +36,28 @@ ssh -i "${SSH_KEY}" "${REMOTE_USER}@${REMOTE_HOST}" << EOF
     echo "Pulling latest image..."
     sudo docker pull ${FULL_IMAGE}
 
-    OLD_CONTAINER_ID=$(sudo docker ps -q -f name=routine)
+    # Debug: Show all running containers first
+    echo "All running containers:"
+    sudo docker ps
+    
+    # Get the container ID with explicit debugging
+    echo "Searching for routine containers..."
+    OLD_CONTAINER_ID=\$(sudo docker ps -q -f name=routine)
+    echo "Found container ID: '\${OLD_CONTAINER_ID}'"
+    echo "Container ID length: \${#OLD_CONTAINER_ID}"
     
     echo "Stopping existing container (if running)..."
-    if [[ -n "${OLD_CONTAINER_ID}" ]]; then
-        echo "  Found running container, stopping..."
-        sudo docker stop ${OLD_CONTAINER_ID}
+    if [[ -n "\${OLD_CONTAINER_ID}" ]]; then
+        echo "  Found running container \${OLD_CONTAINER_ID}, stopping..."
+        sudo docker stop \${OLD_CONTAINER_ID}
     else
         echo "  No running container found"
     fi
     
     echo "Removing existing container (if exists)..."
-    if [[ -n "${OLD_CONTAINER}" ]]; then
-        echo "  Found existing container, removing..."
-        sudo docker rm ${OLD_CONTAINER_ID}
+    if [[ -n "\${OLD_CONTAINER_ID}" ]]; then
+        echo "  Found existing container \${OLD_CONTAINER_ID}, removing..."
+        sudo docker rm \${OLD_CONTAINER_ID}
     else
         echo "  No existing container found"
     fi
