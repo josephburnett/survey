@@ -65,7 +65,7 @@ ssh -i "${SSH_KEY}" "${REMOTE_USER}@${REMOTE_HOST}" << EOF
     echo "Starting new container..."
     sudo docker run -d \\
         -p 80:3000 \\
-        -v /opt/routine/db:/rails/db \\
+        -v survey_storage:/rails/db \\
         -e RAILS_MASTER_KEY=${RAILS_MASTER_KEY} \\
         -e RAILS_ENV=home \\
         --name ${CONTAINER_NAME} \\
