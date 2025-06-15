@@ -112,16 +112,16 @@ a:hover {
   background: var(--white);
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
 }
 
 .section-block {
   background: var(--white);
   border-radius: 0.75rem;
   border: 1px solid var(--gray-200);
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
@@ -138,9 +138,9 @@ a:hover {
 /* Question Blocks */
 .question-block {
   background-color: var(--gray-100);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   border: 1px solid var(--gray-200);
 }
 
@@ -158,7 +158,7 @@ a:hover {
 
 /* Form Fields */
 .field {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .field label {
@@ -273,10 +273,10 @@ input[type="submit"]:hover {
 /* Actions */
 .actions {
   background-color: var(--pale-blue);
-  padding: 2rem;
+  padding: 1.25rem;
   border-radius: 0.75rem;
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 1.25rem;
   border: 1px solid var(--very-light-blue);
 }
 
