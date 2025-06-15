@@ -1,6 +1,8 @@
 # Name of your application. Used to uniquely configure containers.
 service: routine
 
+deploy_timeout: 300
+
 # Name of the container image.
 image: josephburnett/routine
 
