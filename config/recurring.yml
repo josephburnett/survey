@@ -1,4 +1,4 @@
-# home:
+# production:
 #   periodic_cleanup:
 #     class: CleanSoftDeletedRecordsJob
 #     queue: background
