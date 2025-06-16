@@ -31,12 +31,14 @@
     <%= form.select :function, [['Answer', 'answer'], ['Sum', 'sum'], ['Average', 'average'], ['Difference', 'difference'], ['Count', 'count']], { prompt: 'Select function' }, { required: true } %>
   </div>
   
-  <div class="field answer-sources" style="<%= @metric.function == 'answer' ? 'display: block;' : 'display: none;' %>">
-    <%= form.label :answer_ids, "Answers" %>
-    <%= form.collection_check_boxes :answer_ids, @answers, :id, :display_name, { checked: @metric.answer_ids }, { class: 'answer-checkbox' } do |b| %>
+  <div class="field question-sources" style="<%= @metric.function == 'answer' ? 'display: block;' : 'display: none;' %>">
+    <%= form.label :question_ids, "Questions" %>
+    <%= form.collection_check_boxes :question_ids, @questions, :id, :id, { checked: @metric.question_ids }, { class: 'question-checkbox' } do |b| %>
       <div class="checkbox-item">
         <%= b.check_box %>
-        <%= b.label %>
+        <%= b.label do %>
+          <%= "#{b.object.name} (#{b.object.question_type})" %>
+        <% end %>
       </div>
     <% end %>
   </div>
@@ -68,25 +70,32 @@
         <%= form.submit "Update Metric" %>
       </div>
     <% end %>
+    
+    <div style="margin-top: 1rem; text-align: center;">
+      <%= link_to "Delete Metric", soft_delete_metric_path(@metric), 
+          data: { "turbo-method": :patch, confirm: "Are you sure you want to delete this metric? This action cannot be undone." }, 
+          class: "btn", 
+          style: "background-color: var(--error); color: var(--white);" %>
+    </div>
   </div>
 </div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const functionSelect = document.querySelector('#metric_function');
-    const answerSources = document.querySelector('.answer-sources');
+    const questionSources = document.querySelector('.question-sources');
     const metricSources = document.querySelector('.metric-sources');
     
     if (functionSelect) {
       functionSelect.addEventListener('change', function() {
         if (this.value === 'answer') {
-          answerSources.style.display = 'block';
+          questionSources.style.display = 'block';
           metricSources.style.display = 'none';
         } else if (['sum', 'average', 'difference', 'count'].includes(this.value)) {
-          answerSources.style.display = 'none';
+          questionSources.style.display = 'none';
           metricSources.style.display = 'block';
         } else {
-          answerSources.style.display = 'none';
+          questionSources.style.display = 'none';
           metricSources.style.display = 'none';
         }
       });

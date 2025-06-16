@@ -55,6 +55,13 @@
         <%= form.submit "Update Answer" %>
       </div>
     <% end %>
+    
+    <div style="margin-top: 1rem; text-align: center;">
+      <%= link_to "Delete Answer", soft_delete_answer_path(@answer), 
+          data: { "turbo-method": :patch, confirm: "Are you sure you want to delete this answer? This action cannot be undone." }, 
+          class: "btn", 
+          style: "background-color: var(--error); color: var(--white);" %>
+    </div>
   </div>
 </div>
 

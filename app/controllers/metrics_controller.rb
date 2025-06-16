@@ -12,7 +12,7 @@ class MetricsController < ApplicationController
   
   def new
     @metric = Metric.new
-    @answers = current_user.answers.joins(:question).includes(:question).not_deleted
+    @questions = current_user.questions.not_deleted
     @metrics = current_user.metrics.not_deleted
   end
   
@@ -22,14 +22,14 @@ class MetricsController < ApplicationController
     if @metric.save
       redirect_to @metric, notice: 'Metric created successfully'
     else
-      @answers = current_user.answers.joins(:question).includes(:question).not_deleted
+      @questions = current_user.questions.not_deleted
       @metrics = current_user.metrics.not_deleted
       render :new
     end
   end
   
   def edit
-    @answers = current_user.answers.joins(:question).includes(:question).not_deleted
+    @questions = current_user.questions.not_deleted
     @metrics = current_user.metrics.not_deleted.where.not(id: @metric.id)
   end
   
@@ -37,7 +37,7 @@ class MetricsController < ApplicationController
     if @metric.update(metric_params)
       redirect_to @metric, notice: 'Metric updated successfully'
     else
-      @answers = current_user.answers.joins(:question).includes(:question).not_deleted
+      @questions = current_user.questions.not_deleted
       @metrics = current_user.metrics.not_deleted.where.not(id: @metric.id)
       render :edit
     end
@@ -55,6 +55,6 @@ class MetricsController < ApplicationController
   end
   
   def metric_params
-    params.require(:metric).permit(:function, :resolution, :width, answer_ids: [], child_metric_ids: [])
+    params.require(:metric).permit(:function, :resolution, :width, question_ids: [], child_metric_ids: [])
   end
 end

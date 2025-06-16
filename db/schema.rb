@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_16_013306) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_16_024236) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -40,16 +40,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_16_013306) do
     t.integer "section_id", null: false
   end
 
-  create_table "metric_answers", force: :cascade do |t|
-    t.integer "metric_id", null: false
-    t.integer "answer_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["answer_id"], name: "index_metric_answers_on_answer_id"
-    t.index ["metric_id", "answer_id"], name: "index_metric_answers_on_metric_id_and_answer_id", unique: true
-    t.index ["metric_id"], name: "index_metric_answers_on_metric_id"
-  end
-
   create_table "metric_metrics", force: :cascade do |t|
     t.integer "parent_metric_id", null: false
     t.integer "child_metric_id", null: false
@@ -58,6 +48,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_16_013306) do
     t.index ["child_metric_id"], name: "index_metric_metrics_on_child_metric_id"
     t.index ["parent_metric_id", "child_metric_id"], name: "index_metric_metrics_on_parent_and_child", unique: true
     t.index ["parent_metric_id"], name: "index_metric_metrics_on_parent_metric_id"
+  end
+
+  create_table "metric_questions", force: :cascade do |t|
+    t.integer "metric_id", null: false
+    t.integer "question_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["metric_id", "question_id"], name: "index_metric_questions_on_metric_id_and_question_id", unique: true
+    t.index ["metric_id"], name: "index_metric_questions_on_metric_id"
+    t.index ["question_id"], name: "index_metric_questions_on_question_id"
   end
 
   create_table "metrics", force: :cascade do |t|
@@ -117,10 +117,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_16_013306) do
   add_foreign_key "answers", "questions"
   add_foreign_key "answers", "responses"
   add_foreign_key "answers", "users"
-  add_foreign_key "metric_answers", "answers"
-  add_foreign_key "metric_answers", "metrics"
   add_foreign_key "metric_metrics", "metrics", column: "child_metric_id"
   add_foreign_key "metric_metrics", "metrics", column: "parent_metric_id"
+  add_foreign_key "metric_questions", "metrics"
+  add_foreign_key "metric_questions", "questions"
   add_foreign_key "metrics", "users"
   add_foreign_key "questions", "users"
   add_foreign_key "responses", "users"

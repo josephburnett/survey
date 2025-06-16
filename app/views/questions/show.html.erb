@@ -56,4 +56,16 @@
       <p>No answers have been submitted for this question yet.</p>
     <% end %>
   </div>
+  
+  <% if @question.metrics.any? %>
+    <div class="card">
+      <h3>Used by Metrics</h3>
+      <p>This question is referenced by the following metrics:</p>
+      <ul>
+        <% @question.metrics.each do |metric| %>
+          <li><%= link_to "Metric ##{metric.id} - #{metric.function&.capitalize || 'Unknown'} (#{metric.resolution}/#{metric.width})", metric_path(metric) %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 </div>

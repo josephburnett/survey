@@ -8,6 +8,10 @@ class Question < ApplicationRecord
   has_and_belongs_to_many :sections
   has_many :answers
   
+  # Reverse association to see which metrics reference this question
+  has_many :metric_questions, dependent: :destroy
+  has_many :metrics, through: :metric_questions
+  
   scope :not_deleted, -> { where(deleted: false) }
   
   def soft_delete!

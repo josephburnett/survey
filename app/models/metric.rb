@@ -2,8 +2,8 @@ class Metric < ApplicationRecord
   belongs_to :user
   
   # Many-to-many relationships
-  has_many :metric_answers, dependent: :destroy
-  has_many :answers, through: :metric_answers
+  has_many :metric_questions, dependent: :destroy
+  has_many :questions, through: :metric_questions
   
   has_many :parent_metric_metrics, class_name: 'MetricMetric', foreign_key: 'child_metric_id', dependent: :destroy
   has_many :parent_metrics, through: :parent_metric_metrics, source: :parent_metric
@@ -24,9 +24,9 @@ class Metric < ApplicationRecord
   def type
     case function
     when 'answer'
-      # Return the most common answer type from referenced answers
-      answer_types = answers.joins(:question).pluck('questions.question_type').uniq
-      answer_types.first || 'number'
+      # Return the most common question type from referenced questions
+      question_types = questions.pluck(:question_type).uniq
+      question_types.first || 'number'
     else
       'number' # All calculated metrics return numbers
     end
@@ -50,8 +50,9 @@ class Metric < ApplicationRecord
   private
   
   def generate_answer_series
-    # Get all answers from referenced answer IDs
-    filtered_answers = answers.joins(:response)
+    # Get all answers to the referenced questions
+    filtered_answers = Answer.joins(:response, :question)
+                             .where(questions: { id: questions.pluck(:id) })
                              .where(responses: { user_id: user.id })
                              .where(created_at: time_range)
                              .order(:created_at)

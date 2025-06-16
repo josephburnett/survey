@@ -26,11 +26,11 @@
     <p><strong>Resolution:</strong> <%= @metric.resolution %></p>
     <p><strong>Width:</strong> <%= @metric.width %></p>
     
-    <% if @metric.function == 'answer' && @metric.answers.any? %>
-      <p><strong>Referenced Answers:</strong></p>
+    <% if @metric.function == 'answer' && @metric.questions.any? %>
+      <p><strong>Referenced Questions:</strong></p>
       <ul>
-        <% @metric.answers.each do |answer| %>
-          <li><%= link_to answer.display_name, answer_path(answer) %></li>
+        <% @metric.questions.each do |question| %>
+          <li><%= link_to "#{question.name} (#{question.question_type})", question_path(question) %></li>
         <% end %>
       </ul>
     <% end %>

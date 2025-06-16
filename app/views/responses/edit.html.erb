@@ -37,5 +37,12 @@
     <% end %>
 
     <p><em>Note: To modify the answers in this response, you'll need to edit individual answers or retake the form survey.</em></p>
+    
+    <div style="margin-top: 1rem; text-align: center;">
+      <%= link_to "Delete Response", soft_delete_response_path(@response), 
+          data: { "turbo-method": :patch, confirm: "Are you sure you want to delete this response? This action cannot be undone." }, 
+          class: "btn", 
+          style: "background-color: var(--error); color: var(--white);" %>
+    </div>
   </div>
 </div>
