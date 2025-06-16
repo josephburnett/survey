@@ -42,5 +42,14 @@
     <% if @answer.response %>
       <p><strong>Part of Response:</strong> <%= link_to "View Full Response", response_path(@answer.response) %></p>
     <% end %>
+    
+    <% if @answer.metrics.any? %>
+      <p><strong>Used by Metrics:</strong></p>
+      <ul>
+        <% @answer.metrics.each do |metric| %>
+          <li><%= link_to metric.display_name, metric_path(metric) %></li>
+        <% end %>
+      </ul>
+    <% end %>
   </div>
 </div>

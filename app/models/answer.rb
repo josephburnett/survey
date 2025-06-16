@@ -3,6 +3,10 @@ class Answer < ApplicationRecord
   belongs_to :response, optional: true
   belongs_to :user, optional: true
   
+  # Reverse association to see which metrics reference this answer
+  has_many :metric_answers, dependent: :destroy
+  has_many :metrics, through: :metric_answers
+  
   validates :answer_type, presence: true, inclusion: { in: %w[string number bool range] }
   validates :string_value, presence: true, if: -> { answer_type == 'string' }
   validates :number_value, presence: true, if: -> { answer_type == 'number' || answer_type == 'range' }
@@ -34,5 +38,9 @@ class Answer < ApplicationRecord
     when 'bool'
       self.bool_value = val
     end
+  end
+  
+  def display_name
+    "#{question.name}: #{value} (#{created_at.strftime('%Y-%m-%d')})"
   end
 end

@@ -27,18 +27,30 @@
   <% end %>
 
   <div class="field">
-    <%= form.label :source_type, "Source Type" %>
-    <%= form.select :source_type, [['Question', 'Question'], ['Metric', 'Metric']], { prompt: 'Select source type' }, { required: true } %>
+    <%= form.label :function, "Function" %>
+    <%= form.select :function, [['Answer', 'answer'], ['Sum', 'sum'], ['Average', 'average'], ['Difference', 'difference'], ['Count', 'count']], { prompt: 'Select function' }, { required: true } %>
   </div>
   
-  <div class="field question-sources" style="display: none;">
-    <%= form.label :source_id, "Question" %>
-    <%= form.select :source_id, options_from_collection_for_select(@questions, :id, :name), { prompt: 'Select question' }, { class: 'question-select' } %>
+  <div class="field answer-sources" style="display: none;">
+    <%= form.label :answer_ids, "Answers" %>
+    <%= form.collection_check_boxes :answer_ids, @answers, :id, :display_name, { checked: @metric.answer_ids }, { class: 'answer-checkbox' } do |b| %>
+      <div class="checkbox-item">
+        <%= b.check_box %>
+        <%= b.label %>
+      </div>
+    <% end %>
   </div>
   
   <div class="field metric-sources" style="display: none;">
-    <%= form.label :source_id, "Metric" %>
-    <%= form.select :source_id, options_from_collection_for_select(@metrics, :id, :id), { prompt: 'Select metric' }, { class: 'metric-select' } %>
+    <%= form.label :child_metric_ids, "Metrics" %>
+    <%= form.collection_check_boxes :child_metric_ids, @metrics, :id, :id, { checked: @metric.child_metric_ids }, { class: 'metric-checkbox' } do |b| %>
+      <div class="checkbox-item">
+        <%= b.check_box %>
+        <%= b.label do %>
+          <%= "Metric ##{b.object.id} - #{b.object.function&.capitalize || 'Unknown'} (#{b.object.resolution}/#{b.object.width})" %>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 
   <div class="field">
@@ -51,10 +63,6 @@
     <%= form.select :width, [['Daily', 'daily'], ['Weekly', 'weekly'], ['Monthly', 'monthly'], ['90 Days', '90_days'], ['Yearly', 'yearly'], ['All Time', 'all_time']], { prompt: 'Select width' }, { required: true } %>
   </div>
 
-  <div class="field">
-    <%= form.label :aggregation %>
-    <%= form.select :aggregation, [['Sum', 'sum'], ['Average', 'average']], { prompt: 'Select aggregation' }, { required: true } %>
-  </div>
 
       <div class="actions">
         <%= form.submit "Create Metric" %>
@@ -65,29 +73,21 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const sourceTypeSelect = document.querySelector('#metric_source_type');
-    const questionSources = document.querySelector('.question-sources');
+    const functionSelect = document.querySelector('#metric_function');
+    const answerSources = document.querySelector('.answer-sources');
     const metricSources = document.querySelector('.metric-sources');
-    const questionSelect = document.querySelector('.question-select');
-    const metricSelect = document.querySelector('.metric-select');
     
-    if (sourceTypeSelect) {
-      sourceTypeSelect.addEventListener('change', function() {
-        if (this.value === 'Question') {
-          questionSources.style.display = 'block';
+    if (functionSelect) {
+      functionSelect.addEventListener('change', function() {
+        if (this.value === 'answer') {
+          answerSources.style.display = 'block';
           metricSources.style.display = 'none';
-          questionSelect.required = true;
-          metricSelect.required = false;
-        } else if (this.value === 'Metric') {
-          questionSources.style.display = 'none';
+        } else if (['sum', 'average', 'difference', 'count'].includes(this.value)) {
+          answerSources.style.display = 'none';
           metricSources.style.display = 'block';
-          questionSelect.required = false;
-          metricSelect.required = true;
         } else {
-          questionSources.style.display = 'none';
+          answerSources.style.display = 'none';
           metricSources.style.display = 'none';
-          questionSelect.required = false;
-          metricSelect.required = false;
         }
       });
     }

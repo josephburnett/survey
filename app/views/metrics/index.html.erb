@@ -19,8 +19,8 @@
       <% @metrics.each do |metric| %>
         <div class="index-card">
           <h3><%= link_to "Metric ##{metric.id}", metric_path(metric) %></h3>
-          <p>Source: <%= metric.source.respond_to?(:name) ? metric.source.name : metric.source.class.name %></p>
-          <p><%= metric.resolution %> • <%= metric.width %> • <%= metric.aggregation %></p>
+          <p>Function: <%= metric.function.capitalize %></p>
+          <p><%= metric.resolution %> • <%= metric.width %></p>
           <div class="index-card-actions">
             <%= link_to "View", metric_path(metric) %>
             <%= link_to "Edit", edit_metric_path(metric) %>

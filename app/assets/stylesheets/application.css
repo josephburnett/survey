@@ -477,3 +477,29 @@ tr:hover {
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
 .mt-3 { margin-top: 1.5rem; }
+
+/* Checkbox styling for metrics forms */
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 0.25rem;
+  background-color: var(--white);
+}
+
+.checkbox-item:hover {
+  background-color: var(--gray-50);
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin-right: 0.75rem;
+  width: auto;
+}
+
+.checkbox-item label {
+  margin: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}

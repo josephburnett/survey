@@ -21,17 +21,37 @@
 
   <div class="card">
     <h2>Metric Configuration</h2>
-    <p><strong>Source:</strong> 
-      <% if @metric.source.respond_to?(:name) %>
-        <%= link_to @metric.source.name, polymorphic_path(@metric.source) %>
-      <% else %>
-        <%= @metric.source.class.name %> #<%= @metric.source.id %>
-      <% end %>
-    </p>
+    <p><strong>Function:</strong> <%= @metric.function.capitalize %></p>
     <p><strong>Type:</strong> <%= @metric.type %></p>
     <p><strong>Resolution:</strong> <%= @metric.resolution %></p>
     <p><strong>Width:</strong> <%= @metric.width %></p>
-    <p><strong>Aggregation:</strong> <%= @metric.aggregation %></p>
+    
+    <% if @metric.function == 'answer' && @metric.answers.any? %>
+      <p><strong>Referenced Answers:</strong></p>
+      <ul>
+        <% @metric.answers.each do |answer| %>
+          <li><%= link_to answer.display_name, answer_path(answer) %></li>
+        <% end %>
+      </ul>
+    <% end %>
+    
+    <% if ['sum', 'average', 'difference', 'count'].include?(@metric.function) && @metric.child_metrics.any? %>
+      <p><strong>Referenced Metrics:</strong></p>
+      <ul>
+        <% @metric.child_metrics.each do |child_metric| %>
+          <li><%= link_to "Metric ##{child_metric.id} - #{child_metric.function&.capitalize || 'Unknown'} (#{child_metric.resolution}/#{child_metric.width})", metric_path(child_metric) %></li>
+        <% end %>
+      </ul>
+    <% end %>
+    
+    <% if @metric.parent_metrics.any? %>
+      <p><strong>Used by Metrics:</strong></p>
+      <ul>
+        <% @metric.parent_metrics.each do |parent_metric| %>
+          <li><%= link_to "Metric ##{parent_metric.id} - #{parent_metric.function&.capitalize || 'Unknown'} (#{parent_metric.resolution}/#{parent_metric.width})", metric_path(parent_metric) %></li>
+        <% end %>
+      </ul>
+    <% end %>
   </div>
   
   <div class="card">
@@ -94,7 +114,7 @@
       plugins: {
         title: {
           display: true,
-          text: <%= raw "Metric: #{@metric.source.respond_to?(:name) ? @metric.source.name : @metric.source.class.name}".to_json %>
+          text: <%= raw "Metric: #{@metric.function.capitalize} Function".to_json %>
         }
       }
     }
