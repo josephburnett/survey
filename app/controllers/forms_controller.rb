@@ -60,13 +60,13 @@ class FormsController < ApplicationController
         
         case question.question_type
         when 'string'
-          answer.string_value = answer_data[:value]
+          answer.string_value = answer_data['value']
         when 'number'
-          answer.number_value = answer_data[:value].to_f
+          answer.number_value = answer_data['value'].to_f
         when 'bool'
-          answer.bool_value = answer_data[:value] == '1'
+          answer.bool_value = answer_data['value'] == '1'
         when 'range'
-          answer.number_value = answer_data[:value].to_f
+          answer.number_value = answer_data['value'].to_f
         end
         
         answer.save
