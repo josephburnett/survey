@@ -33,7 +33,7 @@
       <div class="grid">
         <% @response.answers.each do |answer| %>
           <div class="question-block">
-            <h4><%= link_to answer.question.name, question_path(answer.question) %></h4>
+            <h4><%= link_to answer.question.name, answer_path(answer) %></h4>
             <p><strong>Your Answer:</strong> 
               <% case answer.answer_type %>
               <% when 'string' %>
