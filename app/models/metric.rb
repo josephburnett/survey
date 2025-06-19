@@ -14,7 +14,7 @@ class Metric < ApplicationRecord
   validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly all_time] }
   validates :function, presence: true, inclusion: { in: %w[answer sum average difference count] }
   
-  attr_accessor :child_metric_ids_temp
+  attr_accessor :child_metric_ids_temp, :child_metric_ids_changed
   
   before_save :store_child_metric_ids
   after_save :create_child_associations
@@ -53,6 +53,7 @@ class Metric < ApplicationRecord
   
   def child_metric_ids=(ids)
     @child_metric_ids_temp = Array(ids).reject(&:blank?)
+    @child_metric_ids_changed = true
   end
   
   def child_metric_ids
@@ -68,6 +69,15 @@ class Metric < ApplicationRecord
       Metric.where(id: child_metric_metrics.pluck(:child_metric_id))
     else
       Metric.where(id: @child_metric_ids_temp || [])
+    end
+  end
+  
+  def display_name
+    if name.present?
+      name
+    else
+      id_display = id ? "##{id}" : "(New)"
+      "Metric #{id_display}"
     end
   end
   
@@ -179,11 +189,6 @@ class Metric < ApplicationRecord
     end
   end
   
-  def display_name
-    id_display = id ? "(ID: #{id})" : "(New)"
-    "#{function&.capitalize || 'Unknown'} - #{resolution}/#{width} #{id_display}"
-  end
-  
   private
   
   def store_child_metric_ids
@@ -191,14 +196,16 @@ class Metric < ApplicationRecord
   end
   
   def create_child_associations
-    return unless @child_metric_ids_temp.present?
+    return unless @child_metric_ids_changed
     
     # Clear existing associations
     child_metric_metrics.destroy_all
     
-    # Create new associations
-    @child_metric_ids_temp.each do |child_id|
-      child_metric_metrics.create!(child_metric_id: child_id)
+    # Create new associations if any
+    if @child_metric_ids_temp.present?
+      @child_metric_ids_temp.each do |child_id|
+        child_metric_metrics.create!(child_metric_id: child_id)
+      end
     end
   end
 end

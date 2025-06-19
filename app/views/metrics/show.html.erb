@@ -10,7 +10,7 @@
   </nav>
 
   <div class="index-header">
-    <h1>Metric #<%= @metric.id %></h1>
+    <h1><%= @metric.display_name %></h1>
     <div style="display: flex; gap: 0.5rem;">
       <%= link_to "Edit", edit_metric_path(@metric), class: "btn btn-primary" %>
       <%= link_to "Delete", soft_delete_metric_path(@metric), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
@@ -39,7 +39,7 @@
       <p><strong>Referenced Metrics:</strong></p>
       <ul>
         <% @metric.child_metrics.each do |child_metric| %>
-          <li><%= link_to "Metric ##{child_metric.id} - #{child_metric.function&.capitalize || 'Unknown'} (#{child_metric.resolution}/#{child_metric.width})", metric_path(child_metric) %></li>
+          <li><%= link_to "#{child_metric.display_name} - #{child_metric.function&.capitalize || 'Unknown'} (#{child_metric.resolution}/#{child_metric.width})", metric_path(child_metric) %></li>
         <% end %>
       </ul>
     <% end %>
@@ -48,7 +48,7 @@
       <p><strong>Used by Metrics:</strong></p>
       <ul>
         <% @metric.parent_metrics.each do |parent_metric| %>
-          <li><%= link_to "Metric ##{parent_metric.id} - #{parent_metric.function&.capitalize || 'Unknown'} (#{parent_metric.resolution}/#{parent_metric.width})", metric_path(parent_metric) %></li>
+          <li><%= link_to "#{parent_metric.display_name} - #{parent_metric.function&.capitalize || 'Unknown'} (#{parent_metric.resolution}/#{parent_metric.width})", metric_path(parent_metric) %></li>
         <% end %>
       </ul>
     <% end %>

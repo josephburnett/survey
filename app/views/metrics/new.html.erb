@@ -27,6 +27,11 @@
   <% end %>
 
   <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, placeholder: "Optional: Enter a name for this metric" %>
+  </div>
+
+  <div class="field">
     <%= form.label :function, "Function" %>
     <%= form.select :function, [['Answer', 'answer'], ['Sum', 'sum'], ['Average', 'average'], ['Difference', 'difference'], ['Count', 'count']], { prompt: 'Select function' }, { required: true } %>
   </div>
@@ -49,7 +54,7 @@
       <div class="checkbox-item">
         <%= b.check_box %>
         <%= b.label do %>
-          <%= "Metric ##{b.object.id} - #{b.object.function&.capitalize || 'Unknown'} (#{b.object.resolution}/#{b.object.width})" %>
+          <%= "#{b.object.display_name} - #{b.object.function&.capitalize || 'Unknown'} (#{b.object.resolution}/#{b.object.width})" %>
         <% end %>
       </div>
     <% end %>

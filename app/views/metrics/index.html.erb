@@ -18,7 +18,7 @@
     <div class="index-grid">
       <% @metrics.each do |metric| %>
         <div class="index-card">
-          <h3><%= link_to "Metric ##{metric.id}", metric_path(metric) %></h3>
+          <h3><%= link_to metric.display_name, metric_path(metric) %></h3>
           <p>Function: <%= metric.function.capitalize %></p>
           <p><%= metric.resolution %> • <%= metric.width %></p>
           <div class="index-card-actions">

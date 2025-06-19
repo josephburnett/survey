@@ -63,7 +63,7 @@
       <p>This question is referenced by the following metrics:</p>
       <ul>
         <% @question.metrics.each do |metric| %>
-          <li><%= link_to "Metric ##{metric.id} - #{metric.function&.capitalize || 'Unknown'} (#{metric.resolution}/#{metric.width})", metric_path(metric) %></li>
+          <li><%= link_to "#{metric.display_name} - #{metric.function&.capitalize || 'Unknown'} (#{metric.resolution}/#{metric.width})", metric_path(metric) %></li>
         <% end %>
       </ul>
     </div>
