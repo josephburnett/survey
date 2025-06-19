@@ -165,7 +165,7 @@ class Metric < ApplicationRecord
     when 'yearly'
       1.year.ago..Time.current
     when 'all_time'
-      Time.at(0)..Time.current
+      actual_data_range
     end
   end
   
@@ -225,6 +225,38 @@ class Metric < ApplicationRecord
       current_bucket + 1.week
     when 'month'
       current_bucket + 1.month
+    end
+  end
+  
+  def actual_data_range
+    case function
+    when 'answer'
+      # For answer metrics, get range from associated questions' answers
+      if questions.any?
+        answers = Answer.joins(:response, :question)
+                        .where(questions: { id: questions.pluck(:id) })
+                        .where(responses: { user_id: user.id })
+        
+        if answers.any?
+          earliest = answers.minimum(:created_at)
+          latest = answers.maximum(:created_at)
+          earliest..latest
+        else
+          Time.current..Time.current
+        end
+      else
+        Time.current..Time.current
+      end
+    else
+      # For calculated metrics, get range from child metrics
+      if child_metrics.any?
+        child_ranges = child_metrics.map { |child| child.send(:actual_data_range) }
+        earliest = child_ranges.map(&:begin).min
+        latest = child_ranges.map(&:end).max
+        earliest..latest
+      else
+        Time.current..Time.current
+      end
     end
   end
   
