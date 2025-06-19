@@ -133,18 +133,22 @@ class Metric < ApplicationRecord
     all_series = child_metrics.map(&:series)
     return [] if all_series.empty?
     
-    # Get all unique time keys
-    all_time_keys = all_series.flat_map { |series| series.map(&:first) }.uniq.sort
+    # Generate time buckets based on this metric's resolution and time range
+    time_buckets = generate_time_buckets
     
     # For each time bucket, combine values from all child metrics
-    all_time_keys.map do |time_key|
+    time_buckets.map do |bucket_start|
       values = all_series.map do |series|
-        time_value_pair = series.find { |pair| pair.first == time_key }
-        time_value_pair ? time_value_pair.last : 0
+        # Sum all values from child series that fall within this time bucket
+        bucket_value = series.select { |time_key, value| 
+          time_key >= bucket_start && time_key < next_bucket_start(bucket_start)
+        }.sum { |time_key, value| value }
+        
+        bucket_value
       end
       
       combined_value = block.call(values)
-      [time_key, combined_value]
+      [bucket_start, combined_value]
     end
   end
   
@@ -186,6 +190,41 @@ class Metric < ApplicationRecord
       answer.bool_value ? 1 : 0
     when 'string'
       0 # Strings don't have numeric value for aggregation
+    end
+  end
+  
+  def generate_time_buckets
+    range = time_range
+    buckets = []
+    current_time = bucket_start_for_time(range.begin)
+    
+    while current_time <= range.end
+      buckets << current_time
+      current_time = next_bucket_start(current_time)
+    end
+    
+    buckets
+  end
+  
+  def bucket_start_for_time(time)
+    case resolution
+    when 'day'
+      time.beginning_of_day
+    when 'week'
+      time.beginning_of_week(:sunday)
+    when 'month'
+      time.beginning_of_month
+    end
+  end
+  
+  def next_bucket_start(current_bucket)
+    case resolution
+    when 'day'
+      current_bucket + 1.day
+    when 'week'
+      current_bucket + 1.week
+    when 'month'
+      current_bucket + 1.month
     end
   end
   
