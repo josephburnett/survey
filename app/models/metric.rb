@@ -9,11 +9,15 @@ class Metric < ApplicationRecord
   has_many :parent_metrics, through: :parent_metric_metrics, source: :parent_metric
   
   has_many :child_metric_metrics, class_name: 'MetricMetric', foreign_key: 'parent_metric_id', dependent: :destroy
-  has_many :child_metrics, through: :child_metric_metrics, source: :child_metric
   
   validates :resolution, presence: true, inclusion: { in: %w[day week month] }
   validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly all_time] }
   validates :function, presence: true, inclusion: { in: %w[answer sum average difference count] }
+  
+  attr_accessor :child_metric_ids_temp
+  
+  before_save :store_child_metric_ids
+  after_save :create_child_associations
   
   scope :not_deleted, -> { where(deleted: false) }
   
@@ -44,6 +48,26 @@ class Metric < ApplicationRecord
       generate_difference_series
     when 'count'
       generate_count_series
+    end
+  end
+  
+  def child_metric_ids=(ids)
+    @child_metric_ids_temp = Array(ids).reject(&:blank?)
+  end
+  
+  def child_metric_ids
+    if persisted?
+      child_metric_metrics.pluck(:child_metric_id)
+    else
+      @child_metric_ids_temp || []
+    end
+  end
+  
+  def child_metrics
+    if persisted?
+      Metric.where(id: child_metric_metrics.pluck(:child_metric_id))
+    else
+      Metric.where(id: @child_metric_ids_temp || [])
     end
   end
   
@@ -158,5 +182,23 @@ class Metric < ApplicationRecord
   def display_name
     id_display = id ? "(ID: #{id})" : "(New)"
     "#{function&.capitalize || 'Unknown'} - #{resolution}/#{width} #{id_display}"
+  end
+  
+  private
+  
+  def store_child_metric_ids
+    # child_metric_ids_temp is already set by the setter
+  end
+  
+  def create_child_associations
+    return unless @child_metric_ids_temp.present?
+    
+    # Clear existing associations
+    child_metric_metrics.destroy_all
+    
+    # Create new associations
+    @child_metric_ids_temp.each do |child_id|
+      child_metric_metrics.create!(child_metric_id: child_id)
+    end
   end
 end
