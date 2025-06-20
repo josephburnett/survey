@@ -1,0 +1,88 @@
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Dashboards", dashboards_path %>
+    <%= link_to "Namespaces", namespaces_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
+
+  <h1>Answer Question</h1>
+  <h2><%= @question.name %></h2>
+
+  <%= link_to "← Back to Question", question_path(@question), class: "back-link" %>
+
+  <div class="card">
+    <%= form_with url: submit_answer_question_path(@question), method: :post, local: true do |form| %>
+      <div class="field">
+        <% case @question.question_type %>
+        <% when 'string' %>
+          <%= label_tag :answer_value, @question.name %>
+          <%= text_field_tag :answer_value, '', required: true %>
+          
+        <% when 'number' %>
+          <%= label_tag :answer_value, @question.name %>
+          <%= number_field_tag :answer_value, '', step: :any, required: true %>
+          
+        <% when 'bool' %>
+          <%= label_tag :answer_value, @question.name %>
+          <div style="margin-top: 0.5rem;">
+            <%= radio_button_tag :answer_value, '1', false, id: 'answer_yes' %>
+            <%= label_tag 'answer_yes', 'Yes', style: 'margin-left: 0.25rem; margin-right: 1rem; font-weight: normal;' %>
+            
+            <%= radio_button_tag :answer_value, '0', false, id: 'answer_no' %>
+            <%= label_tag 'answer_no', 'No', style: 'margin-left: 0.25rem; font-weight: normal;' %>
+          </div>
+          
+        <% when 'range' %>
+          <%= label_tag :answer_value, @question.name %>
+          <% if @question.range_min.present? && @question.range_max.present? %>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem;">
+              <span><%= @question.range_min %></span>
+              <%= range_field_tag :answer_value, (@question.range_min + @question.range_max) / 2, 
+                                  min: @question.range_min, 
+                                  max: @question.range_max, 
+                                  step: 0.1,
+                                  style: 'flex: 1;' %>
+              <span><%= @question.range_max %></span>
+            </div>
+            <div style="text-align: center; margin-top: 0.5rem;">
+              <span id="range-value"><%= (@question.range_min + @question.range_max) / 2 %></span>
+            </div>
+          <% else %>
+            <%= number_field_tag :answer_value, '', step: :any, required: true %>
+          <% end %>
+          
+        <% else %>
+          <p>Question type not supported for answering.</p>
+        <% end %>
+      </div>
+
+      <% if @question.question_type.present? %>
+        <div class="actions">
+          <%= form.submit "Submit Answer", class: "btn btn-primary" %>
+          <%= link_to "Cancel", question_path(@question), class: "btn btn-secondary" %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<% if @question.question_type == 'range' && @question.range_min.present? && @question.range_max.present? %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const rangeInput = document.querySelector('input[type="range"]');
+    const rangeValue = document.getElementById('range-value');
+    
+    if (rangeInput && rangeValue) {
+      rangeInput.addEventListener('input', function() {
+        rangeValue.textContent = parseFloat(this.value).toFixed(1);
+      });
+    }
+  });
+</script>
+<% end %>

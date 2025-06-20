@@ -22,6 +22,8 @@ Rails.application.routes.draw do
   resources :questions do
     member do
       patch :soft_delete
+      get :answer
+      post :submit_answer
     end
   end
   

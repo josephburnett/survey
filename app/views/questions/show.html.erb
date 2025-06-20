@@ -14,7 +14,8 @@
   <div class="index-header">
     <h1>Question: <%= @question.name %></h1>
     <div style="display: flex; gap: 0.5rem;">
-      <%= link_to "Edit", edit_question_path(@question), class: "btn btn-primary" %>
+      <%= link_to "Answer", answer_question_path(@question), class: "btn btn-primary" %>
+      <%= link_to "Edit", edit_question_path(@question), class: "btn btn-secondary" %>
       <%= link_to "Delete", soft_delete_question_path(@question), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
     </div>
   </div>
