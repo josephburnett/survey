@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <%= link_to "← Back to Dashboards", dashboards_path, class: "back-link" %>
+  <%= link_to "← Back to Dashboards", dashboards_path(namespace: @dashboard.namespace), class: "back-link" %>
 
   <% if @dashboard.metrics.any? %>
     <div class="dashboard-metrics">

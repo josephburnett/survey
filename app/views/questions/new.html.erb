@@ -12,7 +12,7 @@
 
   <h1>New Question</h1>
 
-  <%= link_to "← Back to Questions", questions_path, class: "back-link" %>
+  <%= link_to "← Back to Questions", questions_path(namespace: params[:namespace]), class: "back-link" %>
 
   <div class="card">
     <%= form_with model: @question, local: true do |form| %>

@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <%= link_to "← Back to Questions", questions_path, class: "back-link" %>
+  <%= link_to "← Back to Questions", questions_path(namespace: @question.namespace), class: "back-link" %>
 
   <div class="card">
     <h3>Question Details</h3>

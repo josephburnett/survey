@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <%= link_to "← Back to Metrics", metrics_path, class: "back-link" %>
+  <%= link_to "← Back to Metrics", metrics_path(namespace: @metric.namespace), class: "back-link" %>
 
   <div class="card">
     <h2>Metric Configuration</h2>

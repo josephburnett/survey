@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <%= link_to "← Back to Forms", root_path, class: "back-link" %>
+  <%= link_to "← Back to Sections", sections_path(namespace: @section.namespace), class: "back-link" %>
 
   <% if @section.prompt.present? %>
     <div class="card">

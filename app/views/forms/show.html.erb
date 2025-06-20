@@ -19,7 +19,7 @@
     </div>
   </div>
 
-  <%= link_to "← Back to Forms", forms_path, class: "back-link" %>
+  <%= link_to "← Back to Forms", forms_path(namespace: @form.namespace), class: "back-link" %>
 
   <div class="card">
     <h2>Sections</h2>
