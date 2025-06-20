@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_20_003646) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_20_010122) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -87,6 +87,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_003646) do
     t.datetime "updated_at", null: false
     t.boolean "deleted", default: false, null: false
     t.string "name"
+    t.decimal "scale", precision: 10, scale: 4, default: "1.0"
     t.index ["user_id"], name: "index_metrics_on_user_id"
   end
 

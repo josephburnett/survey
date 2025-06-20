@@ -13,6 +13,7 @@ class Metric < ApplicationRecord
   validates :resolution, presence: true, inclusion: { in: %w[day week month] }
   validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly all_time] }
   validates :function, presence: true, inclusion: { in: %w[answer sum average difference count] }
+  validates :scale, numericality: { greater_than: 0 }, allow_nil: true
   
   attr_accessor :child_metric_ids_temp, :child_metric_ids_changed
   
@@ -98,7 +99,10 @@ class Metric < ApplicationRecord
       values = group_answers.map { |answer| numeric_value(answer) }
       value = values.sum
       
-      [time_key, value]
+      # Apply scale factor for answer metrics
+      scaled_value = value * (scale || 1.0)
+      
+      [time_key, scaled_value]
     end
   end
   

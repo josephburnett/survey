@@ -27,13 +27,19 @@
     <p><strong>Resolution:</strong> <%= @metric.resolution %></p>
     <p><strong>Width:</strong> <%= @metric.width %></p>
     
-    <% if @metric.function == 'answer' && @metric.questions.any? %>
-      <p><strong>Referenced Questions:</strong></p>
-      <ul>
-        <% @metric.questions.each do |question| %>
-          <li><%= link_to "#{question.name} (#{question.question_type})", question_path(question) %></li>
-        <% end %>
-      </ul>
+    <% if @metric.function == 'answer' %>
+      <% if @metric.scale.present? && @metric.scale != 1.0 %>
+        <p><strong>Scale Factor:</strong> <%= @metric.scale %></p>
+      <% end %>
+      
+      <% if @metric.questions.any? %>
+        <p><strong>Referenced Questions:</strong></p>
+        <ul>
+          <% @metric.questions.each do |question| %>
+            <li><%= link_to "#{question.name} (#{question.question_type})", question_path(question) %></li>
+          <% end %>
+        </ul>
+      <% end %>
     <% end %>
     
     <% if ['sum', 'average', 'difference', 'count'].include?(@metric.function) && @metric.child_metrics.any? %>

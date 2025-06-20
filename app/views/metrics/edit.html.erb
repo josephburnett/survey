@@ -49,6 +49,12 @@
     <% end %>
   </div>
   
+  <div class="field scale-field" style="<%= @metric.function == 'answer' ? 'display: block;' : 'display: none;' %>">
+    <%= form.label :scale, "Scale Factor (optional)" %>
+    <%= form.number_field :scale, step: 0.01, placeholder: "1.0", min: 0 %>
+    <small style="display: block; color: #666; margin-top: 0.25rem;">Multiply answer values by this number (default: 1.0)</small>
+  </div>
+  
   <div class="field metric-sources" style="<%= ['sum', 'average', 'difference', 'count'].include?(@metric.function) ? 'display: block;' : 'display: none;' %>">
     <%= form.label :child_metric_ids, "Metrics" %>
     <%= form.collection_check_boxes :child_metric_ids, @metrics, :id, :id, { checked: @metric.child_metric_ids }, { class: 'metric-checkbox' } do |b| %>
@@ -91,18 +97,22 @@
     const functionSelect = document.querySelector('#metric_function');
     const questionSources = document.querySelector('.question-sources');
     const metricSources = document.querySelector('.metric-sources');
+    const scaleField = document.querySelector('.scale-field');
     
     if (functionSelect) {
       functionSelect.addEventListener('change', function() {
         if (this.value === 'answer') {
           questionSources.style.display = 'block';
           metricSources.style.display = 'none';
+          scaleField.style.display = 'block';
         } else if (['sum', 'average', 'difference', 'count'].includes(this.value)) {
           questionSources.style.display = 'none';
           metricSources.style.display = 'block';
+          scaleField.style.display = 'none';
         } else {
           questionSources.style.display = 'none';
           metricSources.style.display = 'none';
+          scaleField.style.display = 'none';
         }
       });
     }
