@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_20_035720) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_20_232037) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -29,13 +29,47 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_035720) do
     t.index ["user_id"], name: "index_answers_on_user_id"
   end
 
+  create_table "dashboard_dashboards", force: :cascade do |t|
+    t.integer "dashboard_id", null: false
+    t.integer "linked_dashboard_id", null: false
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dashboard_id", "linked_dashboard_id"], name: "idx_on_dashboard_id_linked_dashboard_id_bc8e1ca434", unique: true
+    t.index ["dashboard_id"], name: "index_dashboard_dashboards_on_dashboard_id"
+    t.index ["linked_dashboard_id"], name: "index_dashboard_dashboards_on_linked_dashboard_id"
+  end
+
+  create_table "dashboard_forms", force: :cascade do |t|
+    t.integer "dashboard_id", null: false
+    t.integer "form_id", null: false
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dashboard_id", "form_id"], name: "index_dashboard_forms_on_dashboard_id_and_form_id", unique: true
+    t.index ["dashboard_id"], name: "index_dashboard_forms_on_dashboard_id"
+    t.index ["form_id"], name: "index_dashboard_forms_on_form_id"
+  end
+
   create_table "dashboard_metrics", force: :cascade do |t|
     t.integer "dashboard_id", null: false
     t.integer "metric_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "position", default: 0
     t.index ["dashboard_id"], name: "index_dashboard_metrics_on_dashboard_id"
     t.index ["metric_id"], name: "index_dashboard_metrics_on_metric_id"
+  end
+
+  create_table "dashboard_questions", force: :cascade do |t|
+    t.integer "dashboard_id", null: false
+    t.integer "question_id", null: false
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dashboard_id", "question_id"], name: "index_dashboard_questions_on_dashboard_id_and_question_id", unique: true
+    t.index ["dashboard_id"], name: "index_dashboard_questions_on_dashboard_id"
+    t.index ["question_id"], name: "index_dashboard_questions_on_question_id"
   end
 
   create_table "dashboards", force: :cascade do |t|
@@ -153,8 +187,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_035720) do
   add_foreign_key "answers", "questions"
   add_foreign_key "answers", "responses"
   add_foreign_key "answers", "users"
+  add_foreign_key "dashboard_dashboards", "dashboards"
+  add_foreign_key "dashboard_dashboards", "dashboards", column: "linked_dashboard_id"
+  add_foreign_key "dashboard_forms", "dashboards"
+  add_foreign_key "dashboard_forms", "forms"
   add_foreign_key "dashboard_metrics", "dashboards"
   add_foreign_key "dashboard_metrics", "metrics"
+  add_foreign_key "dashboard_questions", "dashboards"
+  add_foreign_key "dashboard_questions", "questions"
   add_foreign_key "dashboards", "users"
   add_foreign_key "metric_metrics", "metrics", column: "child_metric_id"
   add_foreign_key "metric_metrics", "metrics", column: "parent_metric_id"

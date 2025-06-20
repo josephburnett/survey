@@ -37,11 +37,47 @@
       
       <div class="field">
         <%= form.label :metric_ids, "Metrics" %>
-        <%= form.collection_check_boxes :metric_ids, @metrics, :id, :id, { checked: @dashboard.metric_ids }, { class: 'metric-checkbox' } do |b| %>
+        <%= form.collection_check_boxes :metric_ids, @metrics, :id, :id, { checked: @dashboard.metric_ids }, { class: 'entity-checkbox' } do |b| %>
           <div class="checkbox-item">
             <%= b.check_box %>
             <%= b.label do %>
-              <%= b.object.display_name %>
+              <%= b.object.display_name %> (Metric)
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="field">
+        <%= form.label :question_ids, "Questions" %>
+        <%= form.collection_check_boxes :question_ids, @questions, :id, :id, { checked: @dashboard.question_ids }, { class: 'entity-checkbox' } do |b| %>
+          <div class="checkbox-item">
+            <%= b.check_box %>
+            <%= b.label do %>
+              <%= b.object.name %> (Question)
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="field">
+        <%= form.label :form_ids, "Forms" %>
+        <%= form.collection_check_boxes :form_ids, @forms, :id, :id, { checked: @dashboard.form_ids }, { class: 'entity-checkbox' } do |b| %>
+          <div class="checkbox-item">
+            <%= b.check_box %>
+            <%= b.label do %>
+              <%= b.object.name %> (Form)
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="field">
+        <%= form.label :linked_dashboard_ids, "Other Dashboards" %>
+        <%= form.collection_check_boxes :linked_dashboard_ids, @dashboards, :id, :id, { checked: @dashboard.linked_dashboard_ids }, { class: 'entity-checkbox' } do |b| %>
+          <div class="checkbox-item">
+            <%= b.check_box %>
+            <%= b.label do %>
+              <%= b.object.name %> (Dashboard)
             <% end %>
           </div>
         <% end %>

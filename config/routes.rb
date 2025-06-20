@@ -48,6 +48,7 @@ Rails.application.routes.draw do
   resources :dashboards do
     member do
       patch :soft_delete
+      post :answer_question
     end
   end
   
