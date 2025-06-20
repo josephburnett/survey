@@ -1,0 +1,91 @@
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Dashboards", dashboards_path %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
+
+  <div class="index-header">
+    <h1><%= @dashboard.name %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "Edit", edit_dashboard_path(@dashboard), class: "btn btn-primary" %>
+      <%= link_to "Delete", soft_delete_dashboard_path(@dashboard), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
+    </div>
+  </div>
+
+  <%= link_to "← Back to Dashboards", dashboards_path, class: "back-link" %>
+
+  <% if @dashboard.metrics.any? %>
+    <div class="dashboard-metrics">
+      <% @dashboard.metrics.each_with_index do |metric, index| %>
+        <% series_data = metric.series %>
+        <div class="card" style="margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3><%= link_to metric.display_name, metric_path(metric) %></h3>
+            <small style="color: #666;"><%= metric.function.capitalize %> • <%= metric.resolution %>/<%=metric.width %></small>
+          </div>
+          
+          <% if series_data.any? %>
+            <div class="chart-container" style="margin-bottom: 1rem;">
+              <canvas id="metricChart<%= index %>" width="400" height="200"></canvas>
+            </div>
+          <% else %>
+            <p style="text-align: center; color: #666; padding: 2rem;">No data available for this metric.</p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <h3>No metrics in this dashboard</h3>
+      <p>Add some metrics to start visualizing your data.</p>
+      <%= link_to "Edit Dashboard", edit_dashboard_path(@dashboard), class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>
+
+<% if @dashboard.metrics.any? %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  <% @dashboard.metrics.each_with_index do |metric, index| %>
+    <% series_data = metric.series %>
+    <% if series_data.any? %>
+      const ctx<%= index %> = document.getElementById('metricChart<%= index %>').getContext('2d');
+      
+      const chartData<%= index %> = {
+        labels: <%= raw series_data.map { |time, _| time.strftime("%m/%d") }.to_json %>,
+        datasets: [{
+          label: <%= raw "#{metric.type.capitalize} Value".to_json %>,
+          data: <%= raw series_data.map { |_, value| value.round(2) }.to_json %>,
+          borderColor: 'rgb(<%= 75 + (index * 50) % 180 %>, <%= 192 - (index * 30) % 100 %>, <%= 192 + (index * 20) % 60 %>)',
+          backgroundColor: 'rgba(<%= 75 + (index * 50) % 180 %>, <%= 192 - (index * 30) % 100 %>, <%= 192 + (index * 20) % 60 %>, 0.2)',
+          tension: 0.1
+        }]
+      };
+      
+      const chart<%= index %> = new Chart(ctx<%= index %>, {
+        type: 'line',
+        data: chartData<%= index %>,
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    <% end %>
+  <% end %>
+</script>
+<% end %>

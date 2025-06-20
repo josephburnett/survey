@@ -1,0 +1,44 @@
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Dashboards", dashboards_path, class: "active" %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
+
+  <div class="index-header">
+    <h1>Dashboards</h1>
+    <%= link_to "New Dashboard", new_dashboard_path, class: "btn btn-primary" %>
+  </div>
+
+  <% if @dashboards.any? %>
+    <div class="grid">
+      <% @dashboards.each do |dashboard| %>
+        <div class="card">
+          <h3><%= link_to dashboard.name, dashboard_path(dashboard) %></h3>
+          <p><strong>Metrics:</strong> <%= dashboard.metrics.count %></p>
+          <p><strong>Created:</strong> <%= dashboard.created_at.strftime("%B %d, %Y") %></p>
+          
+          <div class="card-actions">
+            <%= link_to "View", dashboard_path(dashboard), class: "btn btn-secondary" %>
+            <%= link_to "Edit", edit_dashboard_path(dashboard), class: "btn btn-primary" %>
+            <%= link_to "Delete", soft_delete_dashboard_path(dashboard), 
+                data: { "turbo-method": :patch, confirm: "Are you sure?" }, 
+                class: "btn", 
+                style: "background-color: var(--error); color: var(--white);" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <h3>No dashboards yet</h3>
+      <p>Create your first dashboard to organize your metrics visualizations.</p>
+      <%= link_to "Create Dashboard", new_dashboard_path, class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

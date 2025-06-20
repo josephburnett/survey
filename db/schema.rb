@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_19_032935) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_20_003646) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -25,6 +25,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_19_032935) do
     t.index ["question_id"], name: "index_answers_on_question_id"
     t.index ["response_id"], name: "index_answers_on_response_id"
     t.index ["user_id"], name: "index_answers_on_user_id"
+  end
+
+  create_table "dashboard_metrics", force: :cascade do |t|
+    t.integer "dashboard_id", null: false
+    t.integer "metric_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dashboard_id"], name: "index_dashboard_metrics_on_dashboard_id"
+    t.index ["metric_id"], name: "index_dashboard_metrics_on_metric_id"
+  end
+
+  create_table "dashboards", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id", null: false
+    t.boolean "deleted", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_dashboards_on_user_id"
   end
 
   create_table "forms", force: :cascade do |t|
@@ -118,6 +136,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_19_032935) do
   add_foreign_key "answers", "questions"
   add_foreign_key "answers", "responses"
   add_foreign_key "answers", "users"
+  add_foreign_key "dashboard_metrics", "dashboards"
+  add_foreign_key "dashboard_metrics", "metrics"
+  add_foreign_key "dashboards", "users"
   add_foreign_key "metric_metrics", "metrics", column: "child_metric_id"
   add_foreign_key "metric_metrics", "metrics", column: "parent_metric_id"
   add_foreign_key "metric_questions", "metrics"

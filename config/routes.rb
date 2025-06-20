@@ -43,6 +43,12 @@ Rails.application.routes.draw do
     end
   end
   
+  resources :dashboards do
+    member do
+      patch :soft_delete
+    end
+  end
+  
   resources :sessions, only: [:new, :create, :destroy]
   get '/login', to: 'sessions#new'
   delete '/logout', to: 'sessions#destroy'
