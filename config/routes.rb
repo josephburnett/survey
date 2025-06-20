@@ -49,6 +49,12 @@ Rails.application.routes.draw do
     end
   end
   
+  resources :namespaces, only: [:index, :show] do
+    member do
+      post :show  # Allow POST to show action for bulk move
+    end
+  end
+  
   resources :sessions, only: [:new, :create, :destroy]
   get '/login', to: 'sessions#new'
   delete '/logout', to: 'sessions#destroy'

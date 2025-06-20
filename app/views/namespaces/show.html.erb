@@ -1,0 +1,170 @@
+<div class="container">
+  <nav class="main-nav">
+    <%= link_to "Forms", forms_path %>
+    <%= link_to "Sections", sections_path %>
+    <%= link_to "Questions", questions_path %>
+    <%= link_to "Answers", answers_path %>
+    <%= link_to "Responses", responses_path %>
+    <%= link_to "Metrics", metrics_path %>
+    <%= link_to "Dashboards", dashboards_path %>
+    <%= link_to "Namespaces", namespaces_path, class: "active" %>
+    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
+  </nav>
+
+  <div class="index-header">
+    <h1>Namespace: <%= @namespace.name.present? ? @namespace.name : 'Root' %></h1>
+  </div>
+
+  <% if @namespace.parent_namespace.present? %>
+    <%= link_to "← Back to #{@namespace.parent_namespace}", namespace_path(@namespace.parent_namespace), class: "back-link" %>
+  <% elsif @namespace.name.present? %>
+    <%= link_to "← Back to Root", namespace_path('root'), class: "back-link" %>
+  <% end %>
+
+  <!-- Child Namespaces (Folders) -->
+  <% if @namespace.child_namespaces.any? %>
+    <div class="card">
+      <h2>Folders</h2>
+      <div class="folder-grid">
+        <% @namespace.child_namespaces.each do |child_namespace| %>
+          <div class="folder-item">
+            <%= link_to namespace_path(child_namespace), class: "folder-link" do %>
+              <span class="folder-icon">📁</span>
+              <span class="folder-name"><%= child_namespace.folder_name %></span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Bulk Move Form -->
+  <% if @namespace.entities.any? %>
+    <%= form_with url: namespace_path(@namespace), method: :post, local: true do |form| %>
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+          <h2>Move Items</h2>
+          <label style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="select-all-items">
+            Select All Items
+          </label>
+        </div>
+        
+        <div class="form-group">
+          <%= form.label :target_namespace, "Move selected items to:" %>
+          <input type="text" 
+                 name="target_namespace" 
+                 id="target_namespace"
+                 class="form-control namespace-input"
+                 list="namespace-options"
+                 placeholder="Enter namespace or select from list (leave empty for Root)">
+          
+          <datalist id="namespace-options">
+            <% all_namespaces_for_user(current_user).each do |namespace| %>
+              <option value="<%= namespace %>"><%= namespace %></option>
+            <% end %>
+          </datalist>
+          
+          <small class="form-text text-muted">
+            Use dot notation like "work.projects" or leave empty for Root namespace.
+          </small>
+        </div>
+        
+        <div class="actions">
+          <%= form.submit "Move Selected Items", class: "btn btn-primary" %>
+        </div>
+      </div>
+
+      <!-- Entity Selection -->
+      <% @namespace.entities.each do |entity_type, items| %>
+        <div class="card">
+          <h3><%= entity_type %> (<%= items.count %>)</h3>
+          
+          <div class="index-grid">
+            <% items.each do |item| %>
+              <div class="index-card">
+                <label style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                  <input type="checkbox" 
+                         name="entities[<%= entity_type.downcase %>][]" 
+                         value="<%= item.id %>"
+                         class="entity-checkbox">
+                  <div style="flex: 1;">
+                    <h4>
+                      <% case entity_type %>
+                      <% when 'Forms' %>
+                        <%= link_to item.name, form_path(item) %>
+                      <% when 'Sections' %>
+                        <%= link_to item.name, section_path(item) %>
+                      <% when 'Questions' %>
+                        <%= link_to item.name, question_path(item) %>
+                      <% when 'Answers' %>
+                        <%= link_to "Answer ##{item.id}", answer_path(item) %>
+                      <% when 'Responses' %>
+                        <%= link_to "Response ##{item.id}", response_path(item) %>
+                      <% when 'Metrics' %>
+                        <%= link_to item.display_name, metric_path(item) %>
+                      <% when 'Dashboards' %>
+                        <%= link_to item.name, dashboard_path(item) %>
+                      <% end %>
+                    </h4>
+                    
+                    <% case entity_type %>
+                    <% when 'Forms' %>
+                      <p><%= pluralize(item.sections.count, 'section') %> • <%= pluralize(item.responses.count, 'response') %></p>
+                    <% when 'Sections' %>
+                      <p><%= pluralize(item.questions.count, 'question') %></p>
+                    <% when 'Questions' %>
+                      <p>Type: <%= item.question_type || "Not set" %></p>
+                    <% when 'Answers' %>
+                      <p>Question: <%= item.question.name %></p>
+                    <% when 'Responses' %>
+                      <p>Form: <%= item.form.name %></p>
+                    <% when 'Metrics' %>
+                      <p>Function: <%= item.function.capitalize %></p>
+                    <% when 'Dashboards' %>
+                      <p><%= pluralize(item.metrics.count, 'metric') %></p>
+                    <% end %>
+                    
+                    <p><strong>Created:</strong> <%= item.created_at.strftime("%B %d, %Y") %></p>
+                  </div>
+                </label>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  <% elsif @namespace.child_namespaces.empty? %>
+    <div class="empty-state">
+      <h3>This namespace is empty</h3>
+      <p>This namespace doesn't contain any items or subfolders.</p>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all-items');
+    const entityCheckboxes = document.querySelectorAll('.entity-checkbox');
+    
+    // Handle "Select All" checkbox
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', function() {
+        entityCheckboxes.forEach(function(checkbox) {
+          checkbox.checked = selectAllCheckbox.checked;
+        });
+      });
+    }
+    
+    // Update "Select All" state when individual checkboxes change
+    entityCheckboxes.forEach(function(checkbox) {
+      checkbox.addEventListener('change', function() {
+        if (selectAllCheckbox) {
+          const checkedCount = Array.from(entityCheckboxes).filter(cb => cb.checked).length;
+          selectAllCheckbox.checked = checkedCount === entityCheckboxes.length;
+          selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < entityCheckboxes.length;
+        }
+      });
+    });
+  });
+</script>
