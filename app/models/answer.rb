@@ -38,7 +38,20 @@ class Answer < ApplicationRecord
     end
   end
   
+  def display_title
+    formatted_value = case answer_type
+    when 'bool'
+      value ? 'Yes' : 'No'
+    when 'number', 'range'
+      value.round(2).to_s.gsub(/\.0+$/, '') # Remove trailing zeros
+    else
+      value.to_s
+    end
+    
+    "#{question.name}: #{formatted_value}"
+  end
+  
   def display_name
-    "#{question.name}: #{value} (#{created_at.strftime('%Y-%m-%d')})"
+    "#{display_title} (#{created_at.strftime('%Y-%m-%d')})"
   end
 end

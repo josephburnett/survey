@@ -98,7 +98,7 @@
                       <% when 'Questions' %>
                         <%= link_to item.name, question_path(item) %>
                       <% when 'Answers' %>
-                        <%= link_to "Answer ##{item.id}", answer_path(item) %>
+                        <%= link_to item.display_title, answer_path(item) %>
                       <% when 'Responses' %>
                         <%= link_to "Response ##{item.id}", response_path(item) %>
                       <% when 'Metrics' %>
@@ -116,7 +116,7 @@
                     <% when 'Questions' %>
                       <p>Type: <%= item.question_type || "Not set" %></p>
                     <% when 'Answers' %>
-                      <p>Question: <%= item.question.name %></p>
+                      <p>Type: <%= item.answer_type %></p>
                     <% when 'Responses' %>
                       <p>Form: <%= item.form.name %></p>
                     <% when 'Metrics' %>

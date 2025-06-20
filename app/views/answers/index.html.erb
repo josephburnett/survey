@@ -56,8 +56,7 @@
         <div class="index-grid">
           <% @items.each do |answer| %>
             <div class="index-card">
-              <h4><%= link_to "Answer ##{answer.id}", answer_path(answer) %></h4>
-              <p>Question: <%= truncate(answer.question.name, length: 50) %></p>
+              <h4><%= link_to answer.display_title, answer_path(answer) %></h4>
               <p>Type: <%= answer.answer_type %> • <%= answer.created_at.strftime("%B %d, %Y") %></p>
               <div class="index-card-actions">
                 <%= link_to "View", answer_path(answer) %>
