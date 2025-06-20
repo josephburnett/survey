@@ -43,7 +43,12 @@
     <% end %>
     
     <% if ['sum', 'average', 'difference', 'count'].include?(@metric.function) && @metric.child_metrics.any? %>
-      <p><strong>Referenced Metrics:</strong></p>
+      <% if @metric.function == 'difference' && @metric.first_metric.present? %>
+        <p><strong>First Metric (primary):</strong> <%= link_to "#{@metric.first_metric.display_name} - #{@metric.first_metric.function&.capitalize || 'Unknown'} (#{@metric.first_metric.resolution}/#{@metric.first_metric.width})", metric_path(@metric.first_metric) %></p>
+        <p><strong>Other Metrics (subtracted from first):</strong></p>
+      <% else %>
+        <p><strong>Referenced Metrics:</strong></p>
+      <% end %>
       <ul>
         <% @metric.child_metrics.each do |child_metric| %>
           <li><%= link_to "#{child_metric.display_name} - #{child_metric.function&.capitalize || 'Unknown'} (#{child_metric.resolution}/#{child_metric.width})", metric_path(child_metric) %></li>

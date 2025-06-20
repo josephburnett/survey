@@ -66,6 +66,12 @@
       </div>
     <% end %>
   </div>
+  
+  <div class="field first-metric-field" style="<%= @metric.function == 'difference' ? 'display: block;' : 'display: none;' %>">
+    <%= form.label :first_metric_id, "First Metric (for difference calculation)" %>
+    <%= form.select :first_metric_id, options_from_collection_for_select(@metrics, :id, :display_name, @metric.first_metric_id), { prompt: 'Select first metric (required for difference)' }, { class: 'first-metric-select' } %>
+    <small style="display: block; color: #666; margin-top: 0.25rem;">This metric will be subtracted from (primary metric in the calculation)</small>
+  </div>
 
   <div class="field">
     <%= form.label :resolution %>
@@ -98,6 +104,7 @@
     const questionSources = document.querySelector('.question-sources');
     const metricSources = document.querySelector('.metric-sources');
     const scaleField = document.querySelector('.scale-field');
+    const firstMetricField = document.querySelector('.first-metric-field');
     
     if (functionSelect) {
       functionSelect.addEventListener('change', function() {
@@ -105,14 +112,22 @@
           questionSources.style.display = 'block';
           metricSources.style.display = 'none';
           scaleField.style.display = 'block';
-        } else if (['sum', 'average', 'difference', 'count'].includes(this.value)) {
+          firstMetricField.style.display = 'none';
+        } else if (this.value === 'difference') {
           questionSources.style.display = 'none';
           metricSources.style.display = 'block';
           scaleField.style.display = 'none';
+          firstMetricField.style.display = 'block';
+        } else if (['sum', 'average', 'count'].includes(this.value)) {
+          questionSources.style.display = 'none';
+          metricSources.style.display = 'block';
+          scaleField.style.display = 'none';
+          firstMetricField.style.display = 'none';
         } else {
           questionSources.style.display = 'none';
           metricSources.style.display = 'none';
           scaleField.style.display = 'none';
+          firstMetricField.style.display = 'none';
         }
       });
     }

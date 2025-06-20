@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_20_010122) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -88,6 +88,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_010122) do
     t.boolean "deleted", default: false, null: false
     t.string "name"
     t.decimal "scale", precision: 10, scale: 4, default: "1.0"
+    t.integer "first_metric_id"
+    t.index ["first_metric_id"], name: "index_metrics_on_first_metric_id"
     t.index ["user_id"], name: "index_metrics_on_user_id"
   end
 
@@ -144,6 +146,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_010122) do
   add_foreign_key "metric_metrics", "metrics", column: "parent_metric_id"
   add_foreign_key "metric_questions", "metrics"
   add_foreign_key "metric_questions", "questions"
+  add_foreign_key "metrics", "metrics", column: "first_metric_id"
   add_foreign_key "metrics", "users"
   add_foreign_key "questions", "users"
   add_foreign_key "responses", "users"

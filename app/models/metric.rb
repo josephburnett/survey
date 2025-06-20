@@ -10,6 +10,8 @@ class Metric < ApplicationRecord
   
   has_many :child_metric_metrics, class_name: 'MetricMetric', foreign_key: 'parent_metric_id', dependent: :destroy
   
+  belongs_to :first_metric, class_name: 'Metric', optional: true
+  
   validates :resolution, presence: true, inclusion: { in: %w[day week month] }
   validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly all_time] }
   validates :function, presence: true, inclusion: { in: %w[answer sum average difference count] }
@@ -118,9 +120,34 @@ class Metric < ApplicationRecord
   
   def generate_difference_series
     # Take first metric's values and subtract all others
-    combine_metric_series do |values|
-      return 0 if values.empty?
-      values.first - values[1..-1].sum
+    return [] if child_metrics.empty?
+    
+    # If first_metric is specified, use it; otherwise use first child metric
+    primary_metric = first_metric || child_metrics.first
+    other_metrics = child_metrics.where.not(id: primary_metric.id)
+    
+    # Get series from primary and other metrics
+    primary_series = primary_metric.series
+    other_series = other_metrics.map(&:series)
+    
+    # Generate time buckets based on this metric's resolution
+    time_buckets = generate_time_buckets
+    
+    time_buckets.map do |bucket_start|
+      # Get primary metric value for this time bucket
+      primary_value = primary_series.select { |time_key, value|
+        time_key >= bucket_start && time_key < next_bucket_start(bucket_start)
+      }.sum { |time_key, value| value }
+      
+      # Get sum of all other metrics for this time bucket  
+      other_values = other_series.map do |series|
+        series.select { |time_key, value|
+          time_key >= bucket_start && time_key < next_bucket_start(bucket_start)
+        }.sum { |time_key, value| value }
+      end
+      
+      difference_value = primary_value - other_values.sum
+      [bucket_start, difference_value]
     end
   end
   
