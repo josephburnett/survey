@@ -1,9 +1,11 @@
 class AnswersController < ApplicationController
+  include NamespaceBrowsing
   before_action :require_login
   before_action :find_answer, only: [:show, :edit, :update, :soft_delete]
   
   def index
-    @answers = current_user.answers.not_deleted
+    setup_namespace_browsing(Answer, :answers_path)
+    @items = Answer.items_in_namespace(current_user, @current_namespace).not_deleted
   end
 
   def show
@@ -50,6 +52,6 @@ class AnswersController < ApplicationController
   end
   
   def answer_params
-    params.require(:answer).permit(:question_id, :answer_type, :string_value, :number_value, :bool_value)
+    params.require(:answer).permit(:question_id, :answer_type, :string_value, :number_value, :bool_value, :namespace)
   end
 end

@@ -10,28 +10,67 @@
     <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
   </nav>
 
-  <div class="index-header">
-    <h1>My Questions</h1>
-    <%= link_to "New Question", new_question_path, class: "btn btn-primary" %>
-  </div>
+  <% if logged_in? %>
+    <div class="index-header">
+      <h1>Questions</h1>
+      <%= link_to "New Question", new_question_path(namespace: @current_namespace), class: "btn btn-primary" %>
+    </div>
 
-  <% if @questions.any? %>
-    <div class="index-grid">
-      <% @questions.each do |question| %>
-        <div class="index-card">
-          <h3><%= link_to question.name, question_path(question) %></h3>
-          <p>Type: <%= question.question_type || "Not set" %></p>
-          <div class="index-card-actions">
-            <%= link_to "View", question_path(question) %>
-            <%= link_to "Edit", edit_question_path(question) %>
-          </div>
+    <!-- Breadcrumb Navigation -->
+    <% if @breadcrumbs.length > 1 %>
+      <div class="breadcrumb-nav">
+        <% @breadcrumbs.each_with_index do |(name, path), index| %>
+          <% if index == @breadcrumbs.length - 1 %>
+            <span class="breadcrumb-current"><%= name %></span>
+          <% else %>
+            <%= link_to name, path, class: "breadcrumb-link" %>
+            <span class="breadcrumb-separator">›</span>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Folder Navigation -->
+    <% if @folders.any? %>
+      <div class="folders-section">
+        <h3>Folders</h3>
+        <div class="folder-grid">
+          <% @folders.each do |folder| %>
+            <% folder_namespace = @current_namespace.present? ? "#{@current_namespace}.#{folder}" : folder %>
+            <div class="folder-item">
+              <%= link_to questions_path(namespace: folder_namespace), class: "folder-link" do %>
+                <span class="folder-icon">📁</span>
+                <span class="folder-name"><%= folder %></span>
+              <% end %>
+            </div>
+          <% end %>
         </div>
-      <% end %>
-    </div>
-  <% else %>
-    <div class="card text-center">
-      <p>You haven't created any questions yet.</p>
-      <%= link_to "Create Question", new_question_path, class: "btn btn-primary mt-2" %>
-    </div>
+      </div>
+    <% end %>
+
+    <!-- Items in Current Namespace -->
+    <% if @items.any? %>
+      <div class="items-section">
+        <h3><%= @current_namespace.present? ? "Questions in #{@current_namespace}" : "Questions in Root" %></h3>
+        <div class="index-grid">
+          <% @items.each do |question| %>
+            <div class="index-card">
+              <h4><%= link_to question.name, question_path(question) %></h4>
+              <p>Type: <%= question.question_type || "Not set" %></p>
+              <div class="index-card-actions">
+                <%= link_to "View", question_path(question) %>
+                <%= link_to "Edit", edit_question_path(question) %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% elsif @folders.empty? %>
+      <div class="empty-state">
+        <h3>No questions yet</h3>
+        <p>Create your first question to get started!</p>
+        <%= link_to "Create Question", new_question_path(namespace: @current_namespace), class: "btn btn-primary" %>
+      </div>
+    <% end %>
   <% end %>
 </div>

@@ -1,9 +1,11 @@
 class DashboardsController < ApplicationController
+  include NamespaceBrowsing
   before_action :require_login
   before_action :find_dashboard, only: [:show, :edit, :update, :soft_delete]
   
   def index
-    @dashboards = current_user.dashboards.not_deleted
+    setup_namespace_browsing(Dashboard, :dashboards_path)
+    @items = Dashboard.items_in_namespace(current_user, @current_namespace).not_deleted
   end
 
   def show
@@ -50,6 +52,6 @@ class DashboardsController < ApplicationController
   end
   
   def dashboard_params
-    params.require(:dashboard).permit(:name, metric_ids: [])
+    params.require(:dashboard).permit(:name, :namespace, metric_ids: [])
   end
 end

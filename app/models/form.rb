@@ -1,4 +1,6 @@
 class Form < ApplicationRecord
+  include Namespaceable
+  
   validates :name, presence: true
   
   belongs_to :user, optional: true

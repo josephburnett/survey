@@ -1,4 +1,6 @@
 class Answer < ApplicationRecord
+  include Namespaceable
+  
   belongs_to :question
   belongs_to :response, optional: true
   belongs_to :user, optional: true

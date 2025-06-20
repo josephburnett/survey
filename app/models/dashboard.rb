@@ -1,4 +1,6 @@
 class Dashboard < ApplicationRecord
+  include Namespaceable
+  
   belongs_to :user
   
   has_many :dashboard_metrics, dependent: :destroy

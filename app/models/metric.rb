@@ -1,4 +1,6 @@
 class Metric < ApplicationRecord
+  include Namespaceable
+  
   belongs_to :user
   
   # Many-to-many relationships

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_20_035720) do
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -22,6 +22,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
     t.integer "response_id"
     t.integer "user_id"
     t.boolean "deleted", default: false, null: false
+    t.string "namespace", default: "", null: false
+    t.index ["namespace"], name: "index_answers_on_namespace"
     t.index ["question_id"], name: "index_answers_on_question_id"
     t.index ["response_id"], name: "index_answers_on_response_id"
     t.index ["user_id"], name: "index_answers_on_user_id"
@@ -42,6 +44,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
     t.boolean "deleted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "namespace", default: "", null: false
+    t.index ["namespace"], name: "index_dashboards_on_namespace"
     t.index ["user_id"], name: "index_dashboards_on_user_id"
   end
 
@@ -51,6 +55,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
     t.boolean "deleted", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "namespace", default: "", null: false
+    t.index ["namespace"], name: "index_forms_on_namespace"
   end
 
   create_table "forms_sections", id: false, force: :cascade do |t|
@@ -89,7 +95,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
     t.string "name"
     t.decimal "scale", precision: 10, scale: 4, default: "1.0"
     t.integer "first_metric_id"
+    t.string "namespace", default: "", null: false
     t.index ["first_metric_id"], name: "index_metrics_on_first_metric_id"
+    t.index ["namespace"], name: "index_metrics_on_namespace"
     t.index ["user_id"], name: "index_metrics_on_user_id"
   end
 
@@ -102,6 +110,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
     t.float "range_min"
     t.float "range_max"
     t.boolean "deleted", default: false, null: false
+    t.string "namespace", default: "", null: false
+    t.index ["namespace"], name: "index_questions_on_namespace"
     t.index ["user_id"], name: "index_questions_on_user_id"
   end
 
@@ -116,6 +126,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
     t.integer "user_id"
     t.boolean "deleted", default: false, null: false
     t.integer "form_id"
+    t.string "namespace", default: "", null: false
+    t.index ["namespace"], name: "index_responses_on_namespace"
     t.index ["user_id"], name: "index_responses_on_user_id"
   end
 
@@ -126,6 +138,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_012830) do
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.boolean "deleted", default: false, null: false
+    t.string "namespace", default: "", null: false
+    t.index ["namespace"], name: "index_sections_on_namespace"
     t.index ["user_id"], name: "index_sections_on_user_id"
   end
 

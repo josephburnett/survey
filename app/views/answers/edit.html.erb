@@ -33,6 +33,12 @@
   </div>
 
   <div class="field">
+    <%= form.label :namespace, "Namespace (optional)" %>
+    <%= form.text_field :namespace, placeholder: "e.g., my-items.category or work.projects" %>
+    <small style="display: block; color: #666; margin-top: 0.25rem;">Use dots to create folder structure (e.g., my-items.category)</small>
+  </div>
+
+  <div class="field">
     <%= form.label :answer_type, "Answer Type" %>
     <%= form.select :answer_type, [['String', 'string'], ['Number', 'number'], ['Yes/No', 'bool'], ['Range', 'range']], { prompt: 'Select type' }, { required: true } %>
   </div>

@@ -10,29 +10,68 @@
     <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
   </nav>
 
-  <div class="index-header">
-    <h1>My Answers</h1>
-    <%= link_to "New Answer", new_answer_path, class: "btn btn-primary" %>
-  </div>
+  <% if logged_in? %>
+    <div class="index-header">
+      <h1>Answers</h1>
+      <%= link_to "New Answer", new_answer_path(namespace: @current_namespace), class: "btn btn-primary" %>
+    </div>
 
-  <% if @answers.any? %>
-    <div class="index-grid">
-      <% @answers.each do |answer| %>
-        <div class="index-card">
-          <h3><%= link_to "Answer ##{answer.id}", answer_path(answer) %></h3>
-          <p>Question: <%= truncate(answer.question.name, length: 50) %></p>
-          <p>Type: <%= answer.answer_type %> • <%= answer.created_at.strftime("%B %d, %Y") %></p>
-          <div class="index-card-actions">
-            <%= link_to "View", answer_path(answer) %>
-            <%= link_to "Edit", edit_answer_path(answer) %>
-          </div>
+    <!-- Breadcrumb Navigation -->
+    <% if @breadcrumbs.length > 1 %>
+      <div class="breadcrumb-nav">
+        <% @breadcrumbs.each_with_index do |(name, path), index| %>
+          <% if index == @breadcrumbs.length - 1 %>
+            <span class="breadcrumb-current"><%= name %></span>
+          <% else %>
+            <%= link_to name, path, class: "breadcrumb-link" %>
+            <span class="breadcrumb-separator">›</span>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Folder Navigation -->
+    <% if @folders.any? %>
+      <div class="folders-section">
+        <h3>Folders</h3>
+        <div class="folder-grid">
+          <% @folders.each do |folder| %>
+            <% folder_namespace = @current_namespace.present? ? "#{@current_namespace}.#{folder}" : folder %>
+            <div class="folder-item">
+              <%= link_to answers_path(namespace: folder_namespace), class: "folder-link" do %>
+                <span class="folder-icon">📁</span>
+                <span class="folder-name"><%= folder %></span>
+              <% end %>
+            </div>
+          <% end %>
         </div>
-      <% end %>
-    </div>
-  <% else %>
-    <div class="card text-center">
-      <p>You haven't submitted any answers yet.</p>
-      <%= link_to "Create Answer", new_answer_path, class: "btn btn-primary mt-2" %>
-    </div>
+      </div>
+    <% end %>
+
+    <!-- Items in Current Namespace -->
+    <% if @items.any? %>
+      <div class="items-section">
+        <h3><%= @current_namespace.present? ? "Answers in #{@current_namespace}" : "Answers in Root" %></h3>
+        <div class="index-grid">
+          <% @items.each do |answer| %>
+            <div class="index-card">
+              <h4><%= link_to "Answer ##{answer.id}", answer_path(answer) %></h4>
+              <p>Question: <%= truncate(answer.question.name, length: 50) %></p>
+              <p>Type: <%= answer.answer_type %> • <%= answer.created_at.strftime("%B %d, %Y") %></p>
+              <div class="index-card-actions">
+                <%= link_to "View", answer_path(answer) %>
+                <%= link_to "Edit", edit_answer_path(answer) %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% elsif @folders.empty? %>
+      <div class="empty-state">
+        <h3>No answers yet</h3>
+        <p>Create your first answer to get started!</p>
+        <%= link_to "Create Answer", new_answer_path(namespace: @current_namespace), class: "btn btn-primary" %>
+      </div>
+    <% end %>
   <% end %>
 </div>

@@ -1,9 +1,12 @@
 class FormsController < ApplicationController
+  include NamespaceBrowsing
+  
   before_action :require_login
   before_action :find_form, only: [:show, :edit, :update, :soft_delete, :survey, :submit_survey]
   
   def index
-    @forms = current_user.forms.not_deleted
+    setup_namespace_browsing(Form, :forms_path)
+    @items = Form.items_in_namespace(current_user, @current_namespace).not_deleted
   end
   
   def show
@@ -29,9 +32,12 @@ class FormsController < ApplicationController
   end
   
   def update
+    Rails.logger.info "Form params: #{form_params.inspect}"
     if @form.update(form_params)
+      Rails.logger.info "Form updated successfully. New namespace: #{@form.namespace.inspect}"
       redirect_to @form, notice: 'Form updated successfully'
     else
+      Rails.logger.error "Form update failed: #{@form.errors.full_messages}"
       render :edit
     end
   end
@@ -97,6 +103,7 @@ class FormsController < ApplicationController
   end
   
   def form_params
-    params.require(:form).permit(:name)
+    params.require(:form).permit(:name, :namespace)
   end
+  
 end

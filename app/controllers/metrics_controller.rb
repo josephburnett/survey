@@ -1,9 +1,12 @@
 class MetricsController < ApplicationController
+  include NamespaceBrowsing
+  
   before_action :require_login
   before_action :find_metric, only: [:show, :edit, :update, :soft_delete]
   
   def index
-    @metrics = current_user.metrics.not_deleted
+    setup_namespace_browsing(Metric, :metrics_path)
+    @items = Metric.items_in_namespace(current_user, @current_namespace).not_deleted
   end
 
   def show
@@ -55,6 +58,6 @@ class MetricsController < ApplicationController
   end
   
   def metric_params
-    params.require(:metric).permit(:name, :function, :resolution, :width, :scale, :first_metric_id, question_ids: [], child_metric_ids: [])
+    params.require(:metric).permit(:name, :function, :resolution, :width, :scale, :first_metric_id, :namespace, question_ids: [], child_metric_ids: [])
   end
 end

@@ -1,4 +1,6 @@
 class Question < ApplicationRecord
+  include Namespaceable
+  
   validates :name, presence: true
   validates :question_type, presence: true, inclusion: { in: %w[string number bool range] }
   validates :range_min, :range_max, presence: true, if: -> { question_type == 'range' }

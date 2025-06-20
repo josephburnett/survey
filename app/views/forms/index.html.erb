@@ -11,28 +11,65 @@
   </nav>
 
   <div class="index-header">
-    <h1>Your Forms</h1>
-    <%= link_to "New Form", new_form_path, class: "btn btn-primary" %>
+    <h1>Forms</h1>
+    <%= link_to "New Form", new_form_path(namespace: @current_namespace), class: "btn btn-primary" %>
   </div>
 
-  <% if @forms.any? %>
-    <div class="index-grid">
-      <% @forms.each do |form| %>
-        <div class="index-card">
-          <h3><%= link_to form.name, form_path(form) %></h3>
-          <p><%= pluralize(form.sections.count, 'section') %> • <%= pluralize(form.responses.count, 'response') %></p>
-          <div class="index-card-actions">
-            <%= link_to "View", form_path(form) %>
-            <%= link_to "Edit", edit_form_path(form) %>
-            <%= link_to "Fill Out", survey_form_path(form) %>
-          </div>
-        </div>
+  <!-- Breadcrumb Navigation -->
+  <% if @breadcrumbs.length > 1 %>
+    <div class="breadcrumb-nav">
+      <% @breadcrumbs.each_with_index do |(name, path), index| %>
+        <% if index == @breadcrumbs.length - 1 %>
+          <span class="breadcrumb-current"><%= name %></span>
+        <% else %>
+          <%= link_to name, path, class: "breadcrumb-link" %>
+          <span class="breadcrumb-separator">›</span>
+        <% end %>
       <% end %>
     </div>
-  <% else %>
-    <div class="card text-center">
-      <p>No forms yet. Create your first form to get started!</p>
-      <%= link_to "Create Form", new_form_path, class: "btn btn-primary mt-2" %>
+  <% end %>
+
+  <!-- Folder Navigation -->
+  <% if @folders.any? %>
+    <div class="folders-section">
+      <h3>Folders</h3>
+      <div class="folder-grid">
+        <% @folders.each do |folder| %>
+          <% folder_namespace = @current_namespace.present? ? "#{@current_namespace}.#{folder}" : folder %>
+          <div class="folder-item">
+            <%= link_to forms_path(namespace: folder_namespace), class: "folder-link" do %>
+              <span class="folder-icon">📁</span>
+              <span class="folder-name"><%= folder %></span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Items in Current Namespace -->
+  <% if @items.any? %>
+    <div class="items-section">
+      <h3><%= @current_namespace.present? ? "Forms in #{@current_namespace}" : "Forms in Root" %></h3>
+      <div class="index-grid">
+        <% @items.each do |form| %>
+          <div class="index-card">
+            <h4><%= link_to form.name, form_path(form) %></h4>
+            <p><%= pluralize(form.sections.count, 'section') %> • <%= pluralize(form.responses.count, 'response') %></p>
+            <div class="index-card-actions">
+              <%= link_to "View", form_path(form) %>
+              <%= link_to "Edit", edit_form_path(form) %>
+              <%= link_to "Fill Out", survey_form_path(form) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% elsif @folders.empty? %>
+    <div class="empty-state">
+      <h3>No forms yet</h3>
+      <p>Create your first form to get started!</p>
+      <%= link_to "Create Form", new_form_path(namespace: @current_namespace), class: "btn btn-primary" %>
     </div>
   <% end %>
 </div>

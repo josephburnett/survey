@@ -1,9 +1,12 @@
 class SectionsController < ApplicationController
+  include NamespaceBrowsing
+  
   before_action :require_login
   before_action :find_section, only: [:show, :edit, :update, :soft_delete]
   
   def index
-    @sections = current_user.sections.not_deleted
+    setup_namespace_browsing(Section, :sections_path)
+    @items = Section.items_in_namespace(current_user, @current_namespace).not_deleted
   end
   
   def show
@@ -76,6 +79,6 @@ class SectionsController < ApplicationController
   end
   
   def section_params
-    params.require(:section).permit(:name, :prompt)
+    params.require(:section).permit(:name, :prompt, :namespace)
   end
 end

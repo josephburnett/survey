@@ -1,4 +1,6 @@
 class Response < ApplicationRecord
+  include Namespaceable
+  
   belongs_to :form
   belongs_to :user, optional: true
   has_many :answers

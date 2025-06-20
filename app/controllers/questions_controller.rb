@@ -1,9 +1,11 @@
 class QuestionsController < ApplicationController
+  include NamespaceBrowsing
   before_action :require_login
   before_action :find_question, only: [:show, :edit, :update, :soft_delete]
   
   def index
-    @questions = current_user.questions.not_deleted
+    setup_namespace_browsing(Question, :questions_path)
+    @items = Question.items_in_namespace(current_user, @current_namespace).not_deleted
   end
   
   def show
@@ -61,6 +63,6 @@ class QuestionsController < ApplicationController
   end
   
   def question_params
-    params.require(:question).permit(:name, :question_type, :range_min, :range_max)
+    params.require(:question).permit(:name, :question_type, :range_min, :range_max, :namespace)
   end
 end

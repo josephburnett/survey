@@ -1,4 +1,5 @@
 class ResponsesController < ApplicationController
+  include NamespaceBrowsing
   before_action :require_login
   before_action :find_response, only: [:show, :edit, :update, :soft_delete]
   
@@ -6,8 +7,12 @@ class ResponsesController < ApplicationController
     if params[:form_id]
       @form = current_user.forms.find(params[:form_id])
       @responses = @form.responses.not_deleted.where(user: current_user)
+      @folders = []
+      @items = []
+      @breadcrumbs = []
     else
-      @responses = current_user.responses.not_deleted
+      setup_namespace_browsing(Response, :responses_path)
+      @items = Response.items_in_namespace(current_user, @current_namespace).not_deleted
     end
   end
 
@@ -55,6 +60,6 @@ class ResponsesController < ApplicationController
   end
   
   def response_params
-    params.require(:response).permit(:form_id)
+    params.require(:response).permit(:form_id, :namespace)
   end
 end
