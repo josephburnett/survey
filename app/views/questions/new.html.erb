@@ -45,6 +45,8 @@
     <%= form.number_field :range_max, step: :any %>
   </div>
 
+  <%= render 'shared/namespace_field', form: form %>
+
       <div class="actions">
         <%= form.submit "Create Question" %>
       </div>

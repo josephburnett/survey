@@ -32,6 +32,8 @@
         <%= form.text_field :name, required: true, placeholder: "Enter dashboard name" %>
       </div>
       
+      <%= render 'shared/namespace_field', form: form %>
+      
       <div class="field">
         <%= form.label :metric_ids, "Metrics" %>
         <%= form.collection_check_boxes :metric_ids, @metrics, :id, :id, { checked: @dashboard.metric_ids }, { class: 'metric-checkbox' } do |b| %>

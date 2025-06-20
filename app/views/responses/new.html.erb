@@ -32,6 +32,8 @@
         <%= form.select :form_id, options_from_collection_for_select(@forms, :id, :name), { prompt: 'Select form' }, { required: true } %>
       </div>
 
+      <%= render 'shared/namespace_field', form: form %>
+
       <div class="actions">
         <%= form.submit "Create Response" %>
       </div>

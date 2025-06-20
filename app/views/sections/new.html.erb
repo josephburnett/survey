@@ -37,6 +37,8 @@
         <%= form.text_area :prompt %>
       </div>
 
+      <%= render 'shared/namespace_field', form: form %>
+
       <div class="actions">
         <%= form.submit "Create Section" %>
       </div>

@@ -1,0 +1,20 @@
+<div class="form-group">
+  <%= form.label :namespace, "Namespace (optional)" %>
+  <input type="text" 
+         name="<%= form.object_name %>[namespace]" 
+         id="<%= form.object_name %>_namespace"
+         class="form-control namespace-input"
+         value="<%= form.object.namespace.present? ? form.object.namespace : params[:namespace] %>"
+         list="namespace-options"
+         placeholder="Enter namespace or select from list">
+  
+  <datalist id="namespace-options">
+    <% all_namespaces_for_user(current_user).each do |namespace| %>
+      <option value="<%= namespace %>"><%= namespace %></option>
+    <% end %>
+  </datalist>
+  
+  <small class="form-text text-muted">
+    Use dot notation like "work.projects" or "personal.health" to organize your items into folders.
+  </small>
+</div>

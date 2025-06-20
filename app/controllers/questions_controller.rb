@@ -33,10 +33,11 @@ class QuestionsController < ApplicationController
   
   def create
     if params[:section_id]
-      # Creating question from section
+      # Creating question from section - inherit section's namespace
       @section = current_user.sections.find(params[:section_id])
       @question = Question.new(question_params)
       @question.user = current_user
+      @question.namespace = @section.namespace
       
       if @question.save
         @section.questions << @question

@@ -52,7 +52,7 @@ class FormsController < ApplicationController
   end
   
   def submit_survey
-    @response = Response.new(form: @form, user: current_user)
+    @response = Response.new(form: @form, user: current_user, namespace: @form.namespace)
     
     if @response.save
       # Process answers for each question across all sections
@@ -61,7 +61,8 @@ class FormsController < ApplicationController
         answer = @response.answers.build(
           question: question,
           user: current_user,
-          answer_type: question.question_type
+          answer_type: question.question_type,
+          namespace: @form.namespace
         )
         
         case question.question_type

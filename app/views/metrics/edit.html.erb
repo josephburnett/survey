@@ -32,11 +32,7 @@
     <%= form.text_field :name, placeholder: "Optional: Enter a name for this metric" %>
   </div>
 
-  <div class="field">
-    <%= form.label :namespace, "Namespace (optional)" %>
-    <%= form.text_field :namespace, placeholder: "e.g., my-items.category or work.projects" %>
-    <small style="display: block; color: #666; margin-top: 0.25rem;">Use dots to create folder structure (e.g., my-items.category)</small>
-  </div>
+  <%= render 'shared/namespace_field', form: form %>
 
   <div class="field">
     <%= form.label :function, "Function" %>

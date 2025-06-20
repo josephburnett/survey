@@ -20,10 +20,11 @@ class SectionsController < ApplicationController
   
   def create
     if params[:form_id]
-      # Creating section from form
+      # Creating section from form - inherit form's namespace
       @form = current_user.forms.find(params[:form_id])
       @section = Section.new(section_params)
       @section.user = current_user
+      @section.namespace = @form.namespace
       
       if @section.save
         @form.sections << @section
