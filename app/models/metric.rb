@@ -3,6 +3,9 @@ class Metric < ApplicationRecord
   
   belongs_to :user
   
+  # One-to-many relationships
+  has_many :alerts, dependent: :destroy
+  
   # Many-to-many relationships
   has_many :metric_questions, dependent: :destroy
   has_many :questions, through: :metric_questions

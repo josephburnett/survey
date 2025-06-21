@@ -9,7 +9,7 @@ class Namespace
     namespaces = Set.new
     
     # Collect all namespaces from all namespaceable models
-    [Form, Section, Question, Answer, Response, Metric, Dashboard].each do |model|
+    [Form, Section, Question, Answer, Response, Metric, Alert, Dashboard].each do |model|
       namespaces.merge(model.namespaces_for_user(user))
     end
     
@@ -93,6 +93,7 @@ class Namespace
         ['Answers', Answer],
         ['Responses', Response],
         ['Metrics', Metric],
+        ['Alerts', Alert],
         ['Dashboards', Dashboard]
       ].each do |label, model|
         items = model.where(user: user, namespace: name).not_deleted

@@ -112,6 +112,24 @@
               <%= link_to "View Dashboard", dashboard_path(item), class: "btn btn-primary", style: 'width: 100%;' %>
             </div>
           </div>
+          
+        <% when 'alert' %>
+          <div class="index-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h4><%= link_to item.display_name, alert_path(item) %></h4>
+              <span style="display: inline-block; width: 16px; height: 16px; border-radius: 50%; background-color: <%= item.status_color %>; margin-left: 8px;"></span>
+            </div>
+            
+            <p><strong>Status:</strong> <%= item.status_text %></p>
+            <p><strong>Metric:</strong> <%= link_to item.metric.display_name, metric_path(item.metric) %></p>
+            <p><strong>Threshold:</strong> <%= item.direction.capitalize %> <%= item.threshold %></p>
+            
+            <% if item.metric.series.any? %>
+              <p><strong>Current Value:</strong> <%= item.metric.series.last&.last || "No data" %></p>
+            <% else %>
+              <p><strong>Current Value:</strong> No data available</p>
+            <% end %>
+          </div>
         <% end %>
       <% end %>
     </div>

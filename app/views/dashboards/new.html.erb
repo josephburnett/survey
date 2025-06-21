@@ -72,6 +72,18 @@
           </div>
         <% end %>
       </div>
+      
+      <div class="field">
+        <%= form.label :alert_ids, "Alerts" %>
+        <%= form.collection_check_boxes :alert_ids, @alerts, :id, :id, { checked: @dashboard.alert_ids }, { class: 'entity-checkbox' } do |b| %>
+          <div class="checkbox-item">
+            <%= b.check_box %>
+            <%= b.label do %>
+              <%= b.object.display_name %> (Alert)
+            <% end %>
+          </div>
+        <% end %>
+      </div>
 
       <div class="actions">
         <%= form.submit "Create Dashboard" %>

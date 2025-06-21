@@ -18,6 +18,7 @@ class DashboardsController < ApplicationController
     @questions = current_user.questions.not_deleted
     @forms = current_user.forms.not_deleted
     @dashboards = current_user.dashboards.not_deleted.where.not(id: nil) # All other dashboards
+    @alerts = current_user.alerts.not_deleted
   end
   
   def create
@@ -30,6 +31,7 @@ class DashboardsController < ApplicationController
       @questions = current_user.questions.not_deleted
       @forms = current_user.forms.not_deleted
       @dashboards = current_user.dashboards.not_deleted.where.not(id: nil)
+      @alerts = current_user.alerts.not_deleted
       render :new
     end
   end
@@ -41,6 +43,7 @@ class DashboardsController < ApplicationController
     @questions = current_user.questions.not_deleted.where(namespace: namespace)
     @forms = current_user.forms.not_deleted.where(namespace: namespace)
     @dashboards = current_user.dashboards.not_deleted.where(namespace: namespace).where.not(id: @dashboard.id)
+    @alerts = current_user.alerts.not_deleted.where(namespace: namespace)
   end
   
   def update
@@ -53,6 +56,7 @@ class DashboardsController < ApplicationController
       @questions = current_user.questions.not_deleted.where(namespace: namespace)
       @forms = current_user.forms.not_deleted.where(namespace: namespace)
       @dashboards = current_user.dashboards.not_deleted.where(namespace: namespace).where.not(id: @dashboard.id)
+      @alerts = current_user.alerts.not_deleted.where(namespace: namespace)
       render :edit
     end
   end
@@ -98,6 +102,6 @@ class DashboardsController < ApplicationController
   end
   
   def dashboard_params
-    params.require(:dashboard).permit(:name, :namespace, metric_ids: [], question_ids: [], form_ids: [], linked_dashboard_ids: [])
+    params.require(:dashboard).permit(:name, :namespace, metric_ids: [], question_ids: [], form_ids: [], linked_dashboard_ids: [], alert_ids: [])
   end
 end

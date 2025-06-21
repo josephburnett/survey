@@ -19,6 +19,10 @@ class Dashboard < ApplicationRecord
   has_many :dashboard_dashboards, dependent: :destroy
   has_many :linked_dashboards, through: :dashboard_dashboards
   
+  # Alert associations
+  has_many :dashboard_alerts, dependent: :destroy
+  has_many :alerts, through: :dashboard_alerts
+  
   validates :name, presence: true
   
   scope :not_deleted, -> { where(deleted: false) }
@@ -49,6 +53,11 @@ class Dashboard < ApplicationRecord
     # Add linked dashboards
     dashboard_dashboards.ordered.includes(:linked_dashboard).each do |dd|
       items << { type: 'dashboard', item: dd.linked_dashboard, position: dd.position }
+    end
+    
+    # Add alerts
+    dashboard_alerts.ordered.includes(:alert).each do |da|
+      items << { type: 'alert', item: da.alert, position: da.position }
     end
     
     # Sort by position

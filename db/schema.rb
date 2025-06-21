@@ -10,7 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_20_232037) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_21_203321) do
+  create_table "alerts", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "metric_id", null: false
+    t.decimal "threshold", precision: 10, scale: 2, null: false
+    t.string "direction", null: false
+    t.integer "user_id", null: false
+    t.string "namespace", default: ""
+    t.boolean "deleted", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["metric_id"], name: "index_alerts_on_metric_id"
+    t.index ["namespace"], name: "index_alerts_on_namespace"
+    t.index ["user_id", "deleted"], name: "index_alerts_on_user_id_and_deleted"
+    t.index ["user_id"], name: "index_alerts_on_user_id"
+  end
+
   create_table "answers", force: :cascade do |t|
     t.integer "question_id", null: false
     t.string "answer_type"
@@ -27,6 +43,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_232037) do
     t.index ["question_id"], name: "index_answers_on_question_id"
     t.index ["response_id"], name: "index_answers_on_response_id"
     t.index ["user_id"], name: "index_answers_on_user_id"
+  end
+
+  create_table "dashboard_alerts", force: :cascade do |t|
+    t.integer "dashboard_id", null: false
+    t.integer "alert_id", null: false
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["alert_id"], name: "index_dashboard_alerts_on_alert_id"
+    t.index ["dashboard_id", "position"], name: "index_dashboard_alerts_on_dashboard_id_and_position"
+    t.index ["dashboard_id"], name: "index_dashboard_alerts_on_dashboard_id"
   end
 
   create_table "dashboard_dashboards", force: :cascade do |t|
@@ -184,9 +211,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_20_232037) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "alerts", "metrics"
+  add_foreign_key "alerts", "users"
   add_foreign_key "answers", "questions"
   add_foreign_key "answers", "responses"
   add_foreign_key "answers", "users"
+  add_foreign_key "dashboard_alerts", "alerts"
+  add_foreign_key "dashboard_alerts", "dashboards"
   add_foreign_key "dashboard_dashboards", "dashboards"
   add_foreign_key "dashboard_dashboards", "dashboards", column: "linked_dashboard_id"
   add_foreign_key "dashboard_forms", "dashboards"

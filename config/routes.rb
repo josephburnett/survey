@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  resources :alerts do
+    member do
+      patch :soft_delete
+    end
+  end
   root 'forms#index'
   
   resources :forms do

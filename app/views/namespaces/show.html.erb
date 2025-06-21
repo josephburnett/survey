@@ -51,6 +51,8 @@
                   <%= link_to "Response ##{item.id}", response_path(item) %>
                 <% when 'Metrics' %>
                   <%= link_to item.display_name, metric_path(item) %>
+                <% when 'Alerts' %>
+                  <%= link_to item.display_name, alert_path(item) %>
                 <% when 'Dashboards' %>
                   <%= link_to item.name, dashboard_path(item) %>
                 <% end %>
@@ -69,6 +71,8 @@
                 <p>Form: <%= item.form.name %></p>
               <% when 'Metrics' %>
                 <p>Function: <%= item.function.capitalize %></p>
+              <% when 'Alerts' %>
+                <p>Metric: <%= item.metric.display_name %> • <%= item.direction.capitalize %> <%= item.threshold %></p>
               <% when 'Dashboards' %>
                 <p><%= pluralize(item.metrics.count, 'metric') %></p>
               <% end %>
@@ -144,6 +148,8 @@
                         Response #<%= item.id %>
                       <% when 'Metrics' %>
                         <%= item.display_name %>
+                      <% when 'Alerts' %>
+                        <%= item.display_name %>
                       <% when 'Dashboards' %>
                         <%= item.name %>
                       <% end %>
@@ -162,6 +168,8 @@
                       <p>Form: <%= item.form.name %></p>
                     <% when 'Metrics' %>
                       <p>Function: <%= item.function.capitalize %></p>
+                    <% when 'Alerts' %>
+                      <p>Metric: <%= item.metric.display_name %> • <%= item.direction.capitalize %> <%= item.threshold %></p>
                     <% when 'Dashboards' %>
                       <p><%= pluralize(item.metrics.count, 'metric') %></p>
                     <% end %>

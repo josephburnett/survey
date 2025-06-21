@@ -1,0 +1,43 @@
+<div class="container">
+  <%= render 'shared/main_nav' %>
+
+  <div class="index-header">
+    <h1><%= @alert.display_name %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "Edit", edit_alert_path(@alert), class: "btn btn-primary" %>
+      <%= link_to "Delete", soft_delete_alert_path(@alert), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
+    </div>
+  </div>
+
+  <%= link_to "← Back to Alerts", alerts_path(namespace: @alert.namespace), class: "back-link" %>
+
+  <div class="card">
+    <h3>Alert Details</h3>
+    <p><strong>Name:</strong> <%= @alert.name %></p>
+    <p><strong>Metric:</strong> <%= link_to @alert.metric.display_name, metric_path(@alert.metric) %></p>
+    <p><strong>Threshold:</strong> <%= @alert.direction.capitalize %> <%= @alert.threshold %></p>
+    <p><strong>Current Status:</strong>
+      <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: <%= @alert.status_color %>; margin-right: 8px;"></span>
+      <%= @alert.status_text %>
+    </p>
+    <% if @alert.metric.series.any? %>
+      <p><strong>Current Metric Value:</strong> <%= @alert.metric.series.last&.last || "No data" %></p>
+    <% else %>
+      <p><strong>Current Metric Value:</strong> No data available</p>
+    <% end %>
+    <p><strong>Namespace:</strong> <%= @alert.namespace.present? ? @alert.namespace : "Root" %></p>
+    <p><strong>Created:</strong> <%= @alert.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+  </div>
+
+  <div class="card">
+    <h3>Alert Logic</h3>
+    <p>This alert will be <strong>activated</strong> when the metric "<%= @alert.metric.display_name %>" has a value <%= @alert.direction %> <%= @alert.threshold %>.</p>
+    <p>The alert status is calculated from the most recent data point in the metric's time series.</p>
+    
+    <% if @alert.metric.series.any? %>
+      <p>Based on the current metric value of <strong><%= @alert.metric.series.last&.last %></strong>, this alert is currently <strong><%= @alert.status_text.downcase %></strong>.</p>
+    <% else %>
+      <p>No metric data is available yet, so this alert is currently <strong>deactivated</strong>.</p>
+    <% end %>
+  </div>
+</div>
