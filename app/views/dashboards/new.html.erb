@@ -1,15 +1,5 @@
 <div class="container">
-  <nav class="main-nav">
-    <%= link_to "Forms", forms_path %>
-    <%= link_to "Sections", sections_path %>
-    <%= link_to "Questions", questions_path %>
-    <%= link_to "Answers", answers_path %>
-    <%= link_to "Responses", responses_path %>
-    <%= link_to "Metrics", metrics_path %>
-    <%= link_to "Dashboards", dashboards_path %>
-    <%= link_to "Namespaces", namespaces_path %>
-    <%= link_to "Logout", logout_path, data: { "turbo-method": :delete } %>
-  </nav>
+  <%= render 'shared/main_nav' %>
 
   <h1>New Dashboard</h1>
 
