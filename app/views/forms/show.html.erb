@@ -6,7 +6,6 @@
     <div style="display: flex; gap: 0.5rem;">
       <%= link_to "Fill Out Form", survey_form_path(@form), class: "btn btn-primary" %>
       <%= link_to "Edit", edit_form_path(@form), class: "btn btn-secondary" %>
-      <%= link_to "Delete", soft_delete_form_path(@form), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
     </div>
   </div>
 

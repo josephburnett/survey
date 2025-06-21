@@ -51,6 +51,7 @@
               <div class="index-card-actions">
                 <%= link_to "View", question_path(question) %>
                 <%= link_to "Edit", edit_question_path(question) %>
+                <%= link_to "Answer", answer_question_path(question), class: "btn btn-primary" %>
               </div>
             </div>
           <% end %>

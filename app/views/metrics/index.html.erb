@@ -52,10 +52,6 @@
               <div class="index-card-actions">
                 <%= link_to "View", metric_path(metric) %>
                 <%= link_to "Edit", edit_metric_path(metric) %>
-                <%= link_to "Delete", soft_delete_metric_path(metric), 
-                    data: { "turbo-method": :patch, confirm: "Are you sure?" }, 
-                    class: "btn", 
-                    style: "background-color: var(--error); color: var(--white);" %>
               </div>
             </div>
           <% end %>

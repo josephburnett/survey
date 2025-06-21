@@ -5,7 +5,6 @@
     <h1><%= @answer.display_title %></h1>
     <div style="display: flex; gap: 0.5rem;">
       <%= link_to "Edit", edit_answer_path(@answer), class: "btn btn-primary" %>
-      <%= link_to "Delete", soft_delete_answer_path(@answer), data: { "turbo-method": :patch, confirm: "Are you sure?" }, class: "btn", style: "background-color: var(--error); color: var(--white);" %>
     </div>
   </div>
 
