@@ -38,8 +38,59 @@
     </div>
   <% end %>
 
-  <!-- Bulk Move Form -->
+  <!-- Entity Listings (View Only) -->
   <% if @namespace.entities.any? %>
+    <% @namespace.entities.each do |entity_type, items| %>
+      <div class="card">
+        <h3><%= entity_type %> (<%= items.count %>)</h3>
+        
+        <div class="index-grid">
+          <% items.each do |item| %>
+            <div class="index-card">
+              <h4>
+                <% case entity_type %>
+                <% when 'Forms' %>
+                  <%= link_to item.name, form_path(item) %>
+                <% when 'Sections' %>
+                  <%= link_to item.name, section_path(item) %>
+                <% when 'Questions' %>
+                  <%= link_to item.name, question_path(item) %>
+                <% when 'Answers' %>
+                  <%= link_to item.display_title, answer_path(item) %>
+                <% when 'Responses' %>
+                  <%= link_to "Response ##{item.id}", response_path(item) %>
+                <% when 'Metrics' %>
+                  <%= link_to item.display_name, metric_path(item) %>
+                <% when 'Dashboards' %>
+                  <%= link_to item.name, dashboard_path(item) %>
+                <% end %>
+              </h4>
+              
+              <% case entity_type %>
+              <% when 'Forms' %>
+                <p><%= pluralize(item.sections.count, 'section') %> • <%= pluralize(item.responses.count, 'response') %></p>
+              <% when 'Sections' %>
+                <p><%= pluralize(item.questions.count, 'question') %></p>
+              <% when 'Questions' %>
+                <p>Type: <%= item.question_type || "Not set" %></p>
+              <% when 'Answers' %>
+                <p>Type: <%= item.answer_type %></p>
+              <% when 'Responses' %>
+                <p>Form: <%= item.form.name %></p>
+              <% when 'Metrics' %>
+                <p>Function: <%= item.function.capitalize %></p>
+              <% when 'Dashboards' %>
+                <p><%= pluralize(item.metrics.count, 'metric') %></p>
+              <% end %>
+              
+              <p><strong>Created:</strong> <%= item.created_at.strftime("%B %d, %Y") %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Bulk Move Form -->
     <%= form_with url: namespace_path(@namespace), method: :post, local: true do |form| %>
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
@@ -75,10 +126,10 @@
         </div>
       </div>
 
-      <!-- Entity Selection -->
+      <!-- Entity Selection for Moving -->
       <% @namespace.entities.each do |entity_type, items| %>
         <div class="card">
-          <h3><%= entity_type %> (<%= items.count %>)</h3>
+          <h3>Select <%= entity_type %> to Move (<%= items.count %>)</h3>
           
           <div class="index-grid">
             <% items.each do |item| %>
@@ -92,19 +143,19 @@
                     <h4>
                       <% case entity_type %>
                       <% when 'Forms' %>
-                        <%= link_to item.name, form_path(item) %>
+                        <%= item.name %>
                       <% when 'Sections' %>
-                        <%= link_to item.name, section_path(item) %>
+                        <%= item.name %>
                       <% when 'Questions' %>
-                        <%= link_to item.name, question_path(item) %>
+                        <%= item.name %>
                       <% when 'Answers' %>
-                        <%= link_to item.display_title, answer_path(item) %>
+                        <%= item.display_title %>
                       <% when 'Responses' %>
-                        <%= link_to "Response ##{item.id}", response_path(item) %>
+                        Response #<%= item.id %>
                       <% when 'Metrics' %>
-                        <%= link_to item.display_name, metric_path(item) %>
+                        <%= item.display_name %>
                       <% when 'Dashboards' %>
-                        <%= link_to item.name, dashboard_path(item) %>
+                        <%= item.name %>
                       <% end %>
                     </h4>
                     
