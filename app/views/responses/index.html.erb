@@ -82,11 +82,10 @@
           <% end %>
         </div>
       </div>
-    <% elsif @folders.empty? %>
+    <% else %>
       <div class="empty-state">
         <h3>No responses yet</h3>
-        <p>Create your first response to get started!</p>
-        <%= link_to "Create Response", new_response_path(namespace: @current_namespace), class: "btn btn-primary" %>
+        <p>Create your first response to record completed form submissions.</p>
       </div>
     <% end %>
   <% end %>

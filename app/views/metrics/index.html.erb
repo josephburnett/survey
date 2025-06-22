@@ -57,11 +57,10 @@
           <% end %>
         </div>
       </div>
-    <% elsif @folders.empty? %>
+    <% else %>
       <div class="empty-state">
         <h3>No metrics yet</h3>
-        <p>Create your first metric to get started!</p>
-        <%= link_to "Create Metric", new_metric_path(namespace: @current_namespace), class: "btn btn-primary" %>
+        <p>Create your first metric to track and analyze data over time.</p>
       </div>
     <% end %>
   <% end %>

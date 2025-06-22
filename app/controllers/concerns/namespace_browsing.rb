@@ -3,7 +3,8 @@ module NamespaceBrowsing
   
   def setup_namespace_browsing(model_class, path_helper)
     @current_namespace = params[:namespace] || ''
-    @folders = model_class.namespace_folders_for_user(current_user, @current_namespace)
+    # Use ALL namespaces, not just those specific to this entity type
+    @folders = Namespace.namespace_folders_for_user(current_user, @current_namespace)
     @breadcrumbs = build_namespace_breadcrumbs(@current_namespace, path_helper)
   end
   

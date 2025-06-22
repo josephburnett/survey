@@ -56,11 +56,10 @@
         <% end %>
       </div>
     </div>
-  <% elsif @folders.empty? %>
+  <% else %>
     <div class="empty-state">
       <h3>No forms yet</h3>
-      <p>Create your first form to get started!</p>
-      <%= link_to "Create Form", new_form_path(namespace: @current_namespace), class: "btn btn-primary" %>
+      <p>Create your first form to collect structured data and responses.</p>
     </div>
   <% end %>
 </div>

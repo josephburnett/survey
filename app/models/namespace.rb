@@ -23,12 +23,18 @@ class Namespace
       return new(name: '', user_id: user.id)
     end
     
-    # Check if namespace exists by seeing if any entities use it
-    exists = [Form, Section, Question, Answer, Response, Metric, Dashboard].any? do |model|
+    # Check if namespace exists either by having direct entities or by having child namespaces
+    all_namespaces = all_for_user(user).map(&:name)
+    
+    # Direct existence: has entities in this exact namespace
+    has_direct_entities = [Form, Section, Question, Answer, Response, Metric, Alert, Dashboard].any? do |model|
       model.where(user: user, namespace: namespace_name).exists?
     end
     
-    if exists
+    # Indirect existence: has child namespaces (is a valid intermediate folder)
+    has_child_namespaces = all_namespaces.any? { |ns| ns.start_with?("#{namespace_name}.") }
+    
+    if has_direct_entities || has_child_namespaces
       new(name: namespace_name, user_id: user.id)
     else
       raise ActiveRecord::RecordNotFound, "Namespace '#{namespace_name}' not found"
@@ -107,22 +113,28 @@ class Namespace
     @child_namespaces ||= begin
       all_namespaces = self.class.all_for_user(user).map(&:name)
       
-      # Filter to only show namespaces that are direct children of current namespace
+      # Find folders that represent the first level of namespaces deeper than current
       prefix = name.present? ? "#{name}." : ''
+      folders = Set.new
       
-      direct_children = all_namespaces.select do |ns|
+      all_namespaces.each do |ns|
         # Skip if doesn't start with prefix
-        next false unless ns.start_with?(prefix)
+        next unless ns.start_with?(prefix)
         
         # Remove prefix to get relative path
         relative_path = ns[prefix.length..-1]
-        next false if relative_path.blank?
+        next if relative_path.blank?
         
-        # Only include if there are no more dots (direct child, not grandchild)
-        !relative_path.include?('.')
+        # Get the first component (immediate child folder)
+        first_component = relative_path.split('.').first
+        folders.add(first_component) if first_component.present?
       end
       
-      direct_children.map { |child_name| self.class.new(name: child_name, user_id: user_id) }
+      # Convert folders to namespace objects
+      folders.map do |folder|
+        child_namespace_name = name.present? ? "#{name}.#{folder}" : folder
+        self.class.new(name: child_namespace_name, user_id: user_id)
+      end.sort_by(&:name)
     end
   end
   

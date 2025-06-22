@@ -56,11 +56,10 @@
           <% end %>
         </div>
       </div>
-    <% elsif @folders.empty? %>
+    <% else %>
       <div class="empty-state">
         <h3>No answers yet</h3>
-        <p>Create your first answer to get started!</p>
-        <%= link_to "Create Answer", new_answer_path(namespace: @current_namespace), class: "btn btn-primary" %>
+        <p>Create your first answer to provide response options for questions.</p>
       </div>
     <% end %>
   <% end %>

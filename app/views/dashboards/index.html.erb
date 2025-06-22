@@ -57,11 +57,10 @@
           <% end %>
         </div>
       </div>
-    <% elsif @folders.empty? %>
+    <% else %>
       <div class="empty-state">
         <h3>No dashboards yet</h3>
-        <p>Create your first dashboard to organize your metrics visualizations.</p>
-        <%= link_to "Create Dashboard", new_dashboard_path(namespace: @current_namespace), class: "btn btn-primary" %>
+        <p>Create your first dashboard to organize and visualize your metrics and alerts.</p>
       </div>
     <% end %>
   <% end %>

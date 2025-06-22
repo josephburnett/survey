@@ -49,12 +49,23 @@ module ApplicationHelper
   def namespace_aware_path(model_class, path_method)
     namespace = current_namespace || ''
     
-    # Check if the target model has items in the current namespace
-    if namespace.present? && current_user && model_class.where(user: current_user, namespace: namespace).exists?
+    # Always stay in current namespace if one is active
+    # This allows entering empty namespaces and creating the first entity of any type
+    if namespace.present?
       send(path_method, namespace: namespace)
     else
-      # Fall back to root namespace
+      # Only fall back to root if we're already in root
       send(path_method)
+    end
+  end
+  
+  def namespace_aware_namespaces_path
+    namespace = current_namespace || ''
+    
+    if namespace.present?
+      namespace_path(namespace)
+    else
+      namespaces_path
     end
   end
 end

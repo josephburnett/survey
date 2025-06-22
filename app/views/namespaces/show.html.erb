@@ -28,96 +28,16 @@
     </div>
   <% end %>
 
-  <!-- Entity Listings (View Only) -->
-  <% if @namespace.entities.any? %>
-    <% @namespace.entities.each do |entity_type, items| %>
-      <div class="card">
-        <h3><%= entity_type %> (<%= items.count %>)</h3>
-        
-        <div class="index-grid">
-          <% items.each do |item| %>
-            <div class="index-card">
-              <h4>
-                <% case entity_type %>
-                <% when 'Forms' %>
-                  <%= link_to item.name, form_path(item) %>
-                <% when 'Sections' %>
-                  <%= link_to item.name, section_path(item) %>
-                <% when 'Questions' %>
-                  <%= link_to item.name, question_path(item) %>
-                <% when 'Answers' %>
-                  <%= link_to item.display_title, answer_path(item) %>
-                <% when 'Responses' %>
-                  <%= link_to "Response ##{item.id}", response_path(item) %>
-                <% when 'Metrics' %>
-                  <%= link_to item.display_name, metric_path(item) %>
-                <% when 'Alerts' %>
-                  <%= link_to item.display_name, alert_path(item) %>
-                <% when 'Dashboards' %>
-                  <%= link_to item.name, dashboard_path(item) %>
-                <% end %>
-              </h4>
-              
-              <% case entity_type %>
-              <% when 'Forms' %>
-                <p><%= pluralize(item.sections.count, 'section') %> • <%= pluralize(item.responses.count, 'response') %></p>
-              <% when 'Sections' %>
-                <p><%= pluralize(item.questions.count, 'question') %></p>
-              <% when 'Questions' %>
-                <p>Type: <%= item.question_type || "Not set" %></p>
-              <% when 'Answers' %>
-                <p>Type: <%= item.answer_type %></p>
-              <% when 'Responses' %>
-                <p>Form: <%= item.form.name %></p>
-              <% when 'Metrics' %>
-                <p>Function: <%= item.function.capitalize %></p>
-              <% when 'Alerts' %>
-                <p>Metric: <%= item.metric.display_name %> • <%= item.direction.capitalize %> <%= item.threshold %></p>
-              <% when 'Dashboards' %>
-                <p><%= pluralize(item.metrics.count, 'metric') %></p>
-              <% end %>
-              
-              <p><strong>Created:</strong> <%= item.created_at.strftime("%B %d, %Y") %></p>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    <% end %>
 
+  <% if @namespace.entities.any? %>
     <!-- Bulk Move Form -->
     <%= form_with url: namespace_path(@namespace), method: :post, local: true do |form| %>
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-          <h2>Move Items</h2>
-          <label style="display: flex; align-items: center; gap: 0.5rem;">
-            <input type="checkbox" id="select-all-items">
-            Select All Items
-          </label>
-        </div>
-        
-        <div class="form-group">
-          <%= form.label :target_namespace, "Move selected items to:" %>
-          <input type="text" 
-                 name="target_namespace" 
-                 id="target_namespace"
-                 class="form-control namespace-input"
-                 list="namespace-options"
-                 placeholder="Enter namespace or select from list (leave empty for Root)">
-          
-          <datalist id="namespace-options">
-            <% all_namespaces_for_user(current_user).each do |namespace| %>
-              <option value="<%= namespace %>"><%= namespace %></option>
-            <% end %>
-          </datalist>
-          
-          <small class="form-text text-muted">
-            Use dot notation like "work.projects" or leave empty for Root namespace.
-          </small>
-        </div>
-        
-        <div class="actions">
-          <%= form.submit "Move Selected Items", class: "btn btn-primary" %>
-        </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Move Items</h2>
+        <label style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" id="select-all-items">
+          Select All Items
+        </label>
       </div>
 
       <!-- Entity Selection for Moving -->
@@ -182,6 +102,33 @@
           </div>
         </div>
       <% end %>
+      
+      <!-- Move Controls -->
+      <div class="card">
+        <div class="form-group">
+          <%= form.label :target_namespace, "Move selected items to:" %>
+          <input type="text" 
+                 name="target_namespace" 
+                 id="target_namespace"
+                 class="form-control namespace-input"
+                 list="namespace-options"
+                 placeholder="Enter namespace or select from list (leave empty for Root)">
+          
+          <datalist id="namespace-options">
+            <% all_namespaces_for_user(current_user).each do |namespace| %>
+              <option value="<%= namespace %>"><%= namespace %></option>
+            <% end %>
+          </datalist>
+          
+          <small class="form-text text-muted">
+            Use dot notation like "work.projects" or leave empty for Root namespace.
+          </small>
+        </div>
+        
+        <div class="actions">
+          <%= form.submit "Move Selected Items", class: "btn btn-primary" %>
+        </div>
+      </div>
     <% end %>
   <% elsif @namespace.child_namespaces.empty? %>
     <div class="empty-state">
