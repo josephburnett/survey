@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_21_203321) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_24_173459) do
   create_table "alerts", force: :cascade do |t|
     t.string "name", null: false
     t.integer "metric_id", null: false
@@ -110,6 +110,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_203321) do
     t.index ["user_id"], name: "index_dashboards_on_user_id"
   end
 
+  create_table "form_drafts", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "form_id", null: false
+    t.json "draft_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["form_id"], name: "index_form_drafts_on_form_id"
+    t.index ["user_id", "form_id"], name: "index_form_drafts_on_user_id_and_form_id", unique: true
+    t.index ["user_id"], name: "index_form_drafts_on_user_id"
+  end
+
   create_table "forms", force: :cascade do |t|
     t.string "name"
     t.integer "user_id"
@@ -157,6 +168,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_203321) do
     t.decimal "scale", precision: 10, scale: 4, default: "1.0"
     t.integer "first_metric_id"
     t.string "namespace", default: "", null: false
+    t.string "wrap", default: "none", null: false
     t.index ["first_metric_id"], name: "index_metrics_on_first_metric_id"
     t.index ["namespace"], name: "index_metrics_on_namespace"
     t.index ["user_id"], name: "index_metrics_on_user_id"
@@ -227,6 +239,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_203321) do
   add_foreign_key "dashboard_questions", "dashboards"
   add_foreign_key "dashboard_questions", "questions"
   add_foreign_key "dashboards", "users"
+  add_foreign_key "form_drafts", "forms"
+  add_foreign_key "form_drafts", "users"
   add_foreign_key "metric_metrics", "metrics", column: "child_metric_id"
   add_foreign_key "metric_metrics", "metrics", column: "parent_metric_id"
   add_foreign_key "metric_questions", "metrics"

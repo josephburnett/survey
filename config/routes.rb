@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       post :submit_survey
       patch :soft_delete
       patch :add_section
+      patch :update_draft
     end
   end
   

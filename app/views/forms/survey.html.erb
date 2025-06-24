@@ -15,16 +15,37 @@
           <div class="question-block">
             <label><%= question.name %></label>
             
+            <% field_id = "question_#{question.id}" %>
+            <% draft_value = @draft.get_field(field_id) %>
             <% case question.question_type %>
             <% when 'string' %>
-              <%= text_field_tag "answers[#{question.id}][value]", nil, required: true %>
+              <%= text_field_tag "answers[#{question.id}][value]", draft_value, 
+                  required: true, 
+                  id: field_id, 
+                  class: "draft-field", 
+                  data: { field_id: field_id } %>
             <% when 'number' %>
-              <%= number_field_tag "answers[#{question.id}][value]", nil, step: :any, required: true %>
+              <%= number_field_tag "answers[#{question.id}][value]", draft_value, 
+                  step: :any, 
+                  required: true, 
+                  id: field_id, 
+                  class: "draft-field", 
+                  data: { field_id: field_id } %>
             <% when 'bool' %>
               <%= hidden_field_tag "answers[#{question.id}][value]", '0' %>
-              <%= check_box_tag "answers[#{question.id}][value]", '1', false %>
+              <%= check_box_tag "answers[#{question.id}][value]", '1', 
+                  draft_value == '1', 
+                  id: field_id, 
+                  class: "draft-field", 
+                  data: { field_id: field_id } %>
             <% when 'range' %>
-              <%= select_tag "answers[#{question.id}][value]", options_for_select(question.range_options.map { |val| [val, val] }), prompt: 'Select...', required: true %>
+              <%= select_tag "answers[#{question.id}][value]", 
+                  options_for_select(question.range_options.map { |val| [val, val] }, draft_value), 
+                  prompt: 'Select...', 
+                  required: true, 
+                  id: field_id, 
+                  class: "draft-field", 
+                  data: { field_id: field_id } %>
             <% end %>
           </div>
         <% end %>
@@ -36,3 +57,109 @@
     </div>
   <% end %>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let draftSaveTimeout;
+  const SAVE_DELAY = 1000; // Save 1 second after user stops typing
+  
+  // Function to save draft
+  function saveDraft(fieldId, value) {
+    fetch('<%= update_draft_form_path(@form) %>', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({
+        field_id: fieldId,
+        value: value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        console.log('Draft saved for field:', fieldId);
+        showDraftStatus('Draft saved');
+      }
+    })
+    .catch(error => {
+      console.error('Error saving draft:', error);
+      showDraftStatus('Error saving draft');
+    });
+  }
+  
+  // Function to show draft status
+  function showDraftStatus(message) {
+    // Remove existing status
+    let existingStatus = document.querySelector('.draft-status');
+    if (existingStatus) {
+      existingStatus.remove();
+    }
+    
+    // Create new status element
+    let status = document.createElement('div');
+    status.className = 'draft-status';
+    status.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 8px 16px; border-radius: 4px; font-size: 14px; z-index: 1000;';
+    status.textContent = message;
+    document.body.appendChild(status);
+    
+    // Remove after 2 seconds
+    setTimeout(() => {
+      if (status.parentNode) {
+        status.parentNode.removeChild(status);
+      }
+    }, 2000);
+  }
+  
+  // Add event listeners to all draft fields
+  document.querySelectorAll('.draft-field').forEach(function(field) {
+    function handleChange() {
+      const fieldId = field.dataset.fieldId;
+      let value;
+      
+      if (field.type === 'checkbox') {
+        value = field.checked ? '1' : '0';
+      } else {
+        value = field.value;
+      }
+      
+      // Clear existing timeout
+      if (draftSaveTimeout) {
+        clearTimeout(draftSaveTimeout);
+      }
+      
+      // Set new timeout for saving
+      draftSaveTimeout = setTimeout(function() {
+        saveDraft(fieldId, value);
+      }, SAVE_DELAY);
+    }
+    
+    // For text inputs and numbers, save on input (while typing)
+    if (field.type === 'text' || field.type === 'number') {
+      field.addEventListener('input', handleChange);
+    }
+    
+    // For checkboxes and selects, save immediately on change
+    if (field.type === 'checkbox' || field.tagName === 'SELECT') {
+      field.addEventListener('change', function() {
+        const fieldId = field.dataset.fieldId;
+        let value;
+        
+        if (field.type === 'checkbox') {
+          value = field.checked ? '1' : '0';
+        } else {
+          value = field.value;
+        }
+        
+        saveDraft(fieldId, value);
+      });
+    }
+  });
+  
+  // Show initial status if draft exists
+  <% if @draft.persisted? && @draft.draft_data&.any? %>
+    showDraftStatus('Draft loaded');
+  <% end %>
+});
+</script>

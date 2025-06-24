@@ -2,7 +2,7 @@ class FormsController < ApplicationController
   include NamespaceBrowsing
   
   before_action :require_login
-  before_action :find_form, only: [:show, :edit, :update, :soft_delete, :survey, :submit_survey]
+  before_action :find_form, only: [:show, :edit, :update, :soft_delete, :survey, :submit_survey, :update_draft]
   
   def index
     setup_namespace_browsing(Form, :forms_path)
@@ -49,6 +49,7 @@ class FormsController < ApplicationController
   
   def survey
     @response = Response.new
+    @draft = FormDraft.find_or_initialize_by(user: current_user, form: @form)
   end
   
   def submit_survey
@@ -79,9 +80,23 @@ class FormsController < ApplicationController
         answer.save
       end
       
+      # Clear the draft after successful submission
+      FormDraft.where(user: current_user, form: @form).destroy_all
       redirect_to @form, notice: 'Form submitted successfully'
     else
       render :survey, alert: 'Error submitting form'
+    end
+  end
+  
+  def update_draft
+    draft = FormDraft.find_or_initialize_by(user: current_user, form: @form)
+    draft.draft_data ||= {}
+    draft.draft_data[params[:field_id]] = params[:value]
+    
+    if draft.save
+      render json: { status: 'success' }
+    else
+      render json: { status: 'error' }
     end
   end
   
