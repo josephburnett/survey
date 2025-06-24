@@ -127,7 +127,7 @@ class Metric < ApplicationRecord
     # Get all answers to the referenced questions
     filtered_answers = Answer.joins(:response, :question)
                              .where(questions: { id: questions.pluck(:id) })
-                             .where(responses: { user_id: user.id })
+                             .where(responses: { user_id: user_id })
                              .where(created_at: time_range)
                              .order(:created_at)
     
@@ -325,17 +325,19 @@ class Metric < ApplicationRecord
       if questions.any?
         answers = Answer.joins(:response, :question)
                         .where(questions: { id: questions.pluck(:id) })
-                        .where(responses: { user_id: user.id })
+                        .where(responses: { user_id: user_id })
         
         if answers.any?
           earliest = answers.minimum(:created_at)
           latest = answers.maximum(:created_at)
           earliest..latest
         else
-          Time.current..Time.current
+          # If no answers found, return a reasonable default range
+          1.year.ago..Time.current
         end
       else
-        Time.current..Time.current
+        # If no questions, return a reasonable default range
+        1.year.ago..Time.current
       end
     else
       # For calculated metrics, get range from child metrics
@@ -345,7 +347,8 @@ class Metric < ApplicationRecord
         latest = child_ranges.map(&:end).max
         earliest..latest
       else
-        Time.current..Time.current
+        # If no child metrics, return a reasonable default range
+        1.year.ago..Time.current
       end
     end
   end
