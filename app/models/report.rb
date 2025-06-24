@@ -99,12 +99,19 @@ class Report < ApplicationRecord
   end
   
   def validate_interval_config
-    return unless interval_type && interval_config
+    return unless interval_type
+    
+    if interval_config.blank?
+      errors.add(:interval_config, 'cannot be blank')
+      return
+    end
     
     case interval_type
     when 'weekly'
       days = interval_config['days']
-      unless days.is_a?(Array) && days.all? { |day| %w[monday tuesday wednesday thursday friday saturday sunday].include?(day) }
+      if days.blank? || !days.is_a?(Array) || days.empty?
+        errors.add(:interval_config, 'must include at least one day of the week for weekly interval')
+      elsif !days.all? { |day| %w[monday tuesday wednesday thursday friday saturday sunday].include?(day) }
         errors.add(:interval_config, 'must include valid days of the week for weekly interval')
       end
     when 'monthly'

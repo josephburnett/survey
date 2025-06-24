@@ -36,21 +36,22 @@
         <%= form.select :interval_type, [['Weekly', 'weekly'], ['Monthly', 'monthly']], { prompt: 'Select interval' }, { required: true, id: 'report_interval_type' } %>
       </div>
 
-      <div class="field interval-config weekly-config" style="display: none;">
+      <div class="field interval-config weekly-config" style="<%= @report.interval_type == 'weekly' ? 'display: block;' : 'display: none;' %>">
         <label>Days of the Week</label>
         <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
           <% %w[monday tuesday wednesday thursday friday saturday sunday].each do |day| %>
+            <% checked = params.dig(:interval_config, :days)&.include?(day) || false %>
             <label style="display: flex; align-items: center; gap: 5px;">
-              <%= check_box_tag "interval_config[days][]", day, false, class: "weekly-day" %>
+              <%= check_box_tag "interval_config[days][]", day, checked, class: "weekly-day" %>
               <%= day.capitalize %>
             </label>
           <% end %>
         </div>
       </div>
 
-      <div class="field interval-config monthly-config" style="display: none;">
+      <div class="field interval-config monthly-config" style="<%= @report.interval_type == 'monthly' ? 'display: block;' : 'display: none;' %>">
         <%= label_tag "interval_config[day_of_month]", "Day of Month" %>
-        <%= number_field_tag "interval_config[day_of_month]", nil, min: 1, max: 31, class: "monthly-day" %>
+        <%= number_field_tag "interval_config[day_of_month]", params.dig(:interval_config, :day_of_month), min: 1, max: 31, class: "monthly-day" %>
         <small style="display: block; color: #666; margin-top: 0.25rem;">Day of the month (1-31)</small>
       </div>
 

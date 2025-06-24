@@ -21,6 +21,26 @@ class ReportsController < ApplicationController
   def create
     @report = current_user.reports.build(report_params)
     
+    # Handle interval_config processing
+    if params[:interval_config].present?
+      case params[:report][:interval_type]
+      when 'weekly'
+        if params[:interval_config][:days].present?
+          @report.interval_config = { 'days' => params[:interval_config][:days].reject(&:blank?) }
+        else
+          @report.interval_config = { 'days' => [] }
+        end
+      when 'monthly'
+        if params[:interval_config][:day_of_month].present?
+          @report.interval_config = { 'day_of_month' => params[:interval_config][:day_of_month].to_i }
+        else
+          @report.interval_config = {}
+        end
+      end
+    else
+      @report.interval_config = {}
+    end
+    
     if @report.save
       # Handle alert associations
       if params[:alert_ids].present?
@@ -40,7 +60,7 @@ class ReportsController < ApplicationController
     else
       @alerts = current_user.alerts.not_deleted
       @metrics = current_user.metrics.not_deleted
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -50,6 +70,26 @@ class ReportsController < ApplicationController
   end
 
   def update
+    # Handle interval_config processing
+    if params[:interval_config].present?
+      case params[:report][:interval_type]
+      when 'weekly'
+        if params[:interval_config][:days].present?
+          @report.interval_config = { 'days' => params[:interval_config][:days].reject(&:blank?) }
+        else
+          @report.interval_config = { 'days' => [] }
+        end
+      when 'monthly'
+        if params[:interval_config][:day_of_month].present?
+          @report.interval_config = { 'day_of_month' => params[:interval_config][:day_of_month].to_i }
+        else
+          @report.interval_config = {}
+        end
+      end
+    else
+      @report.interval_config = {}
+    end
+    
     if @report.update(report_params)
       # Update alert associations
       @report.report_alerts.destroy_all
@@ -71,7 +111,7 @@ class ReportsController < ApplicationController
     else
       @alerts = current_user.alerts.not_deleted
       @metrics = current_user.metrics.not_deleted
-      render :edit
+      render :edit, status: :unprocessable_entity
     end
   end
 
