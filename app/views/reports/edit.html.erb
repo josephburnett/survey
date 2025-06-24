@@ -1,2 +1,125 @@
-<h1>Reports#edit</h1>
-<p>Find me in app/views/reports/edit.html.erb</p>
+<div class="container">
+  <%= render 'shared/main_nav' %>
+
+  <h1>Edit Report</h1>
+
+  <%= link_to "← Back to Report", @report, class: "back-link" %>
+
+  <div class="card">
+    <%= form_with model: @report, local: true do |form| %>
+      <% if @report.errors.any? %>
+        <div class="error-messages">
+          <h4><%= pluralize(@report.errors.count, "error") %> prohibited this report from being saved:</h4>
+          <ul>
+            <% @report.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <%= form.label :name %>
+        <%= form.text_field :name, placeholder: "Enter a name for this report", required: true %>
+      </div>
+      
+      <%= render 'shared/namespace_field', form: form %>
+
+      <div class="field">
+        <%= form.label :time_of_day, "Time of Day" %>
+        <%= form.time_field :time_of_day, required: true %>
+        <small style="display: block; color: #666; margin-top: 0.25rem;">When should this report be sent?</small>
+      </div>
+
+      <div class="field">
+        <%= form.label :interval_type, "Interval Type" %>
+        <%= form.select :interval_type, [['Weekly', 'weekly'], ['Monthly', 'monthly']], { prompt: 'Select interval' }, { required: true, id: 'report_interval_type' } %>
+      </div>
+
+      <div class="field interval-config weekly-config" style="<%= @report.interval_type == 'weekly' ? 'display: block;' : 'display: none;' %>">
+        <label>Days of the Week</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
+          <% %w[monday tuesday wednesday thursday friday saturday sunday].each do |day| %>
+            <% checked = @report.interval_config&.dig('days')&.include?(day) %>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <%= check_box_tag "interval_config[days][]", day, checked, class: "weekly-day" %>
+              <%= day.capitalize %>
+            </label>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="field interval-config monthly-config" style="<%= @report.interval_type == 'monthly' ? 'display: block;' : 'display: none;' %>">
+        <%= label_tag "interval_config[day_of_month]", "Day of Month" %>
+        <%= number_field_tag "interval_config[day_of_month]", @report.interval_config&.dig('day_of_month'), min: 1, max: 31, class: "monthly-day" %>
+        <small style="display: block; color: #666; margin-top: 0.25rem;">Day of the month (1-31)</small>
+      </div>
+
+      <div class="field">
+        <label>Alerts to Include</label>
+        <% if @alerts.any? %>
+          <% @alerts.each do |alert| %>
+            <% checked = @report.alerts.include?(alert) %>
+            <div class="checkbox-item">
+              <%= check_box_tag "alert_ids[]", alert.id, checked %>
+              <%= label_tag "alert_ids_#{alert.id}", alert.display_title %>
+            </div>
+          <% end %>
+        <% else %>
+          <p style="color: #666; font-style: italic;">No alerts available</p>
+        <% end %>
+        <small style="display: block; color: #666; margin-top: 0.5rem;">Alerts will only be included in emails when they are activated</small>
+      </div>
+
+      <div class="field">
+        <label>Metrics to Include</label>
+        <% if @metrics.any? %>
+          <% @metrics.each do |metric| %>
+            <% checked = @report.metrics.include?(metric) %>
+            <div class="checkbox-item">
+              <%= check_box_tag "metric_ids[]", metric.id, checked %>
+              <%= label_tag "metric_ids_#{metric.id}", "#{metric.display_name} - #{metric.function&.capitalize || 'Unknown'} (#{metric.resolution}/#{metric.width})" %>
+            </div>
+          <% end %>
+        <% else %>
+          <p style="color: #666; font-style: italic;">No metrics available</p>
+        <% end %>
+        <small style="display: block; color: #666; margin-top: 0.5rem;">Metrics will show recent data summary</small>
+      </div>
+
+      <div class="actions">
+        <%= form.submit "Update Report" %>
+      </div>
+    <% end %>
+    
+    <div style="margin-top: 1rem; text-align: center;">
+      <%= link_to "Delete Report", soft_delete_report_path(@report), 
+          data: { "turbo-method": :patch, confirm: "Are you sure you want to delete this report? This action cannot be undone." }, 
+          class: "btn", 
+          style: "background-color: var(--error); color: var(--white);" %>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('turbo:load', function() {
+  const intervalSelect = document.querySelector('#report_interval_type');
+  const weeklyConfig = document.querySelector('.weekly-config');
+  const monthlyConfig = document.querySelector('.monthly-config');
+  
+  if (intervalSelect && weeklyConfig && monthlyConfig) {
+    intervalSelect.addEventListener('change', function() {
+      if (this.value === 'weekly') {
+        weeklyConfig.style.display = 'block';
+        monthlyConfig.style.display = 'none';
+      } else if (this.value === 'monthly') {
+        weeklyConfig.style.display = 'none';
+        monthlyConfig.style.display = 'block';
+      } else {
+        weeklyConfig.style.display = 'none';
+        monthlyConfig.style.display = 'none';
+      }
+    });
+  }
+});
+</script>

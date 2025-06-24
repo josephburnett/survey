@@ -1,2 +1,130 @@
-<h1>Reports#show</h1>
-<p>Find me in app/views/reports/show.html.erb</p>
+<div class="container">
+  <%= render 'shared/main_nav' %>
+
+  <div class="index-header">
+    <h1><%= @report.name || "Report ##{@report.id}" %></h1>
+    <div style="display: flex; gap: 0.5rem;">
+      <%= link_to "Edit", edit_report_path(@report), class: "btn btn-primary" %>
+    </div>
+  </div>
+
+  <%= link_to "← Back to Reports", reports_path(namespace: @report.namespace), class: "back-link" %>
+
+  <div class="card">
+    <h3>Report Configuration</h3>
+    <p><strong>Name:</strong> <%= @report.name || "Unnamed Report" %></p>
+    <p><strong>Schedule:</strong> <%= @report.interval_type.capitalize %> at <%= @report.time_of_day&.strftime("%H:%M") || "Not set" %></p>
+    <% if @report.interval_type == 'weekly' && @report.interval_config['days']&.any? %>
+      <p><strong>Days of Week:</strong> <%= @report.interval_config['days'].map(&:capitalize).join(', ') %></p>
+    <% elsif @report.interval_type == 'monthly' && @report.interval_config['day_of_month'] %>
+      <p><strong>Day of Month:</strong> <%= @report.interval_config['day_of_month'].ordinalize %></p>
+    <% end %>
+    <p><strong>Last Sent:</strong> <%= @report.last_sent_at&.strftime("%B %d, %Y at %I:%M %p") || "Never" %></p>
+    <% if @report.next_send_time %>
+      <p><strong>Next Send:</strong> <%= @report.next_send_time.strftime("%B %d, %Y at %I:%M %p") %></p>
+    <% end %>
+    <p><strong>Namespace:</strong> <%= @report.namespace.present? ? @report.namespace : "Root" %></p>
+    <p><strong>Created:</strong> <%= @report.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+  </div>
+
+  <div class="card">
+    <h3>Report Status</h3>
+    <p><strong>Content Status:</strong>
+      <span class="status-badge <%= @report.has_content_to_send? ? 'status-active' : 'status-inactive' %>">
+        <%= @report.has_content_to_send? ? 'Has content to send' : 'No content to send' %>
+      </span>
+    </p>
+    <p><strong>Should Send Now:</strong> 
+      <span class="<%= @report.should_send_now? ? 'status-active' : 'status-inactive' %>">
+        <%= @report.should_send_now? ? 'Yes' : 'No' %>
+      </span>
+    </p>
+    <% if @report.active_alerts.any? %>
+      <p><strong>Active Alerts:</strong> <%= @report.active_alerts.count %> of <%= @report.alerts.count %></p>
+    <% elsif @report.alerts.any? %>
+      <p><strong>Active Alerts:</strong> None (0 of <%= @report.alerts.count %>)</p>
+    <% end %>
+  </div>
+
+  <% if @report.alerts.any? %>
+    <div class="card">
+      <h3>Included Alerts (<%= @report.alerts.count %>)</h3>
+      <p><em>These alerts will be included in the email when they are activated.</em></p>
+      <div class="items-grid">
+        <% @report.alerts.each do |alert| %>
+          <div class="item-card">
+            <div class="item-header">
+              <h4><%= link_to alert.display_title, alert_path(alert) %></h4>
+              <span class="status-badge <%= alert.activated? ? 'status-active' : 'status-inactive' %>">
+                <%= alert.activated? ? 'Active' : 'Inactive' %>
+              </span>
+            </div>
+            <div class="item-details">
+              <p><strong>Threshold:</strong> <%= alert.direction.capitalize %> <%= alert.threshold %></p>
+              <% if alert.metric.series.any? %>
+                <p><strong>Current Value:</strong> <%= alert.metric.series.last&.last&.round(2) || "No data" %></p>
+              <% else %>
+                <p><strong>Current Value:</strong> No data available</p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @report.metrics.any? %>
+    <div class="card">
+      <h3>Included Metrics (<%= @report.metrics.count %>)</h3>
+      <p><em>These metrics will always be included in the email with recent data summaries.</em></p>
+      <div class="items-grid">
+        <% @report.metrics.each do |metric| %>
+          <div class="item-card">
+            <div class="item-header">
+              <h4><%= link_to metric.display_name, metric_path(metric) %></h4>
+            </div>
+            <div class="item-details">
+              <p><strong>Function:</strong> <%= metric.function.capitalize %></p>
+              <p><strong>Resolution:</strong> <%= metric.resolution.capitalize %></p>
+              <p><strong>Width:</strong> <%= metric.width.humanize %></p>
+              <% if metric.series.any? %>
+                <p><strong>Latest Value:</strong> <%= metric.series.last&.last&.round(2) %></p>
+                <p><strong>Data Points:</strong> <%= metric.series.count %></p>
+              <% else %>
+                <p><strong>Data:</strong> No data available</p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @report.alerts.empty? && @report.metrics.empty? %>
+    <div class="card">
+      <h3>No Content Configured</h3>
+      <p>This report doesn't have any alerts or metrics configured. Add some content to make it useful:</p>
+      <div style="margin-top: 1rem;">
+        <%= link_to "Edit Report", edit_report_path(@report), class: "btn btn-primary" %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <h3>Email Preview</h3>
+    <p>When this report is sent, the email will contain:</p>
+    <ul>
+      <% if @report.active_alerts.any? %>
+        <li><strong>Active Alerts section</strong> with <%= @report.active_alerts.count %> alert<%= 's' unless @report.active_alerts.count == 1 %></li>
+      <% elsif @report.alerts.any? %>
+        <li><em>No active alerts (alerts section will be hidden)</em></li>
+      <% end %>
+      <% if @report.metrics.any? %>
+        <li><strong>Metrics section</strong> with summaries of <%= @report.metrics.count %> metric<%= 's' unless @report.metrics.count == 1 %></li>
+      <% end %>
+      <% unless @report.has_content_to_send? %>
+        <li><em>No content - email will not be sent</em></li>
+      <% end %>
+    </ul>
+  </div>
+</div>
