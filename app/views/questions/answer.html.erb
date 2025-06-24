@@ -64,7 +64,7 @@
 
 <% if @question.question_type == 'range' && @question.range_min.present? && @question.range_max.present? %>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('turbo:load', function() {
     const rangeInput = document.querySelector('input[type="range"]');
     const rangeValue = document.getElementById('range-value');
     

@@ -187,7 +187,7 @@
 <% range_questions = @dashboard.all_items.select { |item| item[:type] == 'question' && item[:item].question_type == 'range' && item[:item].range_min.present? && item[:item].range_max.present? } %>
 <% if range_questions.any? %>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('turbo:load', function() {
     <% range_questions.each do |dashboard_item| %>
       <% question = dashboard_item[:item] %>
       const rangeInput<%= question.id %> = document.getElementById('range_<%= question.id %>');
