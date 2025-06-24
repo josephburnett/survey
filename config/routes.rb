@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :reports do
+    member do
+      patch :soft_delete
+    end
+  end
+  
   resources :alerts do
     member do
       patch :soft_delete

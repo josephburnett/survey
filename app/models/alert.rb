@@ -4,6 +4,9 @@ class Alert < ApplicationRecord
   belongs_to :user
   belongs_to :metric
   
+  has_many :report_alerts, dependent: :destroy
+  has_many :reports, through: :report_alerts
+  
   validates :name, presence: true
   validates :threshold, presence: true, numericality: true
   validates :direction, presence: true, inclusion: { in: %w[above below] }

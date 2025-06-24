@@ -7,6 +7,9 @@ class Metric < ApplicationRecord
   has_many :alerts, dependent: :destroy
   
   # Many-to-many relationships
+  has_many :report_metrics, dependent: :destroy
+  has_many :reports, through: :report_metrics
+  
   has_many :metric_questions, dependent: :destroy
   has_many :questions, through: :metric_questions
   

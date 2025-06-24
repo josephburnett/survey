@@ -11,4 +11,5 @@ class User < ApplicationRecord
   has_many :metrics
   has_many :alerts
   has_many :dashboards
+  has_many :reports
 end

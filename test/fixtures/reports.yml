@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  name: MyString
+  time_of_day: 2025-06-24 12:32:47
+  interval_type: MyString
+  interval_config: 
+  last_sent_at: 2025-06-24 12:32:47
+
+two:
+  user: two
+  name: MyString
+  time_of_day: 2025-06-24 12:32:47
+  interval_type: MyString
+  interval_config: 
+  last_sent_at: 2025-06-24 12:32:47

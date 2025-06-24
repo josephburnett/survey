@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_24_173459) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_24_193311) do
   create_table "alerts", force: :cascade do |t|
     t.string "name", null: false
     t.integer "metric_id", null: false
@@ -193,6 +193,38 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_173459) do
     t.integer "section_id", null: false
   end
 
+  create_table "report_alerts", force: :cascade do |t|
+    t.integer "report_id", null: false
+    t.integer "alert_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["alert_id"], name: "index_report_alerts_on_alert_id"
+    t.index ["report_id"], name: "index_report_alerts_on_report_id"
+  end
+
+  create_table "report_metrics", force: :cascade do |t|
+    t.integer "report_id", null: false
+    t.integer "metric_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["metric_id"], name: "index_report_metrics_on_metric_id"
+    t.index ["report_id"], name: "index_report_metrics_on_report_id"
+  end
+
+  create_table "reports", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "name"
+    t.time "time_of_day"
+    t.string "interval_type"
+    t.json "interval_config"
+    t.datetime "last_sent_at"
+    t.boolean "deleted", default: false
+    t.string "namespace"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_reports_on_user_id"
+  end
+
   create_table "responses", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -248,6 +280,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_173459) do
   add_foreign_key "metrics", "metrics", column: "first_metric_id"
   add_foreign_key "metrics", "users"
   add_foreign_key "questions", "users"
+  add_foreign_key "report_alerts", "alerts"
+  add_foreign_key "report_alerts", "reports"
+  add_foreign_key "report_metrics", "metrics"
+  add_foreign_key "report_metrics", "reports"
+  add_foreign_key "reports", "users"
   add_foreign_key "responses", "users"
   add_foreign_key "sections", "users"
 end

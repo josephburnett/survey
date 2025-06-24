@@ -1,0 +1,115 @@
+<div class="container">
+  <%= render 'shared/main_nav' %>
+
+  <h1>New Report</h1>
+
+  <%= link_to "← Back to Reports", reports_path(namespace: params[:namespace]), class: "back-link" %>
+
+  <div class="card">
+    <%= form_with model: @report, local: true do |form| %>
+      <% if @report.errors.any? %>
+        <div class="error-messages">
+          <h4><%= pluralize(@report.errors.count, "error") %> prohibited this report from being saved:</h4>
+          <ul>
+            <% @report.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <%= form.label :name %>
+        <%= form.text_field :name, placeholder: "Enter a name for this report", required: true %>
+      </div>
+      
+      <%= render 'shared/namespace_field', form: form %>
+
+      <div class="field">
+        <%= form.label :time_of_day, "Time of Day" %>
+        <%= form.time_field :time_of_day, required: true %>
+        <small style="display: block; color: #666; margin-top: 0.25rem;">When should this report be sent?</small>
+      </div>
+
+      <div class="field">
+        <%= form.label :interval_type, "Interval Type" %>
+        <%= form.select :interval_type, [['Weekly', 'weekly'], ['Monthly', 'monthly']], { prompt: 'Select interval' }, { required: true, id: 'report_interval_type' } %>
+      </div>
+
+      <div class="field interval-config weekly-config" style="display: none;">
+        <label>Days of the Week</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px;">
+          <% %w[monday tuesday wednesday thursday friday saturday sunday].each do |day| %>
+            <label style="display: flex; align-items: center; gap: 5px;">
+              <%= check_box_tag "interval_config[days][]", day, false, class: "weekly-day" %>
+              <%= day.capitalize %>
+            </label>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="field interval-config monthly-config" style="display: none;">
+        <%= label_tag "interval_config[day_of_month]", "Day of Month" %>
+        <%= number_field_tag "interval_config[day_of_month]", nil, min: 1, max: 31, class: "monthly-day" %>
+        <small style="display: block; color: #666; margin-top: 0.25rem;">Day of the month (1-31)</small>
+      </div>
+
+      <div class="field">
+        <label>Alerts to Include</label>
+        <% if @alerts.any? %>
+          <% @alerts.each do |alert| %>
+            <div class="checkbox-item">
+              <%= check_box_tag "alert_ids[]", alert.id, false %>
+              <%= label_tag "alert_ids_#{alert.id}", alert.display_title %>
+            </div>
+          <% end %>
+        <% else %>
+          <p style="color: #666; font-style: italic;">No alerts available</p>
+        <% end %>
+        <small style="display: block; color: #666; margin-top: 0.5rem;">Alerts will only be included in emails when they are activated</small>
+      </div>
+
+      <div class="field">
+        <label>Metrics to Include</label>
+        <% if @metrics.any? %>
+          <% @metrics.each do |metric| %>
+            <div class="checkbox-item">
+              <%= check_box_tag "metric_ids[]", metric.id, false %>
+              <%= label_tag "metric_ids_#{metric.id}", "#{metric.display_name} - #{metric.function&.capitalize || 'Unknown'} (#{metric.resolution}/#{metric.width})" %>
+            </div>
+          <% end %>
+        <% else %>
+          <p style="color: #666; font-style: italic;">No metrics available</p>
+        <% end %>
+        <small style="display: block; color: #666; margin-top: 0.5rem;">Metrics will show recent data summary</small>
+      </div>
+
+      <div class="actions">
+        <%= form.submit "Create Report" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+document.addEventListener('turbo:load', function() {
+  const intervalSelect = document.querySelector('#report_interval_type');
+  const weeklyConfig = document.querySelector('.weekly-config');
+  const monthlyConfig = document.querySelector('.monthly-config');
+  
+  if (intervalSelect && weeklyConfig && monthlyConfig) {
+    intervalSelect.addEventListener('change', function() {
+      if (this.value === 'weekly') {
+        weeklyConfig.style.display = 'block';
+        monthlyConfig.style.display = 'none';
+      } else if (this.value === 'monthly') {
+        weeklyConfig.style.display = 'none';
+        monthlyConfig.style.display = 'block';
+      } else {
+        weeklyConfig.style.display = 'none';
+        monthlyConfig.style.display = 'none';
+      }
+    });
+  }
+});
+</script>
