@@ -17,9 +17,10 @@ class Metric < ApplicationRecord
   
   belongs_to :first_metric, class_name: 'Metric', optional: true
   
-  validates :resolution, presence: true, inclusion: { in: %w[day week month] }
+  validates :resolution, presence: true, inclusion: { in: %w[five_minute hour day week month] }
   validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly all_time] }
   validates :function, presence: true, inclusion: { in: %w[answer sum average difference count] }
+  validates :wrap, inclusion: { in: %w[none hour day weekly] }, allow_nil: true
   validates :scale, numericality: { greater_than: 0 }, allow_nil: true
   
   attr_accessor :child_metric_ids_temp, :child_metric_ids_changed
@@ -45,7 +46,7 @@ class Metric < ApplicationRecord
   end
   
   def series
-    case function
+    raw_series = case function
     when 'answer'
       generate_answer_series
     when 'sum'
@@ -56,6 +57,13 @@ class Metric < ApplicationRecord
       generate_difference_series
     when 'count'
       generate_count_series
+    end
+    
+    # Apply wrapping if specified
+    if wrap.present? && wrap != 'none'
+      apply_wrap(raw_series)
+    else
+      raw_series
     end
   end
   
@@ -91,6 +99,30 @@ class Metric < ApplicationRecord
   
   private
   
+  def apply_wrap(series)
+    return series if series.empty?
+    
+    # For wrapped data, we want to show all individual data points
+    # but map their timestamps to their position within the wrap period
+    base_date = Date.current
+    
+    series.map do |timestamp, value|
+      wrapped_timestamp = case wrap
+      when 'hour'
+        # Map to position within a reference hour (0-59 minutes)
+        base_date.beginning_of_day + timestamp.min.minutes + timestamp.sec.seconds
+      when 'day'
+        # Map to position within a reference day (0-23:59:59)
+        base_date.beginning_of_day + timestamp.hour.hours + timestamp.min.minutes + timestamp.sec.seconds
+      when 'weekly'
+        # Map to position within a reference week (0-6 days, 0-23:59:59)
+        base_date.beginning_of_week + timestamp.wday.days + timestamp.hour.hours + timestamp.min.minutes + timestamp.sec.seconds
+      end
+      
+      [wrapped_timestamp, value]
+    end.sort_by(&:first)
+  end
+  
   def generate_answer_series
     # Get all answers to the referenced questions
     filtered_answers = Answer.joins(:response, :question)
@@ -99,17 +131,27 @@ class Metric < ApplicationRecord
                              .where(created_at: time_range)
                              .order(:created_at)
     
-    grouped_answers = group_by_resolution(filtered_answers)
-    
-    grouped_answers.map do |time_key, group_answers|
-      # For answer function, sum within buckets
-      values = group_answers.map { |answer| numeric_value(answer) }
-      value = values.sum
+    # If wrapping is enabled, return raw data points
+    if wrap.present? && wrap != 'none'
+      filtered_answers.map do |answer|
+        value = numeric_value(answer)
+        scaled_value = value * (scale || 1.0)
+        [answer.created_at, scaled_value]
+      end
+    else
+      # Use bucketing for non-wrapped data
+      grouped_answers = group_by_resolution(filtered_answers)
       
-      # Apply scale factor for answer metrics
-      scaled_value = value * (scale || 1.0)
-      
-      [time_key, scaled_value]
+      grouped_answers.map do |time_key, group_answers|
+        # For answer function, sum within buckets
+        values = group_answers.map { |answer| numeric_value(answer) }
+        value = values.sum
+        
+        # Apply scale factor for answer metrics
+        scaled_value = value * (scale || 1.0)
+        
+        [time_key, scaled_value]
+      end
     end
   end
   
@@ -208,6 +250,10 @@ class Metric < ApplicationRecord
   def group_by_resolution(answers)
     answers.group_by do |answer|
       case resolution
+      when 'five_minute'
+        answer.created_at.beginning_of_hour + (answer.created_at.min / 5) * 5.minutes
+      when 'hour'
+        answer.created_at.beginning_of_hour
       when 'day'
         answer.created_at.beginning_of_day
       when 'week'
@@ -244,6 +290,10 @@ class Metric < ApplicationRecord
   
   def bucket_start_for_time(time)
     case resolution
+    when 'five_minute'
+      time.beginning_of_hour + (time.min / 5) * 5.minutes
+    when 'hour'
+      time.beginning_of_hour
     when 'day'
       time.beginning_of_day
     when 'week'
@@ -255,6 +305,10 @@ class Metric < ApplicationRecord
   
   def next_bucket_start(current_bucket)
     case resolution
+    when 'five_minute'
+      current_bucket + 5.minutes
+    when 'hour'
+      current_bucket + 1.hour
     when 'day'
       current_bucket + 1.day
     when 'week'

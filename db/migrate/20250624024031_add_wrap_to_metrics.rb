@@ -1,0 +1,5 @@
+class AddWrapToMetrics < ActiveRecord::Migration[8.0]
+  def change
+    add_column :metrics, :wrap, :string
+  end
+end

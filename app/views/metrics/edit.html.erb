@@ -68,12 +68,18 @@
 
   <div class="field">
     <%= form.label :resolution %>
-    <%= form.select :resolution, [['Day', 'day'], ['Week', 'week'], ['Month', 'month']], { prompt: 'Select resolution' }, { required: true } %>
+    <%= form.select :resolution, [['Five Minute', 'five_minute'], ['Hour', 'hour'], ['Day', 'day'], ['Week', 'week'], ['Month', 'month']], { prompt: 'Select resolution' }, { required: true } %>
   </div>
 
   <div class="field">
     <%= form.label :width %>
     <%= form.select :width, [['Daily', 'daily'], ['Weekly', 'weekly'], ['Monthly', 'monthly'], ['90 Days', '90_days'], ['Yearly', 'yearly'], ['All Time', 'all_time']], { prompt: 'Select width' }, { required: true } %>
+  </div>
+
+  <div class="field">
+    <%= form.label :wrap, "Wrap (optional)" %>
+    <%= form.select :wrap, [['None', 'none'], ['Hour', 'hour'], ['Day', 'day'], ['Weekly', 'weekly']], { prompt: 'Select wrap', include_blank: true }, { required: false } %>
+    <small style="display: block; color: #666; margin-top: 0.25rem;">Group data points by time pattern for overlay visualization</small>
   </div>
 
 

@@ -16,6 +16,9 @@
     <p><strong>Type:</strong> <%= @metric.type %></p>
     <p><strong>Resolution:</strong> <%= @metric.resolution %></p>
     <p><strong>Width:</strong> <%= @metric.width %></p>
+    <% if @metric.wrap.present? %>
+      <p><strong>Wrap:</strong> <%= @metric.wrap %></p>
+    <% end %>
     
     <% if @metric.function == 'answer' %>
       <% if @metric.scale.present? && @metric.scale != 1.0 %>
@@ -75,7 +78,18 @@
         <tbody>
           <% @series_data.each do |time, value| %>
             <tr>
-              <td><%= time.strftime("%B %d, %Y") %></td>
+              <td>
+                <% case @metric.resolution %>
+                <% when 'five_minute', 'hour' %>
+                  <%= time.strftime("%B %d, %Y %H:%M") %>
+                <% when 'day' %>
+                  <%= time.strftime("%B %d, %Y") %>
+                <% when 'week' %>
+                  <%= time.strftime("Week of %B %d, %Y") %>
+                <% when 'month' %>
+                  <%= time.strftime("%B %Y") %>
+                <% end %>
+              </td>
               <td><%= value.round(2) %></td>
             </tr>
           <% end %>
@@ -92,34 +106,163 @@
 <script>
   const ctx = document.getElementById('metricChart').getContext('2d');
   
-  const chartData = {
-    labels: <%= raw @series_data.map { |time, _| time.strftime("%m/%d") }.to_json %>,
-    datasets: [{
-      label: <%= raw "#{@metric.type.capitalize} Value".to_json %>,
-      data: <%= raw @series_data.map { |_, value| value.round(2) }.to_json %>,
-      borderColor: 'rgb(75, 192, 192)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      tension: 0.1
-    }]
-  };
-  
-  const chart = new Chart(ctx, {
-    type: 'line',
-    data: chartData,
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
+  <% if @metric.wrap.present? && @metric.wrap != 'none' %>
+    // For wrapped metrics, use time scale with proper formatting
+    <% if @metric.wrap == 'day' %>
+      // For day wrap, create data points with time-based x values
+      const chartData = <%= raw @series_data.map { |time, value| 
+        # Convert to minutes since midnight for proper x-axis positioning
+        minutes_since_midnight = time.hour * 60 + time.min
+        { x: minutes_since_midnight, y: value.round(2) }
+      }.to_json %>;
+      
+      const chart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: <%= raw "#{@metric.type.capitalize} Value".to_json %>,
+            data: chartData,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgb(75, 192, 192)',
+            pointRadius: 3,
+            showLine: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: 'linear',
+              min: 0,
+              max: 1440, // 24 * 60 minutes
+              title: {
+                display: true,
+                text: 'Time of Day'
+              },
+              ticks: {
+                stepSize: 60, // Show hour marks
+                callback: function(value) {
+                  const hours = Math.floor(value / 60);
+                  return hours.toString().padStart(2, '0') + ':00';
+                }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Value'
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: <%= raw "Metric: #{@metric.function.capitalize} Function (Wrapped by #{@metric.wrap})".to_json %>
+            }
+          }
         }
+      });
+    <% else %>
+      // For other wrap types, use category scale
+      const chartData = <%= raw @series_data.map { |time, value| 
+        formatted_time = case @metric.wrap
+                        when 'hour'
+                          time.strftime("%M")
+                        when 'weekly'
+                          time.strftime("%w-%H:%M")
+                        else
+                          time.strftime("%H:%M")
+                        end
+        { x: formatted_time, y: value.round(2) }
+      }.to_json %>;
+      
+      const chart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: <%= raw "#{@metric.type.capitalize} Value".to_json %>,
+            data: chartData,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgb(75, 192, 192)',
+            pointRadius: 3,
+            showLine: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: 'category',
+              title: {
+                display: true,
+                text: <%= raw case @metric.wrap
+                             when 'hour'
+                               'Minutes (0-59)'
+                             when 'weekly'
+                               'Day-Time (0=Sun, 6=Sat)'
+                             else
+                               'Time'
+                             end.to_json %>
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Value'
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: <%= raw "Metric: #{@metric.function.capitalize} Function (Wrapped by #{@metric.wrap})".to_json %>
+            }
+          }
+        }
+      });
+    <% end %>
+  <% else %>
+    // For non-wrapped metrics, use regular time formatting
+    const chart = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: <%= raw "#{@metric.type.capitalize} Value".to_json %>,
+          data: <%= raw @series_data.map { |time, value| { x: time.strftime("%m/%d %H:%M"), y: value.round(2) } }.to_json %>,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgb(75, 192, 192)',
+          pointRadius: 4,
+          showLine: false
+        }]
       },
-      plugins: {
-        title: {
-          display: true,
-          text: <%= raw "Metric: #{@metric.function.capitalize} Function".to_json %>
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            type: 'category',
+            title: {
+              display: true,
+              text: 'Time'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Value'
+            }
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: <%= raw "Metric: #{@metric.function.capitalize} Function".to_json %>
+          }
         }
       }
-    }
-  });
+    });
+  <% end %>
 </script>
 <% end %>
