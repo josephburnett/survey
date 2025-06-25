@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_24_193311) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_25_013444) do
   create_table "alerts", force: :cascade do |t|
     t.string "name", null: false
     t.integer "metric_id", null: false
@@ -253,6 +253,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_24_193311) do
     t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "email"
   end
 
   add_foreign_key "alerts", "metrics"
