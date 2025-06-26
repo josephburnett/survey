@@ -17,9 +17,9 @@ end
 module ActionDispatch
   class IntegrationTest
     def login_as(user)
-      post sessions_path, params: { name: user.name, password: 'password' }
+      post sessions_path, params: { name: user.name, password: "password" }
     end
-    
+
     def login_as_user_one
       login_as(users(:one))
     end

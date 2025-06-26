@@ -4,16 +4,16 @@ Rails.application.routes.draw do
       patch :soft_delete
     end
   end
-  
+
   resources :alerts do
     member do
       patch :soft_delete
     end
   end
-  root 'forms#index'
-  
+  root "forms#index"
+
   resources :forms do
-    resources :sections, only: [:create]
+    resources :sections, only: [ :create ]
     member do
       get :survey
       post :submit_survey
@@ -22,15 +22,15 @@ Rails.application.routes.draw do
       patch :update_draft
     end
   end
-  
+
   resources :sections do
-    resources :questions, only: [:create]
+    resources :questions, only: [ :create ]
     member do
       patch :soft_delete
       patch :add_question
     end
   end
-  
+
   resources :questions do
     member do
       patch :soft_delete
@@ -38,41 +38,41 @@ Rails.application.routes.draw do
       post :submit_answer
     end
   end
-  
+
   resources :answers do
     member do
       patch :soft_delete
     end
   end
-  
+
   resources :responses do
     member do
       patch :soft_delete
     end
   end
-  
+
   resources :metrics do
     member do
       patch :soft_delete
     end
   end
-  
+
   resources :dashboards do
     member do
       patch :soft_delete
       post :answer_question
     end
   end
-  
-  resources :namespaces, only: [:index, :show] do
+
+  resources :namespaces, only: [ :index, :show ] do
     member do
       post :show  # Allow POST to show action for bulk move
     end
   end
-  
-  resources :sessions, only: [:new, :create, :destroy]
-  get '/login', to: 'sessions#new'
-  delete '/logout', to: 'sessions#destroy'
+
+  resources :sessions, only: [ :new, :create, :destroy ]
+  get "/login", to: "sessions#new"
+  delete "/logout", to: "sessions#destroy"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

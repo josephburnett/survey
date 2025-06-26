@@ -7,7 +7,7 @@ class CreateDashboardAlerts < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
-    add_index :dashboard_alerts, [:dashboard_id, :position]
+
+    add_index :dashboard_alerts, [ :dashboard_id, :position ]
   end
 end

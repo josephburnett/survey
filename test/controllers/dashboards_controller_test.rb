@@ -25,12 +25,12 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get create" do
-    post dashboards_path, params: { dashboard: { name: 'Test Dashboard' } }
+    post dashboards_path, params: { dashboard: { name: "Test Dashboard" } }
     assert_response :redirect
   end
 
   test "should get update" do
-    patch dashboard_path(dashboards(:one)), params: { dashboard: { name: 'Updated Dashboard' } }
+    patch dashboard_path(dashboards(:one)), params: { dashboard: { name: "Updated Dashboard" } }
     assert_response :redirect
   end
 

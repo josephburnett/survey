@@ -1,12 +1,12 @@
 class ReportMailer < ApplicationMailer
-  default from: 'routine@home.local'
+  default from: "routine@home.local"
 
   def scheduled_report(report)
     @report = report
     @user = report.user
     @active_alerts = report.active_alerts
     @metrics = report.metrics
-    
+
     # Generate metric summaries
     @metric_summaries = @metrics.map do |metric|
       series_data = metric.series || []
@@ -17,7 +17,7 @@ class ReportMailer < ApplicationMailer
         time_range: series_data.any? ? "#{series_data.first.first.strftime('%b %d')} - #{series_data.last.first.strftime('%b %d')}" : "No data"
       }
     end
-    
+
     mail(
       to: @user.email,
       subject: "Routine Report: #{@report.name}"

@@ -11,8 +11,8 @@ class CreateAlerts < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :alerts, :namespace
-    add_index :alerts, [:user_id, :deleted]
+    add_index :alerts, [ :user_id, :deleted ]
   end
 end

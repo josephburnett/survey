@@ -20,9 +20,9 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get create" do
-    post reports_path, params: { 
-      report: { name: 'Test Report', time_of_day: '09:00', interval_type: 'weekly' },
-      interval_config: { days: ['monday'] }
+    post reports_path, params: {
+      report: { name: "Test Report", time_of_day: "09:00", interval_type: "weekly" },
+      interval_config: { days: [ "monday" ] }
     }
     assert_response :redirect
   end
@@ -33,7 +33,7 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get update" do
-    patch report_path(reports(:one)), params: { report: { name: 'Updated Report', time_of_day: '10:00', interval_type: 'weekly', interval_config: { days: ['tuesday'] } } }
+    patch report_path(reports(:one)), params: { report: { name: "Updated Report", time_of_day: "10:00", interval_type: "weekly", interval_config: { days: [ "tuesday" ] } } }
     assert_response :redirect
   end
 

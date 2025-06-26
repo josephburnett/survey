@@ -7,7 +7,7 @@ class AddNamespaceToEntities < ActiveRecord::Migration[8.0]
     add_column :responses, :namespace, :string, default: '', null: false
     add_column :metrics, :namespace, :string, default: '', null: false
     add_column :dashboards, :namespace, :string, default: '', null: false
-    
+
     add_index :forms, :namespace
     add_index :sections, :namespace
     add_index :questions, :namespace
