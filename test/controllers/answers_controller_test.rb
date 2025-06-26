@@ -1,13 +1,16 @@
 require "test_helper"
 
 class AnswersControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    login_as_user_one
+  end
   test "should get index" do
-    get answers_index_url
+    get answers_path
     assert_response :success
   end
 
   test "should get show" do
-    get answers_show_url
+    get answer_path(answers(:one))
     assert_response :success
   end
 end

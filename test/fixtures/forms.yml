@@ -1,13 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  name: Test Form One
   user: one
   deleted: false
-  form: one
   namespace: ""
 
 two:
+  name: Test Form Two
   user: two
   deleted: false
-  form: two
   namespace: ""

@@ -2,16 +2,22 @@
 
 one:
   user: one
-  source: one
-  source_type: Source
   resolution: MyString
   width: MyString
-  aggregation: MyString
+  function: MyString
+  deleted: false
+  name: Test Metric One
+  scale: 1.0
+  namespace: ""
+  wrap: none
 
 two:
   user: two
-  source: two
-  source_type: Source
   resolution: MyString
   width: MyString
-  aggregation: MyString
+  function: MyString
+  deleted: false
+  name: Test Metric Two
+  scale: 1.0
+  namespace: ""
+  wrap: none

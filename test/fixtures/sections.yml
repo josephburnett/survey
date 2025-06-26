@@ -1,9 +1,15 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  prompt: MyString
+  name: Test Section One
+  prompt: Test prompt one
+  user: one
+  deleted: false
+  namespace: ""
 
 two:
-  name: MyString
-  prompt: MyString
+  name: Test Section Two
+  prompt: Test prompt two
+  user: two
+  deleted: false
+  namespace: ""

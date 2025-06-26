@@ -2,17 +2,17 @@ require "test_helper"
 
 class SessionsControllerTest < ActionDispatch::IntegrationTest
   test "should get new" do
-    get sessions_new_url
+    get new_session_path
     assert_response :success
   end
 
   test "should get create" do
-    get sessions_create_url
-    assert_response :success
+    post sessions_path, params: { name: users(:one).name, password: 'password' }
+    assert_response :redirect
   end
 
   test "should get destroy" do
-    get sessions_destroy_url
-    assert_response :success
+    delete logout_path
+    assert_response :redirect
   end
 end

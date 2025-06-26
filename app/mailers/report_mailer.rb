@@ -9,7 +9,7 @@ class ReportMailer < ApplicationMailer
     
     # Generate metric summaries
     @metric_summaries = @metrics.map do |metric|
-      series_data = metric.series
+      series_data = metric.series || []
       {
         metric: metric,
         latest_value: series_data.last&.last,

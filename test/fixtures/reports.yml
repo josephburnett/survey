@@ -2,16 +2,23 @@
 
 one:
   user: one
-  name: MyString
-  time_of_day: 2025-06-24 12:32:47
-  interval_type: MyString
+  name: Test Report One
+  time_of_day: "09:00"
+  interval_type: weekly
   interval_config: 
+    days: 
+      - monday
   last_sent_at: 2025-06-24 12:32:47
+  deleted: false
+  namespace: ""
 
 two:
   user: two
-  name: MyString
-  time_of_day: 2025-06-24 12:32:47
-  interval_type: MyString
-  interval_config: 
+  name: Test Report Two
+  time_of_day: "17:00"
+  interval_type: monthly
+  interval_config:
+    day_of_month: 1
   last_sent_at: 2025-06-24 12:32:47
+  deleted: false
+  namespace: ""

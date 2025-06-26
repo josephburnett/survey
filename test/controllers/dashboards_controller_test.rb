@@ -1,38 +1,41 @@
 require "test_helper"
 
 class DashboardsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    login_as_user_one
+  end
   test "should get index" do
-    get dashboards_index_url
+    get dashboards_path
     assert_response :success
   end
 
   test "should get show" do
-    get dashboards_show_url
+    get dashboard_path(dashboards(:one))
     assert_response :success
   end
 
   test "should get new" do
-    get dashboards_new_url
+    get new_dashboard_path
     assert_response :success
   end
 
   test "should get edit" do
-    get dashboards_edit_url
+    get edit_dashboard_path(dashboards(:one))
     assert_response :success
   end
 
   test "should get create" do
-    get dashboards_create_url
-    assert_response :success
+    post dashboards_path, params: { dashboard: { name: 'Test Dashboard' } }
+    assert_response :redirect
   end
 
   test "should get update" do
-    get dashboards_update_url
-    assert_response :success
+    patch dashboard_path(dashboards(:one)), params: { dashboard: { name: 'Updated Dashboard' } }
+    assert_response :redirect
   end
 
-  test "should get destroy" do
-    get dashboards_destroy_url
-    assert_response :success
+  test "should get soft_delete" do
+    patch soft_delete_dashboard_path(dashboards(:one))
+    assert_response :redirect
   end
 end

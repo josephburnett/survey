@@ -3,6 +3,9 @@ class Report < ApplicationRecord
   
   belongs_to :user
   
+  # JSON attributes
+  attribute :interval_config, :json
+  
   # Many-to-many relationships
   has_many :report_alerts, dependent: :destroy
   has_many :alerts, through: :report_alerts

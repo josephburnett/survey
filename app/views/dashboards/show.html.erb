@@ -18,7 +18,7 @@
         
         <% case item_type %>
         <% when 'metric' %>
-          <% series_data = item.series %>
+          <% series_data = item.series || [] %>
           <div class="index-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
               <h4><%= link_to item.display_name, metric_path(item) %></h4>
@@ -142,7 +142,7 @@
 </div>
 
 <% # JavaScript for metric charts and range sliders %>
-<% metrics_with_data = @dashboard.all_items.select { |item| item[:type] == 'metric' && item[:item].series.any? } %>
+<% metrics_with_data = @dashboard.all_items.select { |item| item[:type] == 'metric' && item[:item].series&.any? } %>
 <% if metrics_with_data.any? %>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

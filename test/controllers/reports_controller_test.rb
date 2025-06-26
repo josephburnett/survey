@@ -1,38 +1,44 @@
 require "test_helper"
 
 class ReportsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    login_as_user_one
+  end
   test "should get index" do
-    get reports_index_url
+    get reports_path
     assert_response :success
   end
 
   test "should get show" do
-    get reports_show_url
+    get report_path(reports(:one))
     assert_response :success
   end
 
   test "should get new" do
-    get reports_new_url
+    get new_report_path
     assert_response :success
   end
 
   test "should get create" do
-    get reports_create_url
-    assert_response :success
+    post reports_path, params: { 
+      report: { name: 'Test Report', time_of_day: '09:00', interval_type: 'weekly' },
+      interval_config: { days: ['monday'] }
+    }
+    assert_response :redirect
   end
 
   test "should get edit" do
-    get reports_edit_url
+    get edit_report_path(reports(:one))
     assert_response :success
   end
 
   test "should get update" do
-    get reports_update_url
-    assert_response :success
+    patch report_path(reports(:one)), params: { report: { name: 'Updated Report', time_of_day: '10:00', interval_type: 'weekly', interval_config: { days: ['tuesday'] } } }
+    assert_response :redirect
   end
 
   test "should get soft_delete" do
-    get reports_soft_delete_url
-    assert_response :success
+    patch soft_delete_report_path(reports(:one))
+    assert_response :redirect
   end
 end

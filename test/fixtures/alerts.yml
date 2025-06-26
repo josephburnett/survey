@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: Test Alert One
+  metric: one
+  threshold: 10.0
+  direction: above
+  user: one
+  namespace: ""
+  deleted: false
+  delay: 1
+
+two:
+  name: Test Alert Two
+  metric: two
+  threshold: 5.0
+  direction: below
+  user: two
+  namespace: ""
+  deleted: false
+  delay: 2

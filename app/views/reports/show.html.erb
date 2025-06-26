@@ -61,7 +61,7 @@
             </div>
             <div class="item-details">
               <p><strong>Threshold:</strong> <%= alert.direction.capitalize %> <%= alert.threshold %></p>
-              <% if alert.metric.series.any? %>
+              <% if alert.metric.series&.any? %>
                 <p><strong>Current Value:</strong> <%= alert.metric.series.last&.last&.round(2) || "No data" %></p>
               <% else %>
                 <p><strong>Current Value:</strong> No data available</p>
@@ -87,7 +87,7 @@
               <p><strong>Function:</strong> <%= metric.function.capitalize %></p>
               <p><strong>Resolution:</strong> <%= metric.resolution.capitalize %></p>
               <p><strong>Width:</strong> <%= metric.width.humanize %></p>
-              <% if metric.series.any? %>
+              <% if metric.series&.any? %>
                 <p><strong>Latest Value:</strong> <%= metric.series.last&.last&.round(2) %></p>
                 <p><strong>Data Points:</strong> <%= metric.series.count %></p>
               <% else %>
