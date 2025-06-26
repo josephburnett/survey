@@ -10,6 +10,7 @@ class Alert < ApplicationRecord
   validates :name, presence: true
   validates :threshold, presence: true, numericality: true
   validates :direction, presence: true, inclusion: { in: %w[above below] }
+  validates :delay, presence: true, numericality: { greater_than: 0, only_integer: true }
   
   scope :not_deleted, -> { where(deleted: false) }
   
@@ -20,15 +21,24 @@ class Alert < ApplicationRecord
   def activated?
     return false unless metric&.series&.any?
     
-    # Get the most recent value from the metric series
-    most_recent_value = metric.series.last&.last
-    return false if most_recent_value.nil?
+    series_data = metric.series
+    return false if series_data.length < delay
     
+    # Get the last 'delay' number of data points
+    recent_values = series_data.last(delay).map(&:last)
+    return false if recent_values.any?(&:nil?)
+    
+    # Check if ALL recent values are outside the threshold (activation condition)
+    # OR if ANY recent value is inside the threshold (deactivation condition)
     case direction
     when 'above'
-      most_recent_value > threshold
+      # For activation: all values must be above threshold
+      # For deactivation: any value below or equal to threshold deactivates
+      recent_values.all? { |value| value > threshold }
     when 'below'
-      most_recent_value < threshold
+      # For activation: all values must be below threshold  
+      # For deactivation: any value above or equal to threshold deactivates
+      recent_values.all? { |value| value < threshold }
     else
       false
     end

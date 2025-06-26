@@ -41,6 +41,12 @@
         <small class="form-text text-muted">Alert activates when metric value is above or below the threshold.</small>
       </div>
 
+      <div class="field">
+        <%= form.label :delay %>
+        <%= form.number_field :delay, min: 1, required: true %>
+        <small class="form-text text-muted">Number of consecutive data points that must be outside the threshold to activate the alert.</small>
+      </div>
+
       <div class="actions">
         <%= form.submit "Update Alert", class: "btn btn-primary" %>
         <%= link_to "Cancel", @alert, class: "btn btn-secondary" %>

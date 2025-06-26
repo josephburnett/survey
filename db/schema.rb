@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_25_013444) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_26_011733) do
   create_table "alerts", force: :cascade do |t|
     t.string "name", null: false
     t.integer "metric_id", null: false
@@ -21,6 +21,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_013444) do
     t.boolean "deleted", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "delay", default: 1, null: false
     t.index ["metric_id"], name: "index_alerts_on_metric_id"
     t.index ["namespace"], name: "index_alerts_on_namespace"
     t.index ["user_id", "deleted"], name: "index_alerts_on_user_id_and_deleted"
