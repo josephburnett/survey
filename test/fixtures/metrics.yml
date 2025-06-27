@@ -2,9 +2,9 @@
 
 one:
   user: one
-  resolution: MyString
-  width: MyString
-  function: MyString
+  resolution: hour
+  width: daily
+  function: answer
   deleted: false
   name: Test Metric One
   scale: 1.0
@@ -13,9 +13,9 @@ one:
 
 two:
   user: two
-  resolution: MyString
-  width: MyString
-  function: MyString
+  resolution: hour
+  width: daily
+  function: answer
   deleted: false
   name: Test Metric Two
   scale: 1.0

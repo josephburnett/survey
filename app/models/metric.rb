@@ -275,6 +275,8 @@ class Metric < ApplicationRecord
       answer.bool_value ? 1 : 0
     when "string"
       0 # Strings don't have numeric value for aggregation
+    else
+      0 # Default fallback for unknown answer types
     end
   end
 

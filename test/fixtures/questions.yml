@@ -1,7 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
+  name: Test Question One
+  question_type: number
+  user: one
+  deleted: false
 
 two:
-  name: MyString
+  name: Test Question Two
+  question_type: number
+  user: two
+  deleted: false
