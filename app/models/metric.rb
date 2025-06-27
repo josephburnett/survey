@@ -21,7 +21,7 @@ class Metric < ApplicationRecord
   belongs_to :first_metric, class_name: "Metric", optional: true
 
   validates :resolution, presence: true, inclusion: { in: %w[five_minute hour day week month] }
-  validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly all_time] }
+  validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly 7_days 30_days all_time] }
   validates :function, presence: true, inclusion: { in: %w[answer sum average difference count] }
   validates :wrap, inclusion: { in: %w[none hour day weekly] }, allow_nil: true
   validates :scale, numericality: { greater_than: 0 }, allow_nil: true
@@ -62,12 +62,8 @@ class Metric < ApplicationRecord
       generate_count_series
     end
 
-    # Apply wrapping if specified
-    if wrap.present? && wrap != "none"
-      apply_wrap(raw_series)
-    else
-      raw_series
-    end
+    # Wrapping is now handled within each series generation method
+    raw_series
   end
 
   def child_metric_ids=(ids)
@@ -102,28 +98,25 @@ class Metric < ApplicationRecord
 
   private
 
-  def apply_wrap(series)
-    return series if series.empty?
-
-    # For wrapped data, we want to show all individual data points
-    # but map their timestamps to their position within the wrap period
+  def wrap_timestamp(timestamp)
+    # Map timestamp to position within the wrap period
     base_date = Date.current
-
-    series.map do |timestamp, value|
-      wrapped_timestamp = case wrap
-      when "hour"
-        # Map to position within a reference hour (0-59 minutes)
-        base_date.beginning_of_day + timestamp.min.minutes + timestamp.sec.seconds
-      when "day"
-        # Map to position within a reference day (0-23:59:59)
-        base_date.beginning_of_day + timestamp.hour.hours + timestamp.min.minutes + timestamp.sec.seconds
-      when "weekly"
-        # Map to position within a reference week (0-6 days, 0-23:59:59)
-        base_date.beginning_of_week + timestamp.wday.days + timestamp.hour.hours + timestamp.min.minutes + timestamp.sec.seconds
-      end
-
-      [ wrapped_timestamp, value ]
-    end.sort_by(&:first)
+    
+    case wrap
+    when "hour"
+      # Map to position within a reference hour (0-59 minutes)
+      base_date.beginning_of_day + timestamp.min.minutes + timestamp.sec.seconds
+    when "day"
+      # Map to position within a reference day (0-23:59:59)
+      base_date.beginning_of_day + timestamp.hour.hours + timestamp.min.minutes + timestamp.sec.seconds
+    when "weekly"
+      # Map to position within a reference week (0-6 days, 0-23:59:59)
+      # Convert wday (0=Sunday, 1=Monday, ...) to days from Monday start
+      days_from_monday = timestamp.wday == 0 ? 6 : timestamp.wday - 1
+      base_date.beginning_of_week + days_from_monday.days + timestamp.hour.hours + timestamp.min.minutes + timestamp.sec.seconds
+    else
+      timestamp
+    end
   end
 
   def generate_answer_series
@@ -134,27 +127,52 @@ class Metric < ApplicationRecord
                              .where(created_at: time_range)
                              .order(:created_at)
 
-    # If wrapping is enabled, return raw data points
+    # If wrapping is enabled, map timestamps first, then group and average
     if wrap.present? && wrap != "none"
-      filtered_answers.map do |answer|
+      # Get raw data points with wrapped timestamps
+      wrapped_data = filtered_answers.map do |answer|
         value = numeric_value(answer)
         scaled_value = value * (scale || 1.0)
-        [ answer.created_at, scaled_value ]
+        wrapped_timestamp = wrap_timestamp(answer.created_at)
+        [ wrapped_timestamp, scaled_value ]
       end
+      
+      # Group by wrapped timestamp and average overlapping values
+      grouped_wrapped = wrapped_data.group_by(&:first)
+      grouped_wrapped.map do |wrapped_time, time_value_pairs|
+        values = time_value_pairs.map(&:last)
+        averaged_value = values.sum.to_f / values.size
+        [ wrapped_time, averaged_value ]
+      end.sort_by(&:first)
     else
-      # Use bucketing for non-wrapped data
+      # Use bucketing for non-wrapped data with previous value maintenance
       grouped_answers = group_by_resolution(filtered_answers)
-
-      grouped_answers.map do |time_key, group_answers|
-        # For answer function, sum within buckets
-        values = group_answers.map { |answer| numeric_value(answer) }
-        value = values.sum
-
-        # Apply scale factor for answer metrics
-        scaled_value = value * (scale || 1.0)
-
-        [ time_key, scaled_value ]
-      end
+      
+      # Generate all time buckets in the range
+      all_buckets = generate_time_buckets
+      
+      # Fill buckets with data, maintaining previous values for missing data
+      previous_value = nil
+      all_buckets.map do |bucket_time|
+        if grouped_answers.has_key?(bucket_time)
+          # Bucket has data - calculate average
+          group_answers = grouped_answers[bucket_time]
+          values = group_answers.map { |answer| numeric_value(answer) }
+          value = values.sum.to_f / values.size
+          
+          # Apply scale factor for answer metrics
+          scaled_value = value * (scale || 1.0)
+          previous_value = scaled_value  # Update previous value
+          
+          [ bucket_time, scaled_value ]
+        elsif previous_value
+          # No data in this bucket - maintain previous value
+          [ bucket_time, previous_value ]
+        else
+          # No data and no previous value - skip this bucket
+          nil
+        end
+      end.compact
     end
   end
 
@@ -236,15 +254,19 @@ class Metric < ApplicationRecord
   def time_range
     case width
     when "daily"
-      1.day.ago..Time.current
+      Time.current.beginning_of_day..Time.current
     when "weekly"
-      1.week.ago..Time.current
+      Time.current.beginning_of_week(:saturday)..Time.current
     when "monthly"
-      1.month.ago..Time.current
+      Time.current.beginning_of_month..Time.current
     when "90_days"
-      90.days.ago..Time.current
+      90.days.ago.beginning_of_day..Time.current
     when "yearly"
-      1.year.ago..Time.current
+      Time.current.beginning_of_year..Time.current
+    when "7_days"
+      7.days.ago.beginning_of_day..Time.current
+    when "30_days"
+      30.days.ago.beginning_of_day..Time.current
     when "all_time"
       actual_data_range
     end
@@ -302,7 +324,7 @@ class Metric < ApplicationRecord
     when "day"
       time.beginning_of_day
     when "week"
-      time.beginning_of_week(:sunday)
+      time.beginning_of_week
     when "month"
       time.beginning_of_month
     end

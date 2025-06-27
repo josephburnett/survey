@@ -3,13 +3,18 @@ require "test_helper"
 class MetricTest < ActiveSupport::TestCase
   def setup
     @user = users(:one)
-    @question = questions(:one)
-    @question.update!(question_type: "number")
+    
+    # Create a unique question for this test to avoid interference
+    @question = Question.create!(
+      name: "Test Question #{SecureRandom.hex(4)}",
+      question_type: "number",
+      user: @user
+    )
     
     # Create a form and response to associate answers with
     @form = Form.create!(
       user: @user,
-      name: "Test Form"
+      name: "Test Form #{SecureRandom.hex(4)}"
     )
     
     @response = Response.create!(
@@ -142,7 +147,6 @@ class MetricTest < ActiveSupport::TestCase
   # =============================================================================
 
   test "7_days width should return sliding window of exactly 7 days back" do
-    skip "7_days width not yet implemented - this test documents expected behavior"
     
     metric = create_metric(width: "7_days", resolution: "day") 
     
@@ -160,7 +164,6 @@ class MetricTest < ActiveSupport::TestCase
   end
 
   test "30_days width should return sliding window of exactly 30 days back" do
-    skip "30_days width not yet implemented - this test documents expected behavior"
     
     metric = create_metric(width: "30_days", resolution: "day")
     
@@ -184,30 +187,30 @@ class MetricTest < ActiveSupport::TestCase
   test "five_minute resolution buckets data into 5-minute intervals" do
     metric = create_metric(width: "daily", resolution: "five_minute")
     
-    # Create answers within the same 5-minute bucket (14:30 - 14:34:59)
-    base_time = @fixed_time.beginning_of_hour + 30.minutes  # 14:30:00
-    create_answer(value: 10, time: base_time)               # 14:30:00
-    create_answer(value: 20, time: base_time + 2.minutes)   # 14:32:00
-    create_answer(value: 30, time: base_time + 4.minutes)   # 14:34:00
+    # Create answers within the same 5-minute bucket (14:25 - 14:29:59)
+    base_time = @fixed_time.beginning_of_hour + 25.minutes  # 14:25:00
+    create_answer(value: 10, time: base_time)               # 14:25:00
+    create_answer(value: 20, time: base_time + 2.minutes)   # 14:27:00
+    create_answer(value: 30, time: base_time + 4.minutes)   # 14:29:00
     
-    # Create answer in next 5-minute bucket (14:35 - 14:39:59)
-    create_answer(value: 40, time: base_time + 5.minutes)   # 14:35:00
+    # Create answer in current 5-minute bucket (14:30 - 14:34:59) 
+    create_answer(value: 40, time: @fixed_time)             # 14:30:00
     
     series = metric.series
     
     # Should have 2 buckets
     assert_equal 2, series.length, "Should have 2 five-minute buckets"
     
-    # First bucket should contain sum of 10+20+30=60
+    # First bucket should contain average of 10+20+30=20
     first_bucket = series.find { |time, value| time == base_time }
-    assert_not_nil first_bucket, "Should have bucket at 14:30:00"
-    assert_equal 60, first_bucket.last, "First bucket should sum to 60"
+    assert_not_nil first_bucket, "Should have bucket at 14:25:00"
+    assert_equal 20.0, first_bucket.last, "First bucket should average to 20"
     
     # Second bucket should contain 40
-    second_bucket_time = base_time + 5.minutes
+    second_bucket_time = @fixed_time.beginning_of_hour + 30.minutes  # 14:30:00
     second_bucket = series.find { |time, value| time == second_bucket_time }
-    assert_not_nil second_bucket, "Should have bucket at 14:35:00"
-    assert_equal 40, second_bucket.last, "Second bucket should contain 40"
+    assert_not_nil second_bucket, "Should have bucket at 14:30:00"
+    assert_equal 40.0, second_bucket.last, "Second bucket should contain 40"
   end
 
   test "hour resolution buckets data into hourly intervals" do
@@ -216,20 +219,25 @@ class MetricTest < ActiveSupport::TestCase
     # Create answers within the same hour (14:00 - 14:59:59)
     hour_start = @fixed_time.beginning_of_hour  # 14:00:00
     create_answer(value: 10, time: hour_start)
-    create_answer(value: 20, time: hour_start + 30.minutes)
-    create_answer(value: 30, time: hour_start + 59.minutes)
+    create_answer(value: 20, time: hour_start + 15.minutes)
+    create_answer(value: 30, time: hour_start + 25.minutes)
     
-    # Create answer in next hour
-    create_answer(value: 40, time: hour_start + 1.hour)
+    # Create answer in previous hour (within daily range)
+    prev_hour = hour_start - 1.hour  # 13:00:00
+    create_answer(value: 40, time: prev_hour)
     
     series = metric.series
     
-    # Should have 2 buckets
+    # Should have 2 buckets (13:00 and 14:00)
     assert_equal 2, series.length, "Should have 2 hourly buckets"
     
-    # First bucket should contain sum of 10+20+30=60
-    first_bucket = series.find { |time, value| time == hour_start }
-    assert_equal 60, first_bucket.last, "First hour bucket should sum to 60"
+    # 14:00 bucket should contain average of 10+20+30=20
+    current_bucket = series.find { |time, value| time == hour_start }
+    assert_equal 20.0, current_bucket.last, "Current hour bucket should average to 20"
+    
+    # 13:00 bucket should contain 40
+    prev_bucket = series.find { |time, value| time == prev_hour }
+    assert_equal 40.0, prev_bucket.last, "Previous hour bucket should contain 40"
   end
 
   test "day resolution buckets data into daily intervals" do
@@ -239,35 +247,45 @@ class MetricTest < ActiveSupport::TestCase
     day_start = @fixed_time.beginning_of_day
     create_answer(value: 10, time: day_start)
     create_answer(value: 20, time: day_start + 12.hours)
-    create_answer(value: 30, time: day_start + 23.hours)
+    create_answer(value: 30, time: @fixed_time)  # 14:30 same day
     
-    # Create answer in next day
-    create_answer(value: 40, time: day_start + 1.day)
+    # Create answer in previous day (within weekly range)
+    prev_day = day_start - 1.day
+    create_answer(value: 40, time: prev_day)
     
     series = metric.series
     
-    # First bucket should contain sum of 10+20+30=60
-    first_bucket = series.find { |time, value| time == day_start }
-    assert_equal 60, first_bucket.last, "First day bucket should sum to 60"
+    # Current day bucket should contain average of 10+20+30=20
+    current_day_bucket = series.find { |time, value| time == day_start }
+    assert_equal 20.0, current_day_bucket.last, "Current day bucket should average to 20"
+    
+    # Previous day bucket should contain 40
+    prev_day_bucket = series.find { |time, value| time == prev_day }
+    assert_equal 40.0, prev_day_bucket.last, "Previous day bucket should contain 40"
   end
 
   test "week resolution buckets data into weekly intervals" do
     metric = create_metric(width: "monthly", resolution: "week")
     
-    # Create answers within the same week
-    week_start = @fixed_time.beginning_of_week(:sunday)
+    # Create answers within the same week (using default Monday start)
+    week_start = @fixed_time.beginning_of_week
     create_answer(value: 10, time: week_start)
     create_answer(value: 20, time: week_start + 3.days)
-    create_answer(value: 30, time: week_start + 6.days)
+    create_answer(value: 30, time: @fixed_time)  # Current time
     
-    # Create answer in next week
-    create_answer(value: 40, time: week_start + 1.week)
+    # Create answer in previous week (within monthly range)
+    prev_week = week_start - 1.week
+    create_answer(value: 40, time: prev_week)
     
     series = metric.series
     
-    # First bucket should contain sum of 10+20+30=60
-    first_bucket = series.find { |time, value| time == week_start }
-    assert_equal 60, first_bucket.last, "First week bucket should sum to 60"
+    # Current week bucket should contain average of 10+20+30=20
+    current_week_bucket = series.find { |time, value| time == week_start }
+    assert_equal 20.0, current_week_bucket.last, "Current week bucket should average to 20"
+    
+    # Previous week bucket should contain 40
+    prev_week_bucket = series.find { |time, value| time == prev_week }
+    assert_equal 40.0, prev_week_bucket.last, "Previous week bucket should contain 40"
   end
 
   test "month resolution buckets data into monthly intervals" do
@@ -277,16 +295,21 @@ class MetricTest < ActiveSupport::TestCase
     month_start = @fixed_time.beginning_of_month
     create_answer(value: 10, time: month_start)
     create_answer(value: 20, time: month_start + 15.days)
-    create_answer(value: 30, time: month_start + 29.days)
+    create_answer(value: 30, time: @fixed_time)  # Current time
     
-    # Create answer in next month
-    create_answer(value: 40, time: month_start + 1.month)
+    # Create answer in previous month (within yearly range)
+    prev_month = month_start - 1.month
+    create_answer(value: 40, time: prev_month)
     
     series = metric.series
     
-    # First bucket should contain sum of 10+20+30=60
-    first_bucket = series.find { |time, value| time == month_start }
-    assert_equal 60, first_bucket.last, "First month bucket should sum to 60"
+    # Current month bucket should contain average of 10+20+30=20
+    current_month_bucket = series.find { |time, value| time == month_start }
+    assert_equal 20.0, current_month_bucket.last, "Current month bucket should average to 20"
+    
+    # Previous month bucket should contain 40
+    prev_month_bucket = series.find { |time, value| time == prev_month }
+    assert_equal 40.0, prev_month_bucket.last, "Previous month bucket should contain 40"
   end
 
   # =============================================================================
@@ -294,7 +317,6 @@ class MetricTest < ActiveSupport::TestCase
   # =============================================================================
 
   test "no data maintains previous value - buckets with no answers preserve last known value" do
-    skip "Previous value maintenance not yet implemented - this test documents expected behavior"
     
     metric = create_metric(width: "daily", resolution: "hour")
     
@@ -328,7 +350,7 @@ class MetricTest < ActiveSupport::TestCase
     hour_start = @fixed_time.beginning_of_hour
     create_answer(value: 10, time: hour_start)
     create_answer(value: 20, time: hour_start + 15.minutes)
-    create_answer(value: 30, time: hour_start + 45.minutes)
+    create_answer(value: 30, time: hour_start + 25.minutes)  # Changed from 45 to 25 minutes
     
     series = metric.series
     
@@ -341,8 +363,7 @@ class MetricTest < ActiveSupport::TestCase
     expected_average = (10.0 + 20.0 + 30.0) / 3.0
     actual_value = bucket.last
     
-    # Skip assertion until implementation is fixed
-    skip "Multiple answers should be averaged (expected: #{expected_average}, actual: #{actual_value})"
+    # Test that multiple answers are averaged, not summed
     assert_equal expected_average, actual_value, "Multiple answers in same bucket should be averaged"
   end
 
@@ -374,8 +395,7 @@ class MetricTest < ActiveSupport::TestCase
     # and should be averaged: (100 + 200 + 300) / 3 = 200
     ten_am_bucket = series.find { |time, value| time.hour == target_hour }
     
-    # Current implementation may not do this correctly - documenting expected behavior
-    skip "Wrap feature should average overlapped values (expected around 200 for 10 AM bucket)"
+    # Test the wrap feature behavior
     assert_not_nil ten_am_bucket, "Should have bucket for 10:00 AM"
     assert_equal 200, ten_am_bucket.last, "Wrapped 10 AM values should be averaged"
     
@@ -398,7 +418,6 @@ class MetricTest < ActiveSupport::TestCase
     
     # After wrapping by hour, all :15 minute values should overlap
     # Should be averaged: (10 + 20 + 30) / 3 = 20
-    skip "Wrap by hour should average values at same minute position"
     
     fifteen_minute_bucket = series.find { |time, value| time.min == 15 }
     assert_not_nil fifteen_minute_bucket, "Should have bucket for :15 minutes"
@@ -408,31 +427,28 @@ class MetricTest < ActiveSupport::TestCase
   test "wrap by weekly maps data to positions within reference week" do
     metric = create_metric(width: "monthly", resolution: "day", wrap: "weekly")
     
-    # Create answers on the same day of week across different weeks
-    month_start = @fixed_time.beginning_of_month
+    # Create answers on the same day of week (Tuesday) across different weeks within the month
+    # Current time is June 27, 2025 (Friday), so use recent Tuesdays
+    current_tuesday = @fixed_time.beginning_of_week + 1.day  # Tuesday of current week
+    prev_tuesday = current_tuesday - 1.week                  # Previous Tuesday
+    prev2_tuesday = current_tuesday - 2.weeks                # Two weeks ago Tuesday
     
-    # Find all Tuesdays in the month
-    tuesday_1 = month_start.beginning_of_week(:saturday) + 3.days  # First Tuesday
-    tuesday_2 = tuesday_1 + 1.week                                 # Second Tuesday
-    tuesday_3 = tuesday_2 + 1.week                                 # Third Tuesday
+    create_answer(value: 100, time: prev2_tuesday)
+    create_answer(value: 200, time: prev_tuesday) 
+    create_answer(value: 300, time: current_tuesday)
     
-    create_answer(value: 100, time: tuesday_1)
-    create_answer(value: 200, time: tuesday_2) 
-    create_answer(value: 300, time: tuesday_3)
-    
-    # Different day of week
-    wednesday_1 = tuesday_1 + 1.day
-    create_answer(value: 50, time: wednesday_1)
+    # Different day of week (Wednesday)
+    current_wednesday = current_tuesday + 1.day
+    create_answer(value: 50, time: current_wednesday)
     
     series = metric.series
     
     # After wrapping by week, all Tuesday values should overlap and average
-    skip "Wrap by weekly should average values on same day of week"
     
     # Should find bucket for Tuesday position with averaged value (100+200+300)/3 = 200
-    tuesday_bucket = series.find { |time, value| time.wday == tuesday_1.wday }
+    tuesday_bucket = series.find { |time, value| time.wday == current_tuesday.wday }
     assert_not_nil tuesday_bucket, "Should have bucket for Tuesday"
-    assert_equal 200, tuesday_bucket.last, "Wrapped Tuesday values should be averaged"
+    assert_equal 200.0, tuesday_bucket.last, "Wrapped Tuesday values should be averaged"
   end
 
   # =============================================================================
@@ -477,18 +493,20 @@ class MetricTest < ActiveSupport::TestCase
     assert_equal 25.0, series.first.last, "Scale factor should be applied (10 * 2.5 = 25)"
   end
 
+
   test "different answer types are converted to numeric correctly" do
     metric = create_metric(width: "daily", resolution: "hour")
     
-    # Create answers of different types
+    # Create answers of different types (all within time range)
     create_answer(value: 42, time: @fixed_time, answer_type: "number")
-    create_answer(value: true, time: @fixed_time + 1.minute, answer_type: "bool")
-    create_answer(value: false, time: @fixed_time + 2.minutes, answer_type: "bool")
+    create_answer(value: true, time: @fixed_time - 1.minute, answer_type: "bool") 
+    create_answer(value: false, time: @fixed_time - 2.minutes, answer_type: "bool")
     
     series = metric.series
     
-    # Should sum: 42 (number) + 1 (true) + 0 (false) = 43
-    assert_equal 43, series.first.last, "Different answer types should convert to numeric correctly"
+    # Should average: (42 + 1 + 0) / 3 = 14.33... 
+    expected_average = (42.0 + 1.0 + 0.0) / 3.0
+    assert_in_delta expected_average, series.first.last, 0.01, "Different answer types should convert to numeric and be averaged correctly"
   end
 
   private
