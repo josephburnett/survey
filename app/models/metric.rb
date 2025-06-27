@@ -56,14 +56,14 @@ class Metric < ApplicationRecord
       rebucketed_sources = rebucket_sources_to_target_parameters(source_series_list)
       return apply_function_across_sources_with_function(rebucketed_sources, "sum")
     end
-    
+
     # New behavior for sum, average, difference functions
     # 1. Collect all source series (Questions and Metrics)
     source_series_list = collect_all_source_series
-    
+
     # 2. Rebucket all sources to match this metric's parameters
     rebucketed_sources = rebucket_sources_to_target_parameters(source_series_list)
-    
+
     # 3. Apply the function across sources for each bucket
     apply_function_across_sources(rebucketed_sources)
   end
@@ -102,28 +102,28 @@ class Metric < ApplicationRecord
 
   def collect_all_source_series
     source_series = []
-    
+
     # Collect series from Question sources (these are already in target parameters)
     questions.each do |question|
       question_series = generate_question_series(question)
       source_series << { type: :question, series: question_series } unless question_series.empty?
     end
-    
+
     # Collect series from Metric sources (these need rebucketing)
     child_metrics.each do |child_metric|
       metric_series = child_metric.series
       source_series << { type: :metric, series: metric_series } unless metric_series.empty?
     end
-    
+
     source_series
   end
 
   def rebucket_sources_to_target_parameters(source_series_list)
     return [] if source_series_list.empty?
-    
+
     # Generate target time buckets based on this metric's parameters
     target_buckets = generate_time_buckets
-    
+
     # Process each source series based on its type
     source_series_list.map do |source_info|
       if source_info[:type] == :question
@@ -142,10 +142,10 @@ class Metric < ApplicationRecord
 
   def apply_function_across_sources_with_function(rebucketed_sources, target_function)
     return [] if rebucketed_sources.empty?
-    
+
     # Get all unique time buckets from all sources
     all_bucket_times = rebucketed_sources.flat_map { |series| series.map(&:first) }.uniq.sort
-    
+
     # For each time bucket, apply the function across all sources
     all_bucket_times.map do |bucket_time|
       # Get values from each source for this time bucket
@@ -153,10 +153,10 @@ class Metric < ApplicationRecord
         bucket = series.find { |time, value| time == bucket_time }
         bucket ? bucket.last : nil
       end
-      
+
       # Remove nil values (sources that don't have data for this bucket)
       available_values = source_values.compact
-      
+
       # Apply the function
       if available_values.empty?
         # If no sources have data for this bucket, skip it
@@ -171,8 +171,8 @@ class Metric < ApplicationRecord
           # First value minus all subsequent values
           available_values.first - available_values[1..-1].sum
         end
-        
-        [bucket_time, result_value]
+
+        [ bucket_time, result_value ]
       end
     end.compact
   end
@@ -194,20 +194,20 @@ class Metric < ApplicationRecord
         value = numeric_value(answer)
         scaled_value = value * (scale || 1.0)
         wrapped_timestamp = wrap_timestamp(answer.created_at)
-        [wrapped_timestamp, scaled_value]
+        [ wrapped_timestamp, scaled_value ]
       end
-      
+
       grouped_wrapped = wrapped_data.group_by(&:first)
       grouped_wrapped.map do |wrapped_time, time_value_pairs|
         values = time_value_pairs.map(&:last)
         averaged_value = values.sum.to_f / values.size
-        [wrapped_time, averaged_value]
+        [ wrapped_time, averaged_value ]
       end.sort_by(&:first)
     else
       # Normal bucketing logic for single question
       grouped_answers = group_by_resolution(filtered_answers)
       all_buckets = generate_time_buckets
-      
+
       previous_value = nil
       all_buckets.map do |bucket_time|
         if grouped_answers.has_key?(bucket_time)
@@ -216,9 +216,9 @@ class Metric < ApplicationRecord
           value = values.sum.to_f / values.size
           scaled_value = value * (scale || 1.0)
           previous_value = scaled_value
-          [bucket_time, scaled_value]
+          [ bucket_time, scaled_value ]
         elsif previous_value
-          [bucket_time, previous_value]
+          [ bucket_time, previous_value ]
         else
           nil
         end
@@ -228,17 +228,17 @@ class Metric < ApplicationRecord
 
   def rebucket_series_to_target_buckets(source_series, target_buckets)
     return [] if source_series.empty? || target_buckets.empty?
-    
+
     # For each target bucket, find source values that apply to it
     target_buckets.map do |target_bucket_start|
       target_bucket_end = next_bucket_start(target_bucket_start)
-      
+
       applicable_values = []
-      
+
       source_series.each do |source_time, source_value|
         # Simple overlap detection: check if target bucket overlaps with source data
         # This handles both directions: finer->coarser and coarser->finer
-        
+
         # Case 1: Exact time match
         if source_time == target_bucket_start
           applicable_values << source_value
@@ -254,7 +254,7 @@ class Metric < ApplicationRecord
           applicable_values << source_value
         end
       end
-      
+
       if applicable_values.any?
         # Use first value for daily->hourly (same value distributed)
         # Sum values for hourly->daily (combine values)
@@ -265,18 +265,18 @@ class Metric < ApplicationRecord
           # Target is hourly - use the daily value
           total_value = applicable_values.first
         end
-        [target_bucket_start, total_value]
+        [ target_bucket_start, total_value ]
       else
         nil
       end
     end.compact
   end
-  
+
 
   def wrap_timestamp(timestamp)
     # Map timestamp to position within the wrap period
     base_date = Date.current
-    
+
     case wrap
     when "hour"
       # Map to position within a reference hour (0-59 minutes)
@@ -311,7 +311,7 @@ class Metric < ApplicationRecord
         wrapped_timestamp = wrap_timestamp(answer.created_at)
         [ wrapped_timestamp, scaled_value ]
       end
-      
+
       # Group by wrapped timestamp and average overlapping values
       grouped_wrapped = wrapped_data.group_by(&:first)
       grouped_wrapped.map do |wrapped_time, time_value_pairs|
@@ -322,10 +322,10 @@ class Metric < ApplicationRecord
     else
       # Use bucketing for non-wrapped data with previous value maintenance
       grouped_answers = group_by_resolution(filtered_answers)
-      
+
       # Generate all time buckets in the range
       all_buckets = generate_time_buckets
-      
+
       # Fill buckets with data, maintaining previous values for missing data
       previous_value = nil
       all_buckets.map do |bucket_time|
@@ -334,11 +334,11 @@ class Metric < ApplicationRecord
           group_answers = grouped_answers[bucket_time]
           values = group_answers.map { |answer| numeric_value(answer) }
           value = values.sum.to_f / values.size
-          
+
           # Apply scale factor for answer metrics
           scaled_value = value * (scale || 1.0)
           previous_value = scaled_value  # Update previous value
-          
+
           [ bucket_time, scaled_value ]
         elsif previous_value
           # No data in this bucket - maintain previous value
