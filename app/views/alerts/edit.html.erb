@@ -47,6 +47,12 @@
         <small class="form-text text-muted">Number of consecutive data points that must be outside the threshold to activate the alert.</small>
       </div>
 
+      <div class="field">
+        <%= form.label :message, "Alert Message (optional)" %>
+        <%= form.text_area :message, rows: 4, placeholder: "Enter a custom message to remind yourself why this alert is important and what actions to take..." %>
+        <small class="form-text text-muted">This message will be included in alert emails to help you understand the context and suggested actions.</small>
+      </div>
+
       <div class="actions">
         <%= form.submit "Update Alert", class: "btn btn-primary" %>
         <%= link_to "Cancel", @alert, class: "btn btn-secondary" %>

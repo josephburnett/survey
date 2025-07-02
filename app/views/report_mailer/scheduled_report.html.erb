@@ -29,6 +29,12 @@
         <div class="alert-item">
           <strong><%= alert.display_title %></strong><br>
           <span style="color: #f44336;">Alert triggered: <%= alert.metric.series.last&.last&.round(2) %> is <%= alert.direction %> threshold of <%= alert.threshold %></span><br>
+          <% if alert.message.present? %>
+            <div style="margin: 12px 0; padding: 12px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+              <strong>Alert Message:</strong><br>
+              <%= simple_format(alert.message) %>
+            </div>
+          <% end %>
           <a href="<%= metric_url(alert.metric) %>" class="btn" style="margin-top: 8px;">View Metric</a>
         </div>
       <% end %>
