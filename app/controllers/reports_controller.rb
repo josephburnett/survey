@@ -1,8 +1,9 @@
 class ReportsController < ApplicationController
   include NamespaceBrowsing
+  require "timeout"
 
   before_action :require_login
-  before_action :find_report, only: [ :show, :edit, :update, :soft_delete ]
+  before_action :find_report, only: [ :edit, :update, :soft_delete ]
 
   def index
     setup_namespace_browsing(Report, :reports_path)
@@ -10,6 +11,72 @@ class ReportsController < ApplicationController
   end
 
   def show
+    # Preload associations to avoid N+1 queries
+    @report = current_user.reports.not_deleted
+                          .includes(alerts: :metric, metrics: [])
+                          .find(params[:id])
+
+    # Pre-calculate expensive metric summaries to avoid timeouts
+    @metric_summaries = @report.metrics.map do |metric|
+      begin
+        # Set a timeout for expensive series calculation
+        series_data = Timeout.timeout(5) { metric.series }
+        latest_value = series_data&.last&.last
+        data_count = series_data&.count || 0
+
+        {
+          metric: metric,
+          latest_value: latest_value,
+          data_count: data_count,
+          has_data: data_count > 0
+        }
+      rescue Timeout::Error, StandardError => e
+        Rails.logger.warn "Metric #{metric.id} series calculation failed: #{e.message}"
+        {
+          metric: metric,
+          latest_value: nil,
+          data_count: 0,
+          has_data: false,
+          error: true
+        }
+      end
+    end
+
+    # Pre-calculate alert summaries
+    @alert_summaries = @report.alerts.map do |alert|
+      begin
+        # Use existing activated? method which may be more efficient
+        is_activated = alert.activated?
+
+        # Only get latest value if we need it, with timeout
+        latest_value = nil
+        if alert.metric
+          series_data = Timeout.timeout(3) { alert.metric.series }
+          latest_value = series_data&.last&.last
+        end
+
+        {
+          alert: alert,
+          is_activated: is_activated,
+          latest_value: latest_value
+        }
+      rescue Timeout::Error, StandardError => e
+        Rails.logger.warn "Alert #{alert.id} calculation failed: #{e.message}"
+        {
+          alert: alert,
+          is_activated: false,
+          latest_value: nil,
+          error: true
+        }
+      end
+    end
+
+    # Pre-calculate report status to avoid repeated expensive calls
+    @report_status = {
+      has_content: safe_has_content_to_send?,
+      should_send: safe_should_send_now?,
+      active_alerts_count: @alert_summaries.count { |s| s[:is_activated] }
+    }
   end
 
   def new
@@ -128,5 +195,19 @@ class ReportsController < ApplicationController
 
   def report_params
     params.require(:report).permit(:name, :time_of_day, :interval_type, :namespace, interval_config: {})
+  end
+
+  def safe_has_content_to_send?
+    Timeout.timeout(3) { @report.has_content_to_send? }
+  rescue Timeout::Error, StandardError => e
+    Rails.logger.warn "Report #{@report.id} has_content_to_send failed: #{e.message}"
+    false
+  end
+
+  def safe_should_send_now?
+    Timeout.timeout(3) { @report.should_send_now? }
+  rescue Timeout::Error, StandardError => e
+    Rails.logger.warn "Report #{@report.id} should_send_now failed: #{e.message}"
+    false
   end
 end

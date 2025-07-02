@@ -30,17 +30,17 @@
   <div class="card">
     <h3>Report Status</h3>
     <p><strong>Content Status:</strong>
-      <span class="status-badge <%= @report.has_content_to_send? ? 'status-active' : 'status-inactive' %>">
-        <%= @report.has_content_to_send? ? 'Has content to send' : 'No content to send' %>
+      <span class="status-badge <%= @report_status[:has_content] ? 'status-active' : 'status-inactive' %>">
+        <%= @report_status[:has_content] ? 'Has content to send' : 'No content to send' %>
       </span>
     </p>
     <p><strong>Should Send Now:</strong> 
-      <span class="<%= @report.should_send_now? ? 'status-active' : 'status-inactive' %>">
-        <%= @report.should_send_now? ? 'Yes' : 'No' %>
+      <span class="<%= @report_status[:should_send] ? 'status-active' : 'status-inactive' %>">
+        <%= @report_status[:should_send] ? 'Yes' : 'No' %>
       </span>
     </p>
-    <% if @report.active_alerts.any? %>
-      <p><strong>Active Alerts:</strong> <%= @report.active_alerts.count %> of <%= @report.alerts.count %></p>
+    <% if @report_status[:active_alerts_count] > 0 %>
+      <p><strong>Active Alerts:</strong> <%= @report_status[:active_alerts_count] %> of <%= @report.alerts.count %></p>
     <% elsif @report.alerts.any? %>
       <p><strong>Active Alerts:</strong> None (0 of <%= @report.alerts.count %>)</p>
     <% end %>
@@ -51,20 +51,24 @@
       <h3>Included Alerts (<%= @report.alerts.count %>)</h3>
       <p><em>These alerts will be included in the email when they are activated.</em></p>
       <div class="items-grid">
-        <% @report.alerts.each do |alert| %>
+        <% @alert_summaries.each do |summary| %>
+          <% alert = summary[:alert] %>
           <div class="item-card">
             <div class="item-header">
               <h4><%= link_to alert.display_title, alert_path(alert) %></h4>
-              <span class="status-badge <%= alert.activated? ? 'status-active' : 'status-inactive' %>">
-                <%= alert.activated? ? 'Active' : 'Inactive' %>
+              <span class="status-badge <%= summary[:is_activated] ? 'status-active' : 'status-inactive' %>">
+                <%= summary[:is_activated] ? 'Active' : 'Inactive' %>
+                <% if summary[:error] %>
+                  <small style="color: orange;">(Error)</small>
+                <% end %>
               </span>
             </div>
             <div class="item-details">
               <p><strong>Threshold:</strong> <%= alert.direction.capitalize %> <%= alert.threshold %></p>
-              <% if alert.metric.series&.any? %>
-                <p><strong>Current Value:</strong> <%= alert.metric.series.last&.last&.round(2) || "No data" %></p>
+              <% if summary[:latest_value] %>
+                <p><strong>Current Value:</strong> <%= summary[:latest_value].round(2) %></p>
               <% else %>
-                <p><strong>Current Value:</strong> No data available</p>
+                <p><strong>Current Value:</strong> <%= summary[:error] ? "Error loading data" : "No data available" %></p>
               <% end %>
             </div>
           </div>
@@ -78,20 +82,24 @@
       <h3>Included Metrics (<%= @report.metrics.count %>)</h3>
       <p><em>These metrics will always be included in the email with recent data summaries.</em></p>
       <div class="items-grid">
-        <% @report.metrics.each do |metric| %>
+        <% @metric_summaries.each do |summary| %>
+          <% metric = summary[:metric] %>
           <div class="item-card">
             <div class="item-header">
               <h4><%= link_to metric.display_name, metric_path(metric) %></h4>
+              <% if summary[:error] %>
+                <small style="color: orange;">(Error loading data)</small>
+              <% end %>
             </div>
             <div class="item-details">
               <p><strong>Function:</strong> <%= metric.function.capitalize %></p>
               <p><strong>Resolution:</strong> <%= metric.resolution.capitalize %></p>
               <p><strong>Width:</strong> <%= metric.width.humanize %></p>
-              <% if metric.series&.any? %>
-                <p><strong>Latest Value:</strong> <%= metric.series.last&.last&.round(2) %></p>
-                <p><strong>Data Points:</strong> <%= metric.series.count %></p>
+              <% if summary[:has_data] %>
+                <p><strong>Latest Value:</strong> <%= summary[:latest_value]&.round(2) || "N/A" %></p>
+                <p><strong>Data Points:</strong> <%= summary[:data_count] %></p>
               <% else %>
-                <p><strong>Data:</strong> No data available</p>
+                <p><strong>Data:</strong> <%= summary[:error] ? "Error loading data" : "No data available" %></p>
               <% end %>
             </div>
           </div>
@@ -114,15 +122,15 @@
     <h3>Email Preview</h3>
     <p>When this report is sent, the email will contain:</p>
     <ul>
-      <% if @report.active_alerts.any? %>
-        <li><strong>Active Alerts section</strong> with <%= @report.active_alerts.count %> alert<%= 's' unless @report.active_alerts.count == 1 %></li>
+      <% if @report_status[:active_alerts_count] > 0 %>
+        <li><strong>Active Alerts section</strong> with <%= @report_status[:active_alerts_count] %> alert<%= 's' unless @report_status[:active_alerts_count] == 1 %></li>
       <% elsif @report.alerts.any? %>
         <li><em>No active alerts (alerts section will be hidden)</em></li>
       <% end %>
       <% if @report.metrics.any? %>
         <li><strong>Metrics section</strong> with summaries of <%= @report.metrics.count %> metric<%= 's' unless @report.metrics.count == 1 %></li>
       <% end %>
-      <% unless @report.has_content_to_send? %>
+      <% unless @report_status[:has_content] %>
         <li><em>No content - email will not be sent</em></li>
       <% end %>
     </ul>
