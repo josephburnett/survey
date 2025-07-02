@@ -20,6 +20,8 @@ class Response < ApplicationRecord
 
   # Update response timestamp and cascade to all answers
   def update_timestamp!(new_datetime)
+    return unless new_datetime && created_at
+
     transaction do
       time_diff = new_datetime - created_at
 
@@ -28,6 +30,7 @@ class Response < ApplicationRecord
 
       # Update all associated answers with the same time difference
       answers.not_deleted.each do |answer|
+        next unless answer.created_at
         answer.update!(created_at: answer.created_at + time_diff, updated_at: Time.current)
       end
     end

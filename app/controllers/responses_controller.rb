@@ -53,8 +53,13 @@ class ResponsesController < ApplicationController
 
     # Handle datetime update if provided
     if params[:response][:response_datetime].present?
-      new_datetime = Time.zone.parse(params[:response][:response_datetime])
-      @response.update_timestamp!(new_datetime)
+      begin
+        new_datetime = Time.zone.parse(params[:response][:response_datetime])
+        @response.update_timestamp!(new_datetime) if new_datetime
+      rescue ArgumentError => e
+        Rails.logger.warn "Invalid datetime format: #{params[:response][:response_datetime]} - #{e.message}"
+        # Continue with other updates even if datetime parsing fails
+      end
     end
 
     # Handle other response attributes
