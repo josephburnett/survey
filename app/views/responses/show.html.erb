@@ -15,6 +15,8 @@
     <h3>Response Details</h3>
     <p><strong>Form:</strong> <%= link_to @response.form.name, form_path(@response.form) %></p>
     <p><strong>Submitted:</strong> <%= @response.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+    <p><strong>Last Updated:</strong> <%= @response.updated_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+    <p><strong>Number of Answers:</strong> <%= @response.answers.count %></p>
   </div>
   
   <div class="card">
@@ -35,7 +37,7 @@
                 <%= answer.bool_value ? 'Yes' : 'No' %>
               <% end %>
             </p>
-            <small>Type: <%= answer.answer_type %></small>
+            <small>Type: <%= answer.answer_type %> | Answered: <%= answer.created_at.strftime("%m/%d/%Y %I:%M %p") %></small>
           </div>
         <% end %>
       </div>

@@ -25,18 +25,79 @@
 
       <%= render 'shared/namespace_field', form: form %>
 
+      <div class="field">
+        <%= form.label :response_datetime, "Response Date & Time" %>
+        <%= form.datetime_local_field :response_datetime, 
+            value: @response.created_at.strftime("%Y-%m-%dT%H:%M"), 
+            class: "form-control" %>
+        <small class="help-text">Change this to backdate or adjust when this response was submitted. All answers will be moved to match this time.</small>
+      </div>
+
       <div class="actions">
-        <%= form.submit "Update Response" %>
+        <%= form.submit "Update Response Details" %>
       </div>
     <% end %>
+  </div>
 
-    <p><em>Note: To modify the answers in this response, you'll need to edit individual answers or retake the form survey.</em></p>
+  <div class="card">
+    <h2>Edit Your Answers</h2>
     
-    <div style="margin-top: 1rem; text-align: center;">
-      <%= link_to "Delete Response", soft_delete_response_path(@response), 
-          data: { "turbo-method": :patch, confirm: "Are you sure you want to delete this response? This action cannot be undone." }, 
-          class: "btn", 
-          style: "background-color: var(--error); color: var(--white);" %>
-    </div>
+    <% if @response.answers.any? %>
+      <%= form_with model: @response, local: true do |form| %>
+        <% @response.answers.each_with_index do |answer, index| %>
+          <div class="question-block" style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <h4><%= answer.question.name %></h4>
+            <small style="color: #666;">Question type: <%= answer.question.question_type %></small>
+            
+            <%= form.fields_for "answers_attributes[#{index}]", answer do |answer_form| %>
+              <%= answer_form.hidden_field :id %>
+              <%= answer_form.hidden_field :answer_type, value: answer.answer_type %>
+              
+              <div class="field" style="margin-top: 0.5rem;">
+                <% case answer.answer_type %>
+                <% when 'string' %>
+                  <%= answer_form.label :string_value, "Your Answer" %>
+                  <%= answer_form.text_area :string_value, rows: 3, class: "form-control" %>
+                  
+                <% when 'number' %>
+                  <%= answer_form.label :number_value, "Your Answer" %>
+                  <%= answer_form.number_field :number_value, step: 0.01, class: "form-control" %>
+                  
+                <% when 'range' %>
+                  <%= answer_form.label :number_value, "Your Answer (#{answer.question.min_value} - #{answer.question.max_value})" %>
+                  <%= answer_form.number_field :number_value, 
+                      min: answer.question.min_value, 
+                      max: answer.question.max_value, 
+                      class: "form-control" %>
+                  
+                <% when 'bool' %>
+                  <%= answer_form.label :bool_value, "Your Answer" %>
+                  <div>
+                    <%= answer_form.radio_button :bool_value, true, id: "answer_#{answer.id}_true" %>
+                    <%= answer_form.label :bool_value, "Yes", value: true, for: "answer_#{answer.id}_true" %>
+                    
+                    <%= answer_form.radio_button :bool_value, false, id: "answer_#{answer.id}_false" %>
+                    <%= answer_form.label :bool_value, "No", value: false, for: "answer_#{answer.id}_false" %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+        
+        <div class="actions">
+          <%= form.submit "Update All Answers" %>
+        </div>
+      <% end %>
+    <% else %>
+      <p>This response has no answers to edit.</p>
+    <% end %>
+  </div>
+
+  <div class="card" style="text-align: center;">
+    <%= link_to "Delete Response", soft_delete_response_path(@response), 
+        data: { "turbo-method": :patch, confirm: "Are you sure you want to delete this response? This action cannot be undone." }, 
+        class: "btn", 
+        style: "background-color: var(--error); color: var(--white);" %>
   </div>
 </div>
