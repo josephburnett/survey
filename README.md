@@ -63,7 +63,7 @@ Transform raw answer data into meaningful analytics:
   - `five_minute`, `hour`, `day`, `week`, `month`
 
 - **Time Width**:
-  - `daily`, `weekly`, `monthly`, `90_days`, `yearly`, `all_time`
+  - `daily`, `7_days`, `weekly`, `30_days`, `monthly`, `90_days`, `yearly`, `all_time`
 
 - **Wrap Functionality**: Overlay data by time patterns
   - `none`: Standard timeline view
