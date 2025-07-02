@@ -64,10 +64,10 @@
                   <%= answer_form.number_field :number_value, step: 0.01, class: "form-control" %>
                   
                 <% when 'range' %>
-                  <%= answer_form.label :number_value, "Your Answer (#{answer.question.min_value} - #{answer.question.max_value})" %>
+                  <%= answer_form.label :number_value, "Your Answer (#{answer.question.range_min} - #{answer.question.range_max})" %>
                   <%= answer_form.number_field :number_value, 
-                      min: answer.question.min_value, 
-                      max: answer.question.max_value, 
+                      min: answer.question.range_min, 
+                      max: answer.question.range_max, 
                       class: "form-control" %>
                   
                 <% when 'bool' %>
