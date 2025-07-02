@@ -3,7 +3,7 @@ class ReportsController < ApplicationController
   require "timeout"
 
   before_action :require_login
-  before_action :find_report, only: [ :edit, :update, :soft_delete ]
+  before_action :find_report, only: [ :edit, :update, :soft_delete, :send_now ]
 
   def index
     setup_namespace_browsing(Report, :reports_path)
@@ -179,6 +179,25 @@ class ReportsController < ApplicationController
       @alerts = current_user.alerts.not_deleted
       @metrics = current_user.metrics.not_deleted
       render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def send_now
+    begin
+      # Check if report has content to send
+      unless @report.has_content_to_send?
+        redirect_to @report, alert: "Cannot send report: no content to send (no active alerts or metrics)"
+        return
+      end
+
+      # Send the report
+      ReportMailer.scheduled_report(@report).deliver_now
+      @report.update!(last_sent_at: Time.current)
+
+      redirect_to @report, notice: "Report sent successfully! Check your email."
+    rescue => e
+      Rails.logger.error "Failed to send report #{@report.name} (ID: #{@report.id}): #{e.message}"
+      redirect_to @report, alert: "Failed to send report: #{e.message}"
     end
   end
 

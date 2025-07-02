@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   resources :reports do
     member do
       patch :soft_delete
+      post :send_now
     end
   end
 
