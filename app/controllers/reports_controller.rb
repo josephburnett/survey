@@ -198,10 +198,16 @@ class ReportsController < ApplicationController
   end
 
   def safe_has_content_to_send?
-    Timeout.timeout(3) { @report.has_content_to_send? }
-  rescue Timeout::Error, StandardError => e
-    Rails.logger.warn "Report #{@report.id} has_content_to_send failed: #{e.message}"
-    false
+    # Check metrics first (fast operation)
+    return true if @report.metrics.any?
+
+    # Only check active alerts if no metrics (potentially slow operation)
+    begin
+      Timeout.timeout(3) { @report.active_alerts.any? }
+    rescue Timeout::Error, StandardError => e
+      Rails.logger.warn "Report #{@report.id} active_alerts check failed: #{e.message}"
+      false
+    end
   end
 
   def safe_should_send_now?
