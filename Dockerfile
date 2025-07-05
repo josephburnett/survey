@@ -62,7 +62,8 @@ COPY --from=build /rails /rails
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp && \
-    mkdir -p /var/run
+    mkdir -p /var/run && \
+    chmod 755 /var/run
 
 # Make cron-start executable
 RUN chmod +x /rails/bin/cron-start
