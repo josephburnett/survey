@@ -6,9 +6,19 @@ if [ -z "${LD_PRELOAD+x}" ]; then
     export LD_PRELOAD
 fi
 
-# If running the rails server then create or migrate existing database
+# If running the rails server then create or migrate existing database and switch to rails user
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
+  # Switch to rails user for server
+  exec su - rails -c "cd /rails && ${*}"
 fi
 
+# If running cron, stay as root but prepare database first as rails user
+if [ "${1}" == "/rails/bin/cron-start" ] || [ "${1}" == "./bin/cron-start" ]; then
+  su - rails -c "cd /rails && ./bin/rails db:prepare"
+  # Execute cron as root
+  exec "${@}"
+fi
+
+# For other commands, execute as current user
 exec "${@}"

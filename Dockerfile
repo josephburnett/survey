@@ -58,13 +58,17 @@ FROM base
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
+# Create rails user but don't switch to it yet (cron needs root)
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp && \
-    mkdir -p /var/run && \
-    chown rails:rails /var/run
-USER 1000:1000
+    mkdir -p /var/run
+
+# Make cron-start executable
+RUN chmod +x /rails/bin/cron-start
+
+# Only switch to rails user for the default server command
+# Cron container should run as root
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
