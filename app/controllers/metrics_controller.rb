@@ -2,7 +2,7 @@ class MetricsController < ApplicationController
   include NamespaceBrowsing
 
   before_action :require_login
-  before_action :find_metric, only: [ :show, :edit, :update, :soft_delete ]
+  before_action :find_metric, only: [ :show, :edit, :update, :soft_delete, :refresh_cache ]
 
   def index
     setup_namespace_browsing(Metric, :metrics_path)
@@ -49,6 +49,17 @@ class MetricsController < ApplicationController
   def soft_delete
     @metric.soft_delete!
     redirect_to metrics_path, notice: "Metric deleted successfully"
+  end
+
+  def refresh_cache
+    @metric.metric_series_cache&.destroy
+    
+    # Also clear alert caches for alerts using this metric
+    @metric.alerts.each do |alert|
+      alert.alert_status_cache&.destroy
+    end
+    
+    redirect_to @metric, notice: "Cache refreshed successfully"
   end
 
   private

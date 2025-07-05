@@ -1,7 +1,7 @@
 class DashboardsController < ApplicationController
   include NamespaceBrowsing
   before_action :require_login
-  before_action :find_dashboard, only: [ :show, :edit, :update, :soft_delete, :answer_question ]
+  before_action :find_dashboard, only: [ :show, :edit, :update, :soft_delete, :answer_question, :refresh_cache ]
 
   def index
     setup_namespace_browsing(Dashboard, :dashboards_path)
@@ -9,6 +9,7 @@ class DashboardsController < ApplicationController
   end
 
   def show
+    # Pre-calculation strategy allows real-time dashboard functionality
   end
 
   def new
@@ -95,9 +96,30 @@ class DashboardsController < ApplicationController
     redirect_to dashboards_path, notice: "Dashboard deleted successfully"
   end
 
+  def refresh_cache
+    # Clear caches for all metrics and alerts in the dashboard
+    @dashboard.all_items.each do |dashboard_item|
+      case dashboard_item[:type]
+      when 'metric'
+        metric = dashboard_item[:item]
+        metric.metric_series_cache&.destroy
+        
+        # Also clear alert caches for alerts using this metric
+        metric.alerts.each { |alert| alert.alert_status_cache&.destroy }
+      when 'alert'
+        alert = dashboard_item[:item]
+        alert.alert_status_cache&.destroy
+        alert.metric.metric_series_cache&.destroy
+      end
+    end
+    
+    redirect_to @dashboard, notice: "Cache refreshed successfully"
+  end
+
   private
 
   def find_dashboard
+    # Minimal loading for performance - avoid loading associations that trigger expensive calculations
     @dashboard = current_user.dashboards.not_deleted.find(params[:id])
   end
 

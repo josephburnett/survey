@@ -4,6 +4,7 @@
   <div class="index-header">
     <h1><%= @dashboard.name %></h1>
     <div style="display: flex; gap: 0.5rem;">
+      <%= button_to "Refresh Cache", refresh_cache_dashboard_path(@dashboard), method: :post, class: "btn btn-secondary" %>
       <%= link_to "Edit", edit_dashboard_path(@dashboard), class: "btn btn-primary" %>
     </div>
   </div>
@@ -18,7 +19,7 @@
         
         <% case item_type %>
         <% when 'metric' %>
-          <% series_data = item.series || [] %>
+          <% series_data = item.series %>
           <div class="index-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
               <h4><%= link_to item.display_name, metric_path(item) %></h4>
@@ -104,7 +105,7 @@
         <% when 'dashboard' %>
           <div class="index-card">
             <h4><%= link_to item.name, dashboard_path(item) %></h4>
-            <p><%= pluralize(item.all_items.count, 'item') %></p>
+            <p>Linked Dashboard</p>
             <p><strong>Created:</strong> <%= item.created_at.strftime("%B %d, %Y") %></p>
             
             <div style="margin-top: 1rem;">
@@ -123,10 +124,10 @@
             <p><strong>Metric:</strong> <%= link_to item.metric.display_name, metric_path(item.metric) %></p>
             <p><strong>Threshold:</strong> <%= item.direction.capitalize %> <%= item.threshold %></p>
             
-            <% if item.metric.series.any? %>
-              <p><strong>Current Value:</strong> <%= item.metric.series.last&.last || "No data" %></p>
+            <% if item.alert_status_cache&.current_value %>
+              <p><strong>Current Value:</strong> <%= item.alert_status_cache.current_value.round(2) %></p>
             <% else %>
-              <p><strong>Current Value:</strong> No data available</p>
+              <p><strong>Current Value:</strong> No data</p>
             <% end %>
           </div>
         <% end %>
@@ -141,8 +142,7 @@
   <% end %>
 </div>
 
-<% # JavaScript for metric charts and range sliders %>
-<% metrics_with_data = @dashboard.all_items.select { |item| item[:type] == 'metric' && item[:item].series&.any? } %>
+<% metrics_with_data = @dashboard.all_items.select { |item| item[:type] == 'metric' && item[:item].series.any? } %>
 <% if metrics_with_data.any? %>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

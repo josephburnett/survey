@@ -12,6 +12,10 @@ class Answer < ApplicationRecord
 
   scope :not_deleted, -> { where(deleted: false) }
 
+  after_create :invalidate_dependent_caches
+  after_update :invalidate_dependent_caches
+  after_destroy :invalidate_dependent_caches
+
   def soft_delete!
     update!(deleted: true)
   end
@@ -53,5 +57,11 @@ class Answer < ApplicationRecord
 
   def display_name
     "#{display_title} (#{created_at.strftime('%Y-%m-%d')})"
+  end
+
+  private
+
+  def invalidate_dependent_caches
+    MetricDependencyService.invalidate_caches_for(self)
   end
 end

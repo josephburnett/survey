@@ -5,6 +5,7 @@ class Metric < ApplicationRecord
 
   # One-to-many relationships
   has_many :alerts, dependent: :destroy
+  has_one :metric_series_cache, dependent: :destroy
 
   # Many-to-many relationships
   has_many :report_metrics, dependent: :destroy
@@ -38,6 +39,9 @@ class Metric < ApplicationRecord
 
   scope :not_deleted, -> { where(deleted: false) }
 
+  after_update :invalidate_dependent_caches
+  after_destroy :invalidate_dependent_caches
+
   def soft_delete!
     update!(deleted: true)
   end
@@ -54,6 +58,18 @@ class Metric < ApplicationRecord
   end
 
   def series
+    # Use cached data if available and fresh
+    if metric_series_cache&.fresh?
+      return metric_series_cache.series_data || []
+    end
+
+    # Otherwise calculate, cache, and return
+    calculated_series = calculate_series_uncached
+    MetricSeriesCache.update_for_metric(self)
+    calculated_series
+  end
+
+  def calculate_series_uncached
     # Legacy support - answer and count functions now behave like sum
     if function == "answer" || function == "count"
       # Use new sum behavior for legacy functions
@@ -578,5 +594,9 @@ class Metric < ApplicationRecord
         child_metric_metrics.create!(child_metric_id: child_id)
       end
     end
+  end
+
+  def invalidate_dependent_caches
+    MetricDependencyService.invalidate_caches_for(self)
   end
 end

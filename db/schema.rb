@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_05_000001) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_05_000003) do
+  create_table "alert_status_caches", force: :cascade do |t|
+    t.integer "alert_id", null: false
+    t.boolean "is_activated", default: false
+    t.decimal "current_value", precision: 10, scale: 2
+    t.datetime "calculated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["alert_id"], name: "index_alert_status_caches_on_alert_id"
+    t.index ["calculated_at"], name: "index_alert_status_caches_on_calculated_at"
+    t.index ["is_activated"], name: "index_alert_status_caches_on_is_activated"
+  end
+
   create_table "alerts", force: :cascade do |t|
     t.string "name", null: false
     t.integer "metric_id", null: false
@@ -158,6 +170,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_05_000001) do
     t.index ["question_id"], name: "index_metric_questions_on_question_id"
   end
 
+  create_table "metric_series_caches", force: :cascade do |t|
+    t.integer "metric_id", null: false
+    t.json "series_data"
+    t.datetime "calculated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["calculated_at"], name: "index_metric_series_caches_on_calculated_at"
+    t.index ["metric_id"], name: "index_metric_series_caches_on_metric_id"
+  end
+
   create_table "metrics", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "resolution"
@@ -269,6 +291,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_05_000001) do
     t.string "email"
   end
 
+  add_foreign_key "alert_status_caches", "alerts"
   add_foreign_key "alerts", "metrics"
   add_foreign_key "alerts", "users"
   add_foreign_key "answers", "questions"
@@ -291,6 +314,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_05_000001) do
   add_foreign_key "metric_metrics", "metrics", column: "parent_metric_id"
   add_foreign_key "metric_questions", "metrics"
   add_foreign_key "metric_questions", "questions"
+  add_foreign_key "metric_series_caches", "metrics"
   add_foreign_key "metrics", "metrics", column: "first_metric_id"
   add_foreign_key "metrics", "users"
   add_foreign_key "questions", "users"

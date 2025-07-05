@@ -55,6 +55,7 @@ Rails.application.routes.draw do
   resources :metrics do
     member do
       patch :soft_delete
+      post :refresh_cache
     end
   end
 
@@ -62,6 +63,7 @@ Rails.application.routes.draw do
     member do
       patch :soft_delete
       post :answer_question
+      post :refresh_cache
     end
   end
 

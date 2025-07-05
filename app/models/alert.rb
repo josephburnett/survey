@@ -3,6 +3,7 @@ class Alert < ApplicationRecord
 
   belongs_to :user
   belongs_to :metric
+  has_one :alert_status_cache, dependent: :destroy
 
   has_many :report_alerts, dependent: :destroy
   has_many :reports, through: :report_alerts
@@ -19,18 +20,33 @@ class Alert < ApplicationRecord
   end
 
   def activated?
-    return false unless metric&.series&.any?
+    # Use cached data if available and fresh
+    if alert_status_cache&.fresh?
+      return alert_status_cache.is_activated
+    end
+
+    # Otherwise calculate, cache, and return
+    is_activated, _current_value = calculate_status_uncached
+    AlertStatusCache.update_for_alert(self)
+    is_activated
+  end
+
+  def calculate_status_uncached
+    return [false, nil] unless metric&.series&.any?
 
     series_data = metric.series
-    return false if series_data.length < delay
+    return [false, nil] if series_data.length < delay
 
     # Get the last 'delay' number of data points
     recent_values = series_data.last(delay).map(&:last)
-    return false if recent_values.any?(&:nil?)
+    return [false, nil] if recent_values.any?(&:nil?)
+
+    # Get current value (most recent)
+    current_value = recent_values.last
 
     # Check if ALL recent values are outside the threshold (activation condition)
     # OR if ANY recent value is inside the threshold (deactivation condition)
-    case direction
+    is_activated = case direction
     when "above"
       # For activation: all values must be above threshold
       # For deactivation: any value below or equal to threshold deactivates
@@ -42,6 +58,8 @@ class Alert < ApplicationRecord
     else
       false
     end
+
+    [is_activated, current_value]
   end
 
   def status_color

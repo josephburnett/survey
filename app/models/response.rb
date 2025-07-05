@@ -8,6 +8,10 @@ class Response < ApplicationRecord
 
   scope :not_deleted, -> { where(deleted: false) }
 
+  after_create :invalidate_dependent_caches
+  after_update :invalidate_dependent_caches
+  after_destroy :invalidate_dependent_caches
+
   # Cascade datetime changes to all associated answers
   after_update :cascade_datetime_to_answers, if: :saved_change_to_created_at?
 
@@ -47,5 +51,9 @@ class Response < ApplicationRecord
     answers.not_deleted.each do |answer|
       answer.update!(created_at: answer.created_at + time_diff, updated_at: Time.current)
     end
+  end
+
+  def invalidate_dependent_caches
+    MetricDependencyService.invalidate_caches_for(self)
   end
 end
