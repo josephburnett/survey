@@ -170,7 +170,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_02_063301) do
     t.decimal "scale", precision: 10, scale: 4, default: "1.0"
     t.integer "first_metric_id"
     t.string "namespace", default: "", null: false
-    t.string "wrap", default: "none", null: false
+    t.string "wrap"
     t.index ["first_metric_id"], name: "index_metrics_on_first_metric_id"
     t.index ["namespace"], name: "index_metrics_on_namespace"
     t.index ["user_id"], name: "index_metrics_on_user_id"

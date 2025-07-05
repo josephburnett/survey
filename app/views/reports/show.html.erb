@@ -137,7 +137,7 @@
     
     <div style="margin-top: 1.5rem; text-align: center;">
       <% if @report_status[:has_content] %>
-        <%= link_to "Send Report Now", report_send_now_path(@report), 
+        <%= link_to "Send Report Now", send_now_report_path(@report), 
             method: :post,
             data: { confirm: "Are you sure you want to send this report now? It will be delivered to #{@report.user.email}." },
             class: "btn btn-primary",
