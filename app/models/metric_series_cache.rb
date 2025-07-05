@@ -27,7 +27,20 @@ class MetricSeriesCache < ApplicationRecord
     return [] unless raw_data
 
     raw_data.map do |time_str, value|
-      [ Time.parse(time_str), value ]
+      # Ensure value is numeric (handle string values from JSON)
+      numeric_value = case value
+      when String
+        begin
+          Float(value)
+        rescue ArgumentError
+          0.0  # Default to 0 for invalid numeric strings
+        end
+      when Numeric
+        value
+      else
+        0.0  # Default to 0 for other types
+      end
+      [ Time.parse(time_str), numeric_value ]
     end
   end
 end
