@@ -4,7 +4,6 @@
   <% if logged_in? %>
     <div class="index-header">
       <h1>Answers</h1>
-      <%= link_to "New Answer", new_answer_path(namespace: @current_namespace), class: "btn btn-primary" %>
     </div>
 
     <!-- Breadcrumb Navigation -->
@@ -55,6 +54,9 @@
             </div>
           <% end %>
         </div>
+        
+        <!-- Pagination -->
+        <%= paginate @items %>
       </div>
     <% else %>
       <div class="empty-state">

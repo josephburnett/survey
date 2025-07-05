@@ -5,7 +5,11 @@ class AnswersController < ApplicationController
 
   def index
     setup_namespace_browsing(Answer, :answers_path)
-    @items = Answer.items_in_namespace(current_user, @current_namespace).not_deleted
+    @items = Answer.items_in_namespace(current_user, @current_namespace)
+                   .not_deleted
+                   .order(created_at: :desc)
+                   .page(params[:page])
+                   .per(25)
   end
 
   def show

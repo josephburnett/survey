@@ -21,6 +21,9 @@
           </div>
         <% end %>
       </div>
+      
+      <!-- Pagination -->
+      <%= paginate @responses %>
     <% else %>
       <div class="card text-center">
         <p>No responses have been submitted for this form yet.</p>
@@ -29,7 +32,6 @@
   <% elsif logged_in? %>
     <div class="index-header">
       <h1>Responses</h1>
-      <%= link_to "New Response", new_response_path(namespace: @current_namespace), class: "btn btn-primary" %>
     </div>
 
     <!-- Breadcrumb Navigation -->
@@ -81,6 +83,9 @@
             </div>
           <% end %>
         </div>
+        
+        <!-- Pagination -->
+        <%= paginate @items %>
       </div>
     <% else %>
       <div class="empty-state">

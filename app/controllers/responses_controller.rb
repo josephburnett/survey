@@ -6,13 +6,21 @@ class ResponsesController < ApplicationController
   def index
     if params[:form_id]
       @form = current_user.forms.find(params[:form_id])
-      @responses = @form.responses.not_deleted.where(user: current_user)
+      @responses = @form.responses.not_deleted
+                        .where(user: current_user)
+                        .order(created_at: :desc)
+                        .page(params[:page])
+                        .per(25)
       @folders = []
       @items = []
       @breadcrumbs = []
     else
       setup_namespace_browsing(Response, :responses_path)
-      @items = Response.items_in_namespace(current_user, @current_namespace).not_deleted
+      @items = Response.items_in_namespace(current_user, @current_namespace)
+                      .not_deleted
+                      .order(created_at: :desc)
+                      .page(params[:page])
+                      .per(25)
     end
   end
 
