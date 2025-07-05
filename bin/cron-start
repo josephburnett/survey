@@ -26,7 +26,5 @@ touch /rails/log/cron.log
 chown rails:rails /rails/log/cron.log
 
 echo "Starting cron daemon..."
-
-# Start cron daemon (running as root)
-# Use -f for foreground mode
+# Start cron daemon in foreground mode
 exec cron -f
