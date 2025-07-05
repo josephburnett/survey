@@ -1,0 +1,122 @@
+<div class="container">
+  <%= render 'shared/main_nav' %>
+
+  <div class="index-header">
+    <h1>Settings</h1>
+  </div>
+
+  <%= form_with model: @user_setting, url: settings_path, method: :patch, local: true do |form| %>
+    <% if @user_setting.errors.any? %>
+      <div class="alert alert-danger">
+        <ul>
+          <% @user_setting.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="card">
+      <h2>Backup Settings</h2>
+      <p style="color: #666; margin-bottom: 1.5rem;">
+        Configure automated backups of your personal data. Backups are encrypted and sent to your specified email address daily at 3:00 AM.
+      </p>
+
+      <div class="field">
+        <%= form.label :backup_enabled do %>
+          <%= form.check_box :backup_enabled %>
+          Enable automated backups
+        <% end %>
+        <small style="display: block; color: #666; margin-top: 0.25rem;">
+          When enabled, your data will be backed up daily and sent to your email
+        </small>
+      </div>
+
+      <div id="backup-options" style="<%= 'display: none;' unless @user_setting.backup_enabled? %>">
+        <div class="field">
+          <%= form.label :backup_method, "Backup Method" %>
+          <%= form.select :backup_method, [['Email', 'email']], { prompt: 'Select backup method' }, { required: true } %>
+          <small style="display: block; color: #666; margin-top: 0.25rem;">
+            Currently only email delivery is supported
+          </small>
+        </div>
+
+        <div class="field">
+          <%= form.label :backup_email, "Backup Email Address" %>
+          <%= form.email_field :backup_email, required: true, placeholder: "Enter email address for backups" %>
+          <small style="display: block; color: #666; margin-top: 0.25rem;">
+            Encrypted backup files will be sent to this email address
+          </small>
+        </div>
+
+        <% if @user_setting.encryption_key.present? %>
+          <div class="field">
+            <label>Encryption Key</label>
+            <div style="position: relative;">
+              <input type="password" id="encryption-key" value="<%= @user_setting.encryption_key %>" readonly style="width: 100%; font-family: monospace;">
+              <button type="button" id="toggle-key" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">👁️</button>
+            </div>
+            <small style="display: block; color: #666; margin-top: 0.25rem;">
+              <strong>Important:</strong> Copy this encryption key and store it securely in a password manager like 1Password. 
+              You will need this key to decrypt your backup files. If you lose this key, your backups cannot be decrypted.
+            </small>
+            <button type="button" id="copy-key" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
+              Copy Encryption Key
+            </button>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="field" style="margin-top: 2rem;">
+        <%= form.submit "Save Settings", class: "btn btn-primary" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function() {
+    const backupEnabled = document.querySelector('#user_setting_backup_enabled');
+    const backupOptions = document.getElementById('backup-options');
+    const toggleKey = document.getElementById('toggle-key');
+    const encryptionKey = document.getElementById('encryption-key');
+    const copyKey = document.getElementById('copy-key');
+
+    // Show/hide backup options based on checkbox
+    if (backupEnabled) {
+      backupEnabled.addEventListener('change', function() {
+        backupOptions.style.display = this.checked ? 'block' : 'none';
+      });
+    }
+
+    // Toggle encryption key visibility
+    if (toggleKey && encryptionKey) {
+      toggleKey.addEventListener('click', function() {
+        if (encryptionKey.type === 'password') {
+          encryptionKey.type = 'text';
+          toggleKey.textContent = '🙈';
+        } else {
+          encryptionKey.type = 'password';
+          toggleKey.textContent = '👁️';
+        }
+      });
+    }
+
+    // Copy encryption key to clipboard
+    if (copyKey && encryptionKey) {
+      copyKey.addEventListener('click', function() {
+        const tempInput = document.createElement('input');
+        tempInput.value = encryptionKey.value;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        
+        copyKey.textContent = 'Copied!';
+        setTimeout(() => {
+          copyKey.textContent = 'Copy Encryption Key';
+        }, 2000);
+      });
+    }
+  });
+</script>

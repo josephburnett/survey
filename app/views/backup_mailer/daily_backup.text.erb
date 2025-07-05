@@ -1,0 +1,35 @@
+Daily Routine Backup - <%= @generated_at.strftime('%B %d, %Y') %>
+
+Generated: <%= @generated_at.strftime('%B %d, %Y at %I:%M %p') %>
+For: <%= @user.name %> (<%= @user.email %>)
+
+Hello <%= @user.name %>,
+
+Your daily encrypted backup has been generated and is attached to this email.
+
+⚠️ IMPORTANT SECURITY INFORMATION ⚠️
+This backup is encrypted and requires your encryption key to decrypt.
+Make sure you have safely stored your encryption key in a secure password manager like 1Password. Without this key, the backup cannot be decrypted.
+
+You can find your encryption key in your Settings page if you need to retrieve it.
+
+BACKUP CONTENTS:
+This backup includes all of your personal data from Routine Tracker:
+- User profile information
+- Forms, sections, and questions  
+- Responses and answers
+- Metrics and alerts
+- Reports and dashboards
+- All associated settings and configurations
+
+HOW TO USE THIS BACKUP:
+If you ever need to restore your data:
+1. Download the attached encrypted backup file
+2. Use your encryption key to decrypt the file
+3. The decrypted file will contain all your data in JSON format
+
+This backup was automatically generated as part of your backup settings. You can modify these settings anytime by visiting your Settings page.
+
+---
+This is an automated message from Routine Tracker running on your personal Raspberry Pi at home.local
+If you no longer wish to receive these backups, you can disable them in your Settings.

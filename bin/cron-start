@@ -11,7 +11,10 @@ cat > /tmp/routine-crontab << 'EOF'
 # Routine Tracker Cron Jobs
 RAILS_ENV=production
 BUNDLE_PATH=/usr/local/bundle
+# Send reports every 15 minutes
 */15 * * * * cd /rails && /usr/local/bundle/bin/bundle exec rake reports:send_due >> /rails/log/cron.log 2>&1
+# Send daily backups at 3:00 AM
+0 3 * * * cd /rails && /usr/local/bundle/bin/bundle exec rake backups:send_daily >> /rails/log/cron.log 2>&1
 
 EOF
 

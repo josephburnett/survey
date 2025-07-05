@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+      .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+      .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Daily Routine Backup</h1>
+        <p><strong>Generated:</strong> <%= @generated_at.strftime('%B %d, %Y at %I:%M %p') %></p>
+        <p><strong>For:</strong> <%= @user.name %> (<%= @user.email %>)</p>
+      </div>
+
+      <p>Hello <%= @user.name %>,</p>
+
+      <p>Your daily encrypted backup has been generated and is attached to this email.</p>
+
+      <div class="warning">
+        <h3>⚠️ Important Security Information</h3>
+        <p><strong>This backup is encrypted and requires your encryption key to decrypt.</strong></p>
+        <p>Make sure you have safely stored your encryption key in a secure password manager like 1Password. Without this key, the backup cannot be decrypted.</p>
+        <p>You can find your encryption key in your Settings page if you need to retrieve it.</p>
+      </div>
+
+      <h3>Backup Contents</h3>
+      <p>This backup includes all of your personal data from Routine Tracker:</p>
+      <ul>
+        <li>User profile information</li>
+        <li>Forms, sections, and questions</li>
+        <li>Responses and answers</li>
+        <li>Metrics and alerts</li>
+        <li>Reports and dashboards</li>
+        <li>All associated settings and configurations</li>
+      </ul>
+
+      <h3>How to Use This Backup</h3>
+      <p>If you ever need to restore your data:</p>
+      <ol>
+        <li>Download the attached encrypted backup file</li>
+        <li>Use your encryption key to decrypt the file</li>
+        <li>The decrypted file will contain all your data in JSON format</li>
+      </ol>
+
+      <p>This backup was automatically generated as part of your backup settings. You can modify these settings anytime by visiting your Settings page.</p>
+
+      <div class="footer">
+        <p>This is an automated message from Routine Tracker running on your personal Raspberry Pi at home.local</p>
+        <p>If you no longer wish to receive these backups, you can disable them in your Settings.</p>
+      </div>
+    </div>
+  </body>
+</html>
