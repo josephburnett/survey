@@ -10,7 +10,7 @@ class MetricsController < ApplicationController
   end
 
   def show
-    @series_data = @metric.series
+    @series_data = limit_series_data(@metric.series)
   end
 
   def new
@@ -54,7 +54,30 @@ class MetricsController < ApplicationController
   private
 
   def find_metric
-    @metric = current_user.metrics.not_deleted.find(params[:id])
+    @metric = current_user.metrics.not_deleted.includes(:questions, :child_metrics, :parent_metrics).find(params[:id])
+  end
+
+  def limit_series_data(series)
+    case @metric.width
+    when "daily"
+      series.last((1.2 * 1).ceil)  # 1 day * 1.2 = ~2 points
+    when "weekly"
+      series.last((1.2 * 7).ceil)  # 7 days * 1.2 = ~9 points
+    when "monthly"
+      series.last((1.2 * 30).ceil)  # 30 days * 1.2 = ~36 points
+    when "7_days"
+      series.last((1.2 * 7).ceil)  # 7 days * 1.2 = ~9 points
+    when "30_days"
+      series.last((1.2 * 30).ceil)  # 30 days * 1.2 = ~36 points
+    when "90_days"
+      series.last((1.2 * 90).ceil)  # 90 days * 1.2 = ~108 points
+    when "yearly"
+      series.last((1.2 * 365).ceil)  # 365 days * 1.2 = ~438 points
+    when "all_time"
+      series  # Load everything for all_time, even if it takes a long time
+    else
+      series.last(100)  # Fallback for unknown width values
+    end
   end
 
   def metric_params
