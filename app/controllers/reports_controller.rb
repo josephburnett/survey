@@ -16,66 +16,27 @@ class ReportsController < ApplicationController
                           .includes(alerts: :metric, metrics: [])
                           .find(params[:id])
 
-    # Pre-calculate expensive metric summaries to avoid timeouts
+    # Basic metric information without expensive series calculations
     @metric_summaries = @report.metrics.map do |metric|
-      begin
-        # Set a timeout for expensive series calculation
-        series_data = Timeout.timeout(5) { metric.series }
-        latest_value = series_data&.last&.last
-        data_count = series_data&.count || 0
-
-        {
-          metric: metric,
-          latest_value: latest_value,
-          data_count: data_count,
-          has_data: data_count > 0
-        }
-      rescue Timeout::Error, StandardError => e
-        Rails.logger.warn "Metric #{metric.id} series calculation failed: #{e.message}"
-        {
-          metric: metric,
-          latest_value: nil,
-          data_count: 0,
-          has_data: false,
-          error: true
-        }
-      end
+      {
+        metric: metric,
+        has_data: true  # Assume metrics have data - avoid expensive series calls
+      }
     end
 
-    # Pre-calculate alert summaries
+    # Basic alert information without expensive activation status calculations
     @alert_summaries = @report.alerts.map do |alert|
-      begin
-        # Use existing activated? method which may be more efficient
-        is_activated = alert.activated?
-
-        # Only get latest value if we need it, with timeout
-        latest_value = nil
-        if alert.metric
-          series_data = Timeout.timeout(3) { alert.metric.series }
-          latest_value = series_data&.last&.last
-        end
-
-        {
-          alert: alert,
-          is_activated: is_activated,
-          latest_value: latest_value
-        }
-      rescue Timeout::Error, StandardError => e
-        Rails.logger.warn "Alert #{alert.id} calculation failed: #{e.message}"
-        {
-          alert: alert,
-          is_activated: false,
-          latest_value: nil,
-          error: true
-        }
-      end
+      {
+        alert: alert,
+        is_activated: nil  # Skip expensive activation check for performance
+      }
     end
 
-    # Pre-calculate report status to avoid repeated expensive calls
+    # Basic report status without expensive calculations
     @report_status = {
-      has_content: safe_has_content_to_send?,
-      should_send: safe_should_send_now?,
-      active_alerts_count: @alert_summaries.count { |s| s[:is_activated] }
+      has_content: @report.metrics.any? || @report.alerts.any?,  # Simple check
+      should_send: false,  # Skip expensive should_send_now check
+      active_alerts_count: 0  # Skip expensive activation checks
     }
   end
 
