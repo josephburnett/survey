@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_02_063301) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_05_000001) do
   create_table "alerts", force: :cascade do |t|
     t.string "name", null: false
     t.integer "metric_id", null: false
@@ -250,6 +250,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_02_063301) do
     t.index ["user_id"], name: "index_sections_on_user_id"
   end
 
+  create_table "user_settings", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.boolean "backup_enabled", default: false
+    t.string "backup_method"
+    t.string "backup_email"
+    t.text "encryption_key"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_settings_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "password_digest"
@@ -290,4 +301,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_02_063301) do
   add_foreign_key "reports", "users"
   add_foreign_key "responses", "users"
   add_foreign_key "sections", "users"
+  add_foreign_key "user_settings", "users"
 end

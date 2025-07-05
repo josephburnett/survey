@@ -10,6 +10,6 @@ class CreateUserSettings < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :user_settings, :user_id, unique: true
+    add_index :user_settings, :user_id, unique: true unless index_exists?(:user_settings, :user_id)
   end
 end
