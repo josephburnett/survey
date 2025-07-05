@@ -54,7 +54,7 @@ class MetricsController < ApplicationController
   private
 
   def find_metric
-    @metric = current_user.metrics.not_deleted.includes(:questions, :child_metrics, :parent_metrics).find(params[:id])
+    @metric = current_user.metrics.not_deleted.includes(:questions, :child_metric_metrics, :parent_metrics, :first_metric).find(params[:id])
   end
 
   def limit_series_data(series)
