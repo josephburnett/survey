@@ -9,6 +9,8 @@ fi
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
+  # Clear cache on boot to avoid serialization issues
+  ./bin/rails runner "MetricSeriesCache.delete_all; AlertStatusCache.delete_all; puts 'Cache cleared on boot'"
 fi
 
 # If running cron as root, prepare database first as rails user, then start cron as root
