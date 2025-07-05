@@ -43,7 +43,8 @@
         <p><strong>Referenced Metrics:</strong></p>
       <% end %>
       <ul>
-        <% @metric.child_metrics.each do |child_metric| %>
+        <% child_metrics_to_show = @metric.function == 'difference' && @metric.first_metric.present? ? @metric.child_metrics.where.not(id: @metric.first_metric.id) : @metric.child_metrics %>
+        <% child_metrics_to_show.each do |child_metric| %>
           <li><%= link_to "#{child_metric.display_name} - #{child_metric.function&.capitalize || 'Unknown'} (#{child_metric.resolution}/#{child_metric.width})", metric_path(child_metric) %></li>
         <% end %>
       </ul>
