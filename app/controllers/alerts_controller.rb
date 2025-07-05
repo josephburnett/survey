@@ -10,6 +10,17 @@ class AlertsController < ApplicationController
   end
 
   def show
+    # Cache the expensive series calculation to avoid multiple calls
+    begin
+      @metric_series = @alert.metric.series.last(50)  # Limit to last 50 points for performance
+      @has_series_data = @metric_series.any?
+      @latest_value = @metric_series.last&.last
+    rescue => e
+      Rails.logger.warn "Alert #{@alert.id} series calculation failed: #{e.message}"
+      @metric_series = []
+      @has_series_data = false
+      @latest_value = nil
+    end
   end
 
   def new
@@ -49,7 +60,7 @@ class AlertsController < ApplicationController
   private
 
   def find_alert
-    @alert = current_user.alerts.not_deleted.find(params[:id])
+    @alert = current_user.alerts.not_deleted.includes(metric: [:questions, :child_metrics]).find(params[:id])
   end
 
   def alert_params
