@@ -26,10 +26,7 @@ touch /rails/log/cron.log
 chown rails:rails /rails/log/cron.log
 
 echo "Starting cron daemon..."
-# Create a custom run directory for cron
-mkdir -p /rails/run
-chmod 755 /rails/run
 
-# Start cron with custom configuration
-# Use -f for foreground and specify alternate run directory
-exec cron -f -P
+# Start cron daemon (running as root)
+# Use -f for foreground mode
+exec cron -f
