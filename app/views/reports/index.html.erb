@@ -1,11 +1,10 @@
 <div class="container">
   <%= render 'shared/main_nav' %>
 
-  <% if logged_in? %>
-    <div class="index-header">
-      <h1>Reports</h1>
-      <%= link_to "New Report", new_report_path(namespace: @current_namespace), class: "btn btn-primary" %>
-    </div>
+  <div class="index-header">
+    <h1>Reports</h1>
+    <%= link_to "New Report", new_report_path(namespace: @current_namespace), class: "btn btn-primary" %>
+  </div>
 
     <!-- Breadcrumb Navigation -->
     <% if @breadcrumbs.length > 1 %>
@@ -28,61 +27,40 @@
         <div class="folder-grid">
           <% @folders.each do |folder| %>
             <% folder_namespace = @current_namespace.present? ? "#{@current_namespace}.#{folder}" : folder %>
-            <%= link_to reports_path(namespace: folder_namespace), class: "folder-card" do %>
-              <div class="folder-icon">📁</div>
-              <div class="folder-name"><%= folder %></div>
-            <% end %>
-          <% end %>
-        </div>
-      </div>
-    <% end %>
-
-    <!-- Reports List -->
-    <% if @items.any? %>
-      <div class="items-section">
-        <h3>Reports in this namespace</h3>
-        <div class="items-grid">
-          <% @items.each do |report| %>
-            <div class="item-card">
-              <div class="item-header">
-                <h4><%= link_to report.name || "Report ##{report.id}", report_path(report) %></h4>
-                <div class="item-actions">
-                  <%= link_to "Edit", edit_report_path(report), class: "btn btn-secondary btn-small" %>
-                </div>
-              </div>
-              <div class="item-details">
-                <p><strong>Schedule:</strong> <%= report.interval_type.capitalize %> at <%= report.time_of_day&.strftime("%H:%M") || "Not set" %></p>
-                <% if report.interval_type == 'weekly' && report.interval_config['days']&.any? %>
-                  <p><strong>Days:</strong> <%= report.interval_config['days'].map(&:capitalize).join(', ') %></p>
-                <% elsif report.interval_type == 'monthly' && report.interval_config['day_of_month'] %>
-                  <p><strong>Day:</strong> <%= report.interval_config['day_of_month'].ordinalize %> of each month</p>
-                <% end %>
-                <p><strong>Content:</strong> 
-                  <%= report.alerts.count %> alert<%= 's' unless report.alerts.count == 1 %>, 
-                  <%= report.metrics.count %> metric<%= 's' unless report.metrics.count == 1 %>
-                </p>
-                <p><strong>Last sent:</strong> <%= report.last_sent_at&.strftime("%b %d, %Y at %H:%M") || "Never" %></p>
-                <% if report.next_send_time %>
-                  <p><strong>Next send:</strong> <%= report.next_send_time.strftime("%b %d, %Y at %H:%M") %></p>
-                <% end %>
-                <p><strong>Status:</strong> 
-                  <span class="status-badge <%= report.has_content_to_send? ? 'status-active' : 'status-inactive' %>">
-                    <%= report.has_content_to_send? ? 'Has content' : 'No content' %>
-                  </span>
-                </p>
-              </div>
+            <div class="folder-item">
+              <%= link_to reports_path(namespace: folder_namespace), class: "folder-link" do %>
+                <span class="folder-icon">📁</span>
+                <span class="folder-name"><%= folder %></span>
+              <% end %>
             </div>
           <% end %>
         </div>
       </div>
-    <% else %>
-      <div class="empty-state">
-        <p>No reports found in this namespace.</p>
-        <%= link_to "Create your first report", new_report_path(namespace: @current_namespace), class: "btn btn-primary" %>
-      </div>
     <% end %>
 
+  <!-- Items in Current Namespace -->
+  <% if @items.any? %>
+    <div class="items-section">
+      <h3><%= @current_namespace.present? ? "Reports in #{@current_namespace}" : "Reports in Root" %></h3>
+      <div class="index-grid">
+        <% @items.each do |report| %>
+          <div class="index-card">
+            <h4><%= link_to report.name || "Report ##{report.id}", report_path(report) %></h4>
+            <p><%= pluralize(report.alerts.count, 'alert') %> • <%= pluralize(report.metrics.count, 'metric') %></p>
+            <p><%= report.interval_type.capitalize %> at <%= report.time_of_day&.strftime("%H:%M") || "Not set" %></p>
+            <div class="index-card-actions">
+              <%= link_to "View", report_path(report) %>
+              <%= link_to "Edit", edit_report_path(report) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
   <% else %>
-    <p>Please <%= link_to "log in", login_path %> to view your reports.</p>
+    <div class="empty-state">
+      <h3>No reports yet</h3>
+      <p>Create your first report to schedule automated alerts and metrics.</p>
+    </div>
   <% end %>
+
 </div>
