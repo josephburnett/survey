@@ -105,7 +105,12 @@
 <% if @series_data.any? %>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const ctx = document.getElementById('metricChart').getContext('2d');
+  document.addEventListener('turbo:load', function() {
+    // Ensure the chart element exists before trying to use it
+    const chartElement = document.getElementById('metricChart');
+    if (!chartElement) return;
+    
+    const ctx = chartElement.getContext('2d');
   
   <% if @metric.wrap.present? && @metric.wrap != 'none' %>
     // For wrapped metrics, use time scale with proper formatting
@@ -265,5 +270,6 @@
       }
     });
   <% end %>
+  }); // End turbo:load event listener
 </script>
 <% end %>

@@ -23,10 +23,15 @@ class Metric < ApplicationRecord
   validates :resolution, presence: true, inclusion: { in: %w[five_minute hour day week month] }
   validates :width, presence: true, inclusion: { in: %w[daily weekly monthly 90_days yearly 7_days 30_days all_time] }
   validates :function, presence: true, inclusion: { in: %w[answer sum average difference count] }
-  validates :wrap, inclusion: { in: %w[none hour day weekly] }, allow_nil: true
+  validates :wrap, inclusion: { in: %w[none hour day weekly] }, allow_nil: true, allow_blank: true
   validates :scale, numericality: { greater_than: 0 }, allow_nil: true
 
   attr_accessor :child_metric_ids_temp, :child_metric_ids_changed
+
+  # Convert empty string to nil for wrap field
+  def wrap=(value)
+    super(value.presence)
+  end
 
   before_save :store_child_metric_ids
   after_save :create_child_associations
