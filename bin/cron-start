@@ -25,5 +25,5 @@ crontab /tmp/routine-crontab
 touch /rails/log/cron.log
 
 echo "Starting cron daemon..."
-# Run cron in foreground mode
+# Run cron in foreground mode (no PID file needed in foreground mode)
 exec cron -f
