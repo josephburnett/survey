@@ -3,32 +3,24 @@ set -e
 
 echo "Setting up cron for Routine Tracker..."
 
-# Install cron if not present
-if ! command -v cron &> /dev/null; then
-    echo "Installing cron..."
-    apt-get update -qq
-    apt-get install -y cron
-fi
+# Cron is already installed in the Docker image
 
-# Create crontab file
-echo "Creating crontab..."
-cat > /etc/cron.d/routine-tracker << 'EOF'
+# Create crontab file for rails user
+echo "Creating crontab for rails user..."
+cat > /tmp/routine-crontab << 'EOF'
 # Routine Tracker Cron Jobs
 RAILS_ENV=production
 BUNDLE_PATH=/usr/local/bundle
-*/15 * * * * root cd /rails && /usr/local/bundle/bin/bundle exec rake reports:send_due >> /var/log/cron.log 2>&1
+*/15 * * * * cd /rails && /usr/local/bundle/bin/bundle exec rake reports:send_due >> /rails/log/cron.log 2>&1
 
 EOF
 
-# Set permissions
-chmod 0644 /etc/cron.d/routine-tracker
-crontab /etc/cron.d/routine-tracker
+# Install crontab for rails user (not root)
+crontab /tmp/routine-crontab
 
-# Create log file
-touch /var/log/cron.log
+# Create log file in a location the rails user can write to
+touch /rails/log/cron.log
 
 echo "Starting cron daemon..."
-cron
-
-echo "Cron setup complete! Tailing log file..."
-tail -f /var/log/cron.log
+# Run cron in foreground mode
+exec cron -f
