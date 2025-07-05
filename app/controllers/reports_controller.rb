@@ -7,7 +7,7 @@ class ReportsController < ApplicationController
 
   def index
     setup_namespace_browsing(Report, :reports_path)
-    @items = Report.items_in_namespace(current_user, @current_namespace).not_deleted
+    @items = Report.items_in_namespace(current_user, @current_namespace).not_deleted.includes(:alerts, :metrics)
   end
 
   def show
