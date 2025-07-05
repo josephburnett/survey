@@ -13,6 +13,16 @@
         <%= form.password_field :password, required: true %>
       </div>
 
+      <div class="field">
+        <%= form.label :remember_me do %>
+          <%= form.check_box :remember_me %>
+          Remember me for 30 days
+        <% end %>
+        <small style="display: block; color: #666; margin-top: 0.25rem;">
+          Keep me logged in on this device for longer
+        </small>
+      </div>
+
       <div class="actions">
         <%= form.submit "Login" %>
       </div>
