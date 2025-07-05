@@ -1,6 +1,6 @@
-require 'openssl'
-require 'json'
-require 'base64'
+require "openssl"
+require "json"
+require "base64"
 
 class BackupService
   attr_reader :user
@@ -28,43 +28,43 @@ class BackupService
   end
 
   def encrypt_backup(data, encryption_key)
-    cipher = OpenSSL::Cipher.new('AES-256-GCM')
+    cipher = OpenSSL::Cipher.new("AES-256-GCM")
     cipher.encrypt
-    
+
     # Use the provided key directly (it's already base64 encoded)
     key = Base64.decode64(encryption_key)
     cipher.key = key
-    
+
     # Generate a random IV
     iv = cipher.random_iv
     cipher.iv = iv
-    
+
     # Encrypt the data
     encrypted = cipher.update(data) + cipher.final
     auth_tag = cipher.auth_tag
-    
+
     # Combine IV, auth_tag, and encrypted data
     encrypted_data = {
       iv: Base64.encode64(iv),
       auth_tag: Base64.encode64(auth_tag),
       data: Base64.encode64(encrypted)
     }
-    
+
     encrypted_data.to_json
   end
 
   def self.decrypt_backup(encrypted_json, encryption_key)
     encrypted_data = JSON.parse(encrypted_json)
-    
-    cipher = OpenSSL::Cipher.new('AES-256-GCM')
+
+    cipher = OpenSSL::Cipher.new("AES-256-GCM")
     cipher.decrypt
-    
+
     key = Base64.decode64(encryption_key)
     cipher.key = key
-    cipher.iv = Base64.decode64(encrypted_data['iv'])
-    cipher.auth_tag = Base64.decode64(encrypted_data['auth_tag'])
-    
-    decrypted = cipher.update(Base64.decode64(encrypted_data['data'])) + cipher.final
+    cipher.iv = Base64.decode64(encrypted_data["iv"])
+    cipher.auth_tag = Base64.decode64(encrypted_data["auth_tag"])
+
+    decrypted = cipher.update(Base64.decode64(encrypted_data["data"])) + cipher.final
     decrypted
   end
 
