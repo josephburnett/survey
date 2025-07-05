@@ -60,7 +60,7 @@ class AlertsController < ApplicationController
   private
 
   def find_alert
-    @alert = current_user.alerts.not_deleted.includes(metric: [ :questions, :child_metrics ]).find(params[:id])
+    @alert = current_user.alerts.not_deleted.includes(metric: [ :questions, :child_metric_metrics ]).find(params[:id])
   end
 
   def alert_params
