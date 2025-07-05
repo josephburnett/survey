@@ -32,14 +32,14 @@ class Alert < ApplicationRecord
   end
 
   def calculate_status_uncached
-    return [false, nil] unless metric&.series&.any?
+    return [ false, nil ] unless metric&.series&.any?
 
     series_data = metric.series
-    return [false, nil] if series_data.length < delay
+    return [ false, nil ] if series_data.length < delay
 
     # Get the last 'delay' number of data points
     recent_values = series_data.last(delay).map(&:last)
-    return [false, nil] if recent_values.any?(&:nil?)
+    return [ false, nil ] if recent_values.any?(&:nil?)
 
     # Get current value (most recent)
     current_value = recent_values.last
@@ -59,7 +59,7 @@ class Alert < ApplicationRecord
       false
     end
 
-    [is_activated, current_value]
+    [ is_activated, current_value ]
   end
 
   def status_color

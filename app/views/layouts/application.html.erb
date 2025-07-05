@@ -23,6 +23,18 @@
   </head>
 
   <body>
+    <% if flash[:notice] %>
+      <div class="flash notice" style="background-color: #d4edda; color: #155724; padding: 1rem; margin: 1rem; border: 1px solid #c3e6cb; border-radius: 4px;">
+        <%= flash[:notice] %>
+      </div>
+    <% end %>
+    
+    <% if flash[:alert] %>
+      <div class="flash alert" style="background-color: #f8d7da; color: #721c24; padding: 1rem; margin: 1rem; border: 1px solid #f5c6cb; border-radius: 4px;">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+    
     <%= yield %>
   </body>
 </html>

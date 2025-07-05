@@ -53,12 +53,10 @@ class MetricsController < ApplicationController
 
   def refresh_cache
     @metric.metric_series_cache&.destroy
-    
     # Also clear alert caches for alerts using this metric
     @metric.alerts.each do |alert|
       alert.alert_status_cache&.destroy
     end
-    
     redirect_to @metric, notice: "Cache refreshed successfully"
   end
 

@@ -43,7 +43,7 @@ class MetricDependencyService
 
   def self.find_dependent_metrics(metric)
     visited = Set.new
-    to_visit = [metric]
+    to_visit = [ metric ]
     dependent_metrics = []
 
     while to_visit.any?

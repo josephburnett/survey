@@ -100,19 +100,18 @@ class DashboardsController < ApplicationController
     # Clear caches for all metrics and alerts in the dashboard
     @dashboard.all_items.each do |dashboard_item|
       case dashboard_item[:type]
-      when 'metric'
+      when "metric"
         metric = dashboard_item[:item]
         metric.metric_series_cache&.destroy
-        
         # Also clear alert caches for alerts using this metric
         metric.alerts.each { |alert| alert.alert_status_cache&.destroy }
-      when 'alert'
+      when "alert"
         alert = dashboard_item[:item]
         alert.alert_status_cache&.destroy
         alert.metric.metric_series_cache&.destroy
       end
     end
-    
+
     redirect_to @dashboard, notice: "Cache refreshed successfully"
   end
 
