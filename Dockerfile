@@ -67,8 +67,9 @@ RUN groupadd --system --gid 1000 rails && \
 # Make cron-start executable
 RUN chmod +x /rails/bin/cron-start
 
-# Only switch to rails user for the default server command
-# Cron container should run as root
+# Switch to rails user by default (most containers)
+# Cron container overrides this by running entrypoint as root
+USER 1000:1000
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
