@@ -25,7 +25,8 @@ class AlertsController < ApplicationController
 
   def new
     @alert = Alert.new
-    @metrics = current_user.metrics.not_deleted
+    current_ns = params[:namespace] || ""
+    @metrics = entities_in_allowed_namespaces(Metric, current_ns)
   end
 
   def create
@@ -34,20 +35,21 @@ class AlertsController < ApplicationController
     if @alert.save
       redirect_to @alert, notice: "Alert created successfully"
     else
-      @metrics = current_user.metrics.not_deleted
+      current_ns = @alert.namespace || ""
+      @metrics = entities_in_allowed_namespaces(Metric, current_ns)
       render :new
     end
   end
 
   def edit
-    @metrics = current_user.metrics.not_deleted
+    @metrics = entities_in_allowed_namespaces(Metric, @alert.namespace)
   end
 
   def update
     if @alert.update(alert_params)
       redirect_to @alert, notice: "Alert updated successfully"
     else
-      @metrics = current_user.metrics.not_deleted
+      @metrics = entities_in_allowed_namespaces(Metric, @alert.namespace)
       render :edit
     end
   end

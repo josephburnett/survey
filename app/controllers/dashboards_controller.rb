@@ -14,12 +14,12 @@ class DashboardsController < ApplicationController
 
   def new
     @dashboard = Dashboard.new
-    # For new dashboards, show all entities since namespace isn't set yet
-    @metrics = current_user.metrics.not_deleted
-    @questions = current_user.questions.not_deleted
-    @forms = current_user.forms.not_deleted
-    @dashboards = current_user.dashboards.not_deleted.where.not(id: nil) # All other dashboards
-    @alerts = current_user.alerts.not_deleted
+    current_ns = params[:namespace] || ""
+    @metrics = entities_in_allowed_namespaces(Metric, current_ns)
+    @questions = entities_in_allowed_namespaces(Question, current_ns)
+    @forms = entities_in_allowed_namespaces(Form, current_ns)
+    @dashboards = entities_in_allowed_namespaces(Dashboard, current_ns)
+    @alerts = entities_in_allowed_namespaces(Alert, current_ns)
   end
 
   def create
@@ -28,36 +28,33 @@ class DashboardsController < ApplicationController
     if @dashboard.save
       redirect_to @dashboard, notice: "Dashboard created successfully"
     else
-      @metrics = current_user.metrics.not_deleted
-      @questions = current_user.questions.not_deleted
-      @forms = current_user.forms.not_deleted
-      @dashboards = current_user.dashboards.not_deleted.where.not(id: nil)
-      @alerts = current_user.alerts.not_deleted
+      current_ns = @dashboard.namespace || ""
+      @metrics = entities_in_allowed_namespaces(Metric, current_ns)
+      @questions = entities_in_allowed_namespaces(Question, current_ns)
+      @forms = entities_in_allowed_namespaces(Form, current_ns)
+      @dashboards = entities_in_allowed_namespaces(Dashboard, current_ns)
+      @alerts = entities_in_allowed_namespaces(Alert, current_ns)
       render :new
     end
   end
 
   def edit
-    # Filter entities to only show those in the same namespace as the dashboard
-    namespace = @dashboard.namespace
-    @metrics = current_user.metrics.not_deleted.where(namespace: namespace)
-    @questions = current_user.questions.not_deleted.where(namespace: namespace)
-    @forms = current_user.forms.not_deleted.where(namespace: namespace)
-    @dashboards = current_user.dashboards.not_deleted.where(namespace: namespace).where.not(id: @dashboard.id)
-    @alerts = current_user.alerts.not_deleted.where(namespace: namespace)
+    @metrics = entities_in_allowed_namespaces(Metric, @dashboard.namespace)
+    @questions = entities_in_allowed_namespaces(Question, @dashboard.namespace)
+    @forms = entities_in_allowed_namespaces(Form, @dashboard.namespace)
+    @dashboards = entities_in_allowed_namespaces(Dashboard, @dashboard.namespace).where.not(id: @dashboard.id)
+    @alerts = entities_in_allowed_namespaces(Alert, @dashboard.namespace)
   end
 
   def update
     if @dashboard.update(dashboard_params)
       redirect_to @dashboard, notice: "Dashboard updated successfully"
     else
-      # Filter entities to only show those in the same namespace as the dashboard
-      namespace = @dashboard.namespace
-      @metrics = current_user.metrics.not_deleted.where(namespace: namespace)
-      @questions = current_user.questions.not_deleted.where(namespace: namespace)
-      @forms = current_user.forms.not_deleted.where(namespace: namespace)
-      @dashboards = current_user.dashboards.not_deleted.where(namespace: namespace).where.not(id: @dashboard.id)
-      @alerts = current_user.alerts.not_deleted.where(namespace: namespace)
+      @metrics = entities_in_allowed_namespaces(Metric, @dashboard.namespace)
+      @questions = entities_in_allowed_namespaces(Question, @dashboard.namespace)
+      @forms = entities_in_allowed_namespaces(Form, @dashboard.namespace)
+      @dashboards = entities_in_allowed_namespaces(Dashboard, @dashboard.namespace).where.not(id: @dashboard.id)
+      @alerts = entities_in_allowed_namespaces(Alert, @dashboard.namespace)
       render :edit
     end
   end

@@ -78,4 +78,27 @@ module ApplicationHelper
       settings_path
     end
   end
+
+  def allowed_namespaces_for_selection(current_namespace)
+    # Root can access everything
+    return all_namespaces_for_user(current_user) if current_namespace.blank?
+    
+    # Current namespace + all child namespaces
+    all_namespaces = all_namespaces_for_user(current_user)
+    
+    # Include current namespace
+    allowed = [current_namespace]
+    
+    # Include all child namespaces (those that start with current namespace + ":")
+    child_namespaces = all_namespaces.select do |namespace|
+      namespace.start_with?("#{current_namespace}:")
+    end
+    
+    allowed + child_namespaces
+  end
+
+  def entities_in_allowed_namespaces(model_class, current_namespace)
+    allowed_namespaces = allowed_namespaces_for_selection(current_namespace)
+    model_class.where(user: current_user, namespace: allowed_namespaces).not_deleted
+  end
 end

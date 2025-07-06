@@ -15,8 +15,9 @@ class MetricsController < ApplicationController
 
   def new
     @metric = Metric.new
-    @questions = current_user.questions.not_deleted
-    @metrics = current_user.metrics.not_deleted
+    current_ns = params[:namespace] || ""
+    @questions = entities_in_allowed_namespaces(Question, current_ns)
+    @metrics = entities_in_allowed_namespaces(Metric, current_ns)
   end
 
   def create
@@ -25,23 +26,24 @@ class MetricsController < ApplicationController
     if @metric.save
       redirect_to @metric, notice: "Metric created successfully"
     else
-      @questions = current_user.questions.not_deleted
-      @metrics = current_user.metrics.not_deleted
+      current_ns = @metric.namespace || ""
+      @questions = entities_in_allowed_namespaces(Question, current_ns)
+      @metrics = entities_in_allowed_namespaces(Metric, current_ns)
       render :new
     end
   end
 
   def edit
-    @questions = current_user.questions.not_deleted
-    @metrics = current_user.metrics.not_deleted.where.not(id: @metric.id)
+    @questions = entities_in_allowed_namespaces(Question, @metric.namespace)
+    @metrics = entities_in_allowed_namespaces(Metric, @metric.namespace).where.not(id: @metric.id)
   end
 
   def update
     if @metric.update(metric_params)
       redirect_to @metric, notice: "Metric updated successfully"
     else
-      @questions = current_user.questions.not_deleted
-      @metrics = current_user.metrics.not_deleted.where.not(id: @metric.id)
+      @questions = entities_in_allowed_namespaces(Question, @metric.namespace)
+      @metrics = entities_in_allowed_namespaces(Metric, @metric.namespace).where.not(id: @metric.id)
       render :edit
     end
   end

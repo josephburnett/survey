@@ -42,8 +42,9 @@ class ReportsController < ApplicationController
 
   def new
     @report = Report.new
-    @alerts = current_user.alerts.not_deleted
-    @metrics = current_user.metrics.not_deleted
+    current_ns = params[:namespace] || ""
+    @alerts = entities_in_allowed_namespaces(Alert, current_ns)
+    @metrics = entities_in_allowed_namespaces(Metric, current_ns)
   end
 
   def create
@@ -86,15 +87,16 @@ class ReportsController < ApplicationController
 
       redirect_to @report, notice: "Report created successfully"
     else
-      @alerts = current_user.alerts.not_deleted
-      @metrics = current_user.metrics.not_deleted
+      current_ns = @report.namespace || ""
+      @alerts = entities_in_allowed_namespaces(Alert, current_ns)
+      @metrics = entities_in_allowed_namespaces(Metric, current_ns)
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
-    @alerts = current_user.alerts.not_deleted
-    @metrics = current_user.metrics.not_deleted
+    @alerts = entities_in_allowed_namespaces(Alert, @report.namespace)
+    @metrics = entities_in_allowed_namespaces(Metric, @report.namespace)
   end
 
   def update
@@ -137,8 +139,8 @@ class ReportsController < ApplicationController
 
       redirect_to @report, notice: "Report updated successfully"
     else
-      @alerts = current_user.alerts.not_deleted
-      @metrics = current_user.metrics.not_deleted
+      @alerts = entities_in_allowed_namespaces(Alert, @report.namespace)
+      @metrics = entities_in_allowed_namespaces(Metric, @report.namespace)
       render :edit, status: :unprocessable_entity
     end
   end
