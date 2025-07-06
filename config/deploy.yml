@@ -14,7 +14,8 @@ servers:
     hosts:
       - home.local
     cmd: bin/cron-start
-    user: root
+    options:
+      user: root
     env:
       secret:
         - RAILS_MASTER_KEY
