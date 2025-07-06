@@ -5,23 +5,23 @@ echo "Setting up cron for Routine Tracker..."
 
 # Cron is already installed in the Docker image
 
-# Create crontab file for root user that runs commands as rails user
+# Create crontab file for root user using canonical Docker pattern
 echo "Creating crontab for root user..."
 cat > /tmp/routine-crontab << 'EOF'
 # Routine Tracker Cron Jobs
 RAILS_ENV=production
 BUNDLE_PATH=/usr/local/bundle
-# Send reports every 15 minutes - run as rails user
-*/15 * * * * su - rails -c "cd /rails && /usr/local/bundle/bin/bundle exec rake reports:send_due >> /rails/log/cron.log 2>&1"
-# Send daily backups at 3:00 AM - run as rails user  
-0 3 * * * su - rails -c "cd /rails && /usr/local/bundle/bin/bundle exec rake backups:send_daily >> /rails/log/cron.log 2>&1"
+# Send reports every 15 minutes - run as root with explicit file ownership
+*/15 * * * * cd /rails && /usr/local/bundle/bin/bundle exec rake reports:send_due >> /rails/log/cron.log 2>&1 && chown rails:rails /rails/log/cron.log
+# Send daily backups at 3:00 AM - run as root with explicit file ownership
+0 3 * * * cd /rails && /usr/local/bundle/bin/bundle exec rake backups:send_daily >> /rails/log/cron.log 2>&1 && chown rails:rails /rails/log/cron.log
 
 EOF
 
 # Install crontab for root user
 crontab /tmp/routine-crontab
 
-# Create log file and ensure rails user can write to it
+# Create log file and ensure rails user can access it
 touch /rails/log/cron.log
 chown rails:rails /rails/log/cron.log
 
