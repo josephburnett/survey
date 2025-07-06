@@ -30,7 +30,7 @@
         <p><strong>Referenced Questions:</strong></p>
         <ul>
           <% @metric.questions.each do |question| %>
-            <li><%= link_to "#{question.name} (#{question.question_type})", question_path(question) %></li>
+            <li><%= link_to "#{question.name} (#{question.question_type})", question_path(question, namespace: question.namespace) %></li>
           <% end %>
         </ul>
       <% end %>
@@ -38,7 +38,7 @@
     
     <% if ['sum', 'average', 'difference', 'count'].include?(@metric.function) && @metric.child_metrics.any? %>
       <% if @metric.function == 'difference' && @metric.first_metric.present? %>
-        <p><strong>First Metric (primary):</strong> <%= link_to "#{@metric.first_metric.display_name} - #{@metric.first_metric.function&.capitalize || 'Unknown'} (#{@metric.first_metric.resolution}/#{@metric.first_metric.width})", metric_path(@metric.first_metric) %></p>
+        <p><strong>First Metric (primary):</strong> <%= link_to "#{@metric.first_metric.display_name} - #{@metric.first_metric.function&.capitalize || 'Unknown'} (#{@metric.first_metric.resolution}/#{@metric.first_metric.width})", metric_path(@metric.first_metric, namespace: @metric.first_metric.namespace) %></p>
         <p><strong>Other Metrics (subtracted from first):</strong></p>
       <% else %>
         <p><strong>Referenced Metrics:</strong></p>
@@ -46,7 +46,7 @@
       <ul>
         <% child_metrics_to_show = @metric.function == 'difference' && @metric.first_metric.present? ? @metric.child_metrics.where.not(id: @metric.first_metric.id) : @metric.child_metrics %>
         <% child_metrics_to_show.each do |child_metric| %>
-          <li><%= link_to "#{child_metric.display_name} - #{child_metric.function&.capitalize || 'Unknown'} (#{child_metric.resolution}/#{child_metric.width})", metric_path(child_metric) %></li>
+          <li><%= link_to "#{child_metric.display_name} - #{child_metric.function&.capitalize || 'Unknown'} (#{child_metric.resolution}/#{child_metric.width})", metric_path(child_metric, namespace: child_metric.namespace) %></li>
         <% end %>
       </ul>
     <% end %>
@@ -55,7 +55,7 @@
       <p><strong>Used by Metrics:</strong></p>
       <ul>
         <% @metric.parent_metrics.each do |parent_metric| %>
-          <li><%= link_to "#{parent_metric.display_name} - #{parent_metric.function&.capitalize || 'Unknown'} (#{parent_metric.resolution}/#{parent_metric.width})", metric_path(parent_metric) %></li>
+          <li><%= link_to "#{parent_metric.display_name} - #{parent_metric.function&.capitalize || 'Unknown'} (#{parent_metric.resolution}/#{parent_metric.width})", metric_path(parent_metric, namespace: parent_metric.namespace) %></li>
         <% end %>
       </ul>
     <% end %>

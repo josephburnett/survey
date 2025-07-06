@@ -5,7 +5,7 @@
     <h1>Settings</h1>
   </div>
 
-  <%= form_with model: @user_setting, url: settings_path, method: :patch, local: true do |form| %>
+  <%= form_with model: @user_setting, url: settings_path(return_namespace: @return_namespace), method: :patch, local: true do |form| %>
     <% if @user_setting.errors.any? %>
       <div class="alert alert-danger">
         <ul>

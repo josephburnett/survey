@@ -68,4 +68,14 @@ module ApplicationHelper
       namespaces_path
     end
   end
+
+  def namespace_aware_settings_path
+    namespace = current_namespace || ""
+    
+    if namespace.present?
+      settings_path(return_namespace: namespace)
+    else
+      settings_path
+    end
+  end
 end

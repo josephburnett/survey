@@ -22,7 +22,7 @@
           <% series_data = item.series %>
           <div class="index-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <h4><%= link_to item.display_name, metric_path(item) %></h4>
+              <h4><%= link_to item.display_name, metric_path(item, namespace: item.namespace) %></h4>
               <small style="color: #666;"><%= item.function.capitalize %> • <%= item.resolution %>/<%=item.width %></small>
             </div>
             
@@ -37,7 +37,7 @@
           
         <% when 'question' %>
           <div class="index-card">
-            <h4><%= link_to item.name, question_path(item) %></h4>
+            <h4><%= link_to item.name, question_path(item, namespace: item.namespace) %></h4>
             <p><strong>Type:</strong> <%= item.question_type&.capitalize || "Not set" %></p>
             
             <%= form_with url: answer_question_dashboard_path(@dashboard), method: :post, local: true do |form| %>
@@ -93,7 +93,7 @@
           
         <% when 'form' %>
           <div class="index-card">
-            <h4><%= link_to item.name, form_path(item) %></h4>
+            <h4><%= link_to item.name, form_path(item, namespace: item.namespace) %></h4>
             <p><%= pluralize(item.sections.count, 'section') %> • <%= pluralize(item.responses.count, 'response') %></p>
             <p><strong>Created:</strong> <%= item.created_at.strftime("%B %d, %Y") %></p>
             
@@ -104,7 +104,7 @@
           
         <% when 'dashboard' %>
           <div class="index-card">
-            <h4><%= link_to item.name, dashboard_path(item) %></h4>
+            <h4><%= link_to item.name, dashboard_path(item, namespace: item.namespace) %></h4>
             <p>Linked Dashboard</p>
             <p><strong>Created:</strong> <%= item.created_at.strftime("%B %d, %Y") %></p>
             
@@ -116,12 +116,12 @@
         <% when 'alert' %>
           <div class="index-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <h4><%= link_to item.display_name, alert_path(item) %></h4>
+              <h4><%= link_to item.display_name, alert_path(item, namespace: item.namespace) %></h4>
               <span style="display: inline-block; width: 16px; height: 16px; border-radius: 50%; background-color: <%= item.status_color %>; margin-left: 8px;"></span>
             </div>
             
             <p><strong>Status:</strong> <%= item.status_text %></p>
-            <p><strong>Metric:</strong> <%= link_to item.metric.display_name, metric_path(item.metric) %></p>
+            <p><strong>Metric:</strong> <%= link_to item.metric.display_name, metric_path(item.metric, namespace: item.metric.namespace) %></p>
             <p><strong>Threshold:</strong> <%= item.direction.capitalize %> <%= item.threshold %></p>
             
             <% if item.alert_status_cache&.current_value %>
