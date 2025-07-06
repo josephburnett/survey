@@ -71,7 +71,7 @@ module ApplicationHelper
 
   def namespace_aware_settings_path
     namespace = current_namespace || ""
-    
+
     if namespace.present?
       settings_path(return_namespace: namespace)
     else
@@ -82,18 +82,18 @@ module ApplicationHelper
   def allowed_namespaces_for_selection(current_namespace)
     # Root can access everything
     return all_namespaces_for_user(current_user) if current_namespace.blank?
-    
+
     # Current namespace + all child namespaces
     all_namespaces = all_namespaces_for_user(current_user)
-    
+
     # Include current namespace
-    allowed = [current_namespace]
-    
+    allowed = [ current_namespace ]
+
     # Include all child namespaces (those that start with current namespace + ":")
     child_namespaces = all_namespaces.select do |namespace|
       namespace.start_with?("#{current_namespace}:")
     end
-    
+
     allowed + child_namespaces
   end
 
