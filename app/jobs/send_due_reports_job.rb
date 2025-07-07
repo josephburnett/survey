@@ -5,6 +5,12 @@ class SendDueReportsJob < ApplicationJob
     Rails.logger.info "Checking for due reports..."
 
     Report.not_deleted.find_each do |report|
+      Rails.logger.info "Checking report: #{report.name}"
+      Rails.logger.info "  - has_content_to_send?: #{report.has_content_to_send?}"
+      Rails.logger.info "  - next_send_time: #{report.next_send_time}"
+      Rails.logger.info "  - last_sent_at: #{report.last_sent_at}"
+      Rails.logger.info "  - should_send_now?: #{report.should_send_now?}"
+
       if report.should_send_now?
         Rails.logger.info "Sending report: #{report.name}"
         begin
@@ -16,7 +22,7 @@ class SendDueReportsJob < ApplicationJob
           raise e
         end
       else
-        Rails.logger.debug "Skipping report: #{report.name} (not due or no content)"
+        Rails.logger.info "Skipping report: #{report.name} (not due or no content)"
       end
     end
 
