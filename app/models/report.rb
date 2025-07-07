@@ -97,8 +97,43 @@ class Report < ApplicationRecord
 
   def next_send_time_passed?
     return true unless last_sent_at
-    return false unless next_send_time
-    Time.current >= next_send_time
+
+    # Check if enough time has passed since last sent based on interval
+    case interval_type
+    when "weekly"
+      days = interval_config["days"] || []
+      return false if days.empty?
+
+      # Check if today is a scheduled day and enough time has passed
+      today = Time.current.strftime("%A").downcase
+      return false unless days.include?(today)
+
+      # Check if we've passed the scheduled time today
+      scheduled_time_today = Time.current.beginning_of_day + time_of_day.seconds_since_midnight.seconds
+      return false if Time.current < scheduled_time_today
+
+      # Check if we already sent today (within the last 23 hours to account for DST)
+      return false if last_sent_at && last_sent_at > 23.hours.ago
+
+      true
+    when "monthly"
+      day_of_month = interval_config["day_of_month"]&.to_i
+      return false unless day_of_month
+
+      # Check if today is the scheduled day and enough time has passed
+      return false unless Time.current.day == day_of_month
+
+      # Check if we've passed the scheduled time today
+      scheduled_time_today = Time.current.beginning_of_day + time_of_day.seconds_since_midnight.seconds
+      return false if Time.current < scheduled_time_today
+
+      # Check if we already sent this month
+      return false if last_sent_at && last_sent_at.month == Time.current.month && last_sent_at.year == Time.current.year
+
+      true
+    else
+      false
+    end
   end
 
   def validate_interval_config
