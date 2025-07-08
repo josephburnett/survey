@@ -96,7 +96,7 @@ class BackupService
         id: section.id,
         name: section.name,
         prompt: section.prompt,
-        form_id: section.form_id,
+        form_ids: section.form_ids,
         namespace: section.namespace,
         created_at: section.created_at.iso8601
       }
