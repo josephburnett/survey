@@ -112,8 +112,8 @@ class Report < ApplicationRecord
       scheduled_time_today = Time.current.beginning_of_day + time_of_day.seconds_since_midnight.seconds
       return false if Time.current < scheduled_time_today
 
-      # Check if we already sent today (within the last 23 hours to account for DST)
-      return false if last_sent_at && last_sent_at > 23.hours.ago
+      # Check if we already sent today
+      return false if last_sent_at && last_sent_at.to_date == Time.current.to_date
 
       true
     when "monthly"
